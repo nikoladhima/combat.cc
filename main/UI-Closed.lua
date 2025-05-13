@@ -4327,8 +4327,6 @@ function Library:CreateWindow(WindowInfo)
                     TabIcon = New("ImageLabel", {
                     Image = "rbxassetid://113497862039604",
                     ImageColor3 = "AccentColor",
-                    ImageRectOffset = Icon.ImageRectOffset,
-                    ImageRectSize = Icon.ImageRectSize,
                     ImageTransparency = 0.5,
                     Size = UDim2.fromScale(1, 1),
                     SizeConstraint = Enum.SizeConstraint.RelativeYY,

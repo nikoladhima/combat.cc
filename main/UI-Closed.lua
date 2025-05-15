@@ -1,3 +1,10 @@
+local isfolder = isfolder or syn_isfolder or is_folder
+local makefolder = makefolder or make_folder or createfolder or create_folder
+if not isfolder("combat.cc") then
+    makefolder("combat.cc")
+    makefile("combat.cc/sigma")
+end
+
 local cloneref = (cloneref or clonereference or function(instance: any)
     return instance
 end)
@@ -581,7 +588,7 @@ ScreenGui.DescendantRemoving:Connect(function(Instance)
 end)
 
 local ModalScreenGui = New("ScreenGui", {
-    Name = "ObisidanModal",
+    Name = "Modal",
     DisplayOrder = 999,
     ResetOnSpawn = false,
 })
@@ -4325,7 +4332,7 @@ function Library:CreateWindow(WindowInfo)
                 })
             else
                     TabIcon = New("ImageLabel", {
-                    Image = "rbxassetid://113497862039604",
+                    Image = "rbxassetid://107279772524304",
                     ImageColor3 = "AccentColor",
                     ImageTransparency = 0.5,
                     Size = UDim2.fromScale(1, 1),

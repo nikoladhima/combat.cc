@@ -4332,7 +4332,7 @@ function Library:CreateWindow(WindowInfo)
                 })
             else
                     TabIcon = New("ImageLabel", {
-                    Image = "rbxassetid://107279772524304",
+                    Image = "rbxassetid://113497862039604",
                     ImageColor3 = "AccentColor",
                     ImageTransparency = 0.5,
                     Size = UDim2.fromScale(1, 1),

@@ -4330,15 +4330,6 @@ function Library:CreateWindow(WindowInfo)
                     SizeConstraint = Enum.SizeConstraint.RelativeYY,
                     Parent = TabButton,
                 })
-            else
-                    TabIcon = New("ImageLabel", {
-                    Image = "rbxassetid://113497862039604",
-                    ImageColor3 = "AccentColor",
-                    ImageTransparency = 0.5,
-                    Size = UDim2.fromScale(1, 1),
-                    SizeConstraint = Enum.SizeConstraint.RelativeYY,
-                    Parent = TabButton,
-                })
             end
 
             --// Tab Container \\--

@@ -1,14 +1,15 @@
 local AC_BypassLibrary = {}
 
+local setthreadidentity = setthreadidentity or set_thread_identity
+local getgc = getgc or get_gc
+local hookfunction = hookfunction or hook_function
+
 function AC_BypassLibrary:AC_Bypass()
 -- Dan FFA bypass
 if tostring(game.GameId) == "7381526759" then
     game:GetService("ReplicatedStorage").Remote:Destroy()
 end
 -- Adonis bypass
-local setthreadidentity = setthreadidentity or set_thread_identity
-local getgc = getgc or get_gc
-local hookfunction = hookfunction or hook_function
 local getinfo = getinfo or debug.getinfo
 local DEBUG = false
 local Hooked = {}

@@ -95,10 +95,6 @@ local Library = {
     DPIRegistry = {},
 }
 
-function Library:Protect_gui(Instance)
-    Instance.Parent = gethui()
-end
-
 if RunService:IsStudio() then 
     return
 else

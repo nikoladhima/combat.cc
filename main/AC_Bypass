@@ -1,13 +1,13 @@
 local AC_BypassLibrary = {}
--- General variables
+-- General variables --
 local setthreadidentity = setthreadidentity or set_thread_identity
 local getgc = getgc or get_gc
 local hookfunction = hookfunction or hook_function
--- Dan FFA Anti-Detection made by nikoleto scripts
+-- // Dan FFA Anti-Detection made by nikoleto scripts \\ --
 if tostring(game.GameId) == "7381526759" then
-    game:GetService("ReplicatedStorage"):WaitForChild("Remote"):Destroy() -- Honestly imagine having such a bad AntiCheat
+    game:GetService("ReplicatedStorage"):WaitForChild("Remote"):Destroy() -- Imagine having such a bad Anti-Cheat system.
 end
--- Adonis Anti-Detection made by ??? (Optimized by nikoleto scripts)
+-- // Adonis Anti-Detection made by ??? (Optimized by nikoleto scripts) \\ --
 local getinfo = getinfo or debug.getinfo
 local Hooked = {}
 local Detected, Kill
@@ -63,7 +63,7 @@ local ProtectedGUI = gethui or gethiddenui or get_hidden_ui or get_hui or get_h_
 end
 
 function AC_BypassLibrary:Protect_gui(Instance)
-    Instance.Parent = ProtectedGUI
+    Instance.Parent = ProtectedGUI -- Prevents the GUI from getting detected by Anti-Cheat systems.
 end
 
 return AC_BypassLibrary

@@ -1,23 +1,13 @@
 local AC_BypassLibrary = {}
-
-local ProtectedGUI = gethui or gethiddenui or get_hidden_ui or get_hui or get_h_ui or function()
-    return (cloneref(game:GetService("CoreGui")) or clonereference(game:GetService("CoreGui")))
-end
-
-function AC_BypassLibrary:Protect_gui(Instance)
-    Instance.Parent = ProtectedGUI
-end
-
+-- General variables
 local setthreadidentity = setthreadidentity or set_thread_identity
 local getgc = getgc or get_gc
 local hookfunction = hookfunction or hook_function
-
-function AC_BypassLibrary:AC_Bypass()
--- Dan FFA bypass
+-- Dan FFA Anti-Detection made by nikoleto scripts
 if tostring(game.GameId) == "7381526759" then
-    game:GetService("ReplicatedStorage"):WaitForChild("Remote"):Destroy()
+    game:GetService("ReplicatedStorage"):WaitForChild("Remote"):Destroy() -- Honestly imagine having such a bad AntiCheat
 end
--- Adonis bypass
+-- Adonis Anti-Detection made by ??? (Optimized by nikoleto scripts)
 local getinfo = getinfo or debug.getinfo
 local Hooked = {}
 local Detected, Kill
@@ -62,6 +52,18 @@ local Old; Old = hookfunction(getrenv().debug.info, newcclosure(function(...)
     return Old(...)
 end))
 setthreadidentity(7)
+
+local cf = cloneref or clonereference or function(instance : any)
+    return instance
+end
+local CoreGui : CoreGui = cf(game:GetService("CoreGui"))
+
+local ProtectedGUI = gethui or gethiddenui or get_hidden_ui or get_hui or get_h_ui or function()
+    return CoreGui
+end
+
+function AC_BypassLibrary:Protect_gui(Instance)
+    Instance.Parent = ProtectedGUI
 end
 
 return AC_BypassLibrary

@@ -2,12 +2,12 @@ local isfolder = isfolder or syn_isfolder or is_folder
 local makefolder = makefolder or make_folder or createfolder or create_folder
 if not isfolder("combat.cc") then
     makefolder("combat.cc")
-    makefile("combat.cc/sigma")
 end
 
 local cloneref = (cloneref or clonereference or function(instance: any)
     return instance
 end)
+
 local CoreGui: CoreGui = cloneref(game:GetService("CoreGui"))
 local Players: Players = cloneref(game:GetService("Players"))
 local RunService: RunService = cloneref(game:GetService("RunService"))
@@ -94,6 +94,10 @@ local Library = {
     Registry = {},
     DPIRegistry = {},
 }
+
+function Library:Protect_gui(Instance)
+    Instance.Parent = gethui()
+end
 
 if RunService:IsStudio() then 
     return

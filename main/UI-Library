@@ -977,7 +977,7 @@ function Library:AddDraggableMenu(Name: string)
         Parent = Container,
     })
 
-    Library:MakeDraggable(Background, Label, true)
+   -- Library:MakeDraggable(Background, Label, true)
     return Background, Container
 end
 

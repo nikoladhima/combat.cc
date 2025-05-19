@@ -904,7 +904,7 @@ function Library:AddDraggableButton(Text: string, Func)
     Button.MouseButton1Click:Connect(function()
         Library:SafeCallback(Func, Table)
     end)
-    Library:MakeDraggable(Button, Button, true)
+    --Library:MakeDraggable(Button, Button, true)
 
     function Table:SetText(NewText: string)
         local X, Y = Library:GetTextBounds(NewText, Library.Scheme.Font, 16)

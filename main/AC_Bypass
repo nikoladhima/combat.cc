@@ -5,7 +5,9 @@ local getgc = getgc or get_gc
 local hookfunction = hookfunction or hook_function
 -- // Dan FFA Anti-Detection made by nikoleto scripts \\ --
 if tostring(game.GameId) == "7381526759" then
-    game:GetService("ReplicatedStorage"):WaitForChild("Remote"):Destroy() -- Imagine having such a bad Anti-Cheat system.
+    task.spawn(function()
+        game:GetService("ReplicatedStorage"):WaitForChild("Remote"):Destroy() -- Imagine having such a bad Anti-Cheat system.
+    end)
 end
 -- // Adonis Anti-Detection made by ??? (Optimized by nikoleto scripts) \\ --
 local getinfo = getinfo or debug.getinfo
@@ -19,7 +21,6 @@ for i, v in getgc(true) do
         if DetectFunc and KillFunc then
         if typeof(DetectFunc) == "function" and not Detected then
             Detected = DetectFunc
-            
             local Old; Old = hookfunction(Detected, function(Action, Info, NoCrash)
                 if Action ~= "_" then
                         warn(`Adonis AntiCheat flagged\nMethod: {Action}\nInfo: {Info}`)
@@ -57,13 +58,16 @@ local cf = cloneref or clonereference or function(instance : any)
     return instance
 end
 local CoreGui : CoreGui = cf(game:GetService("CoreGui"))
+local ProtectedFolder = Instance.new("Folder")
+ProtectedFolder.Parent = CoreGui
+ProtectedFolder.Name = " ̸̛̗͓̓̾̋͊̆̑͗̐̋̆́͘̚͝ͅ ̶̨̡̡̘͓̺͕̤͍́̑̋̓̏̓͊́́͂̈́ ̶͍̫̤͚̙͓̻͛̏͜͜ ̷̗͙̖͉͇̤͓͕̀̅́͜ ̸̛̼̗̭̞̙͖̐͌͒͗̚͘ ̵̧̢̧̢̯͉̜̙͈̉̈́͌̀́̋̎̐̈́̀͘͜͝͝͝ ̸̰͖̙͌͊̀̍͑̄̍̈́ ̷̢̩̩̼̦̪̘̍͊̏̋̽̃̕͝ͅ ̸̞̃̎͒̀̒͘ ̵͉̬̣̘̘̱̳̝͖̩̭̣̥̲͊̏́͌͌̄̅̌̀̈̚͜ ̸̳̤̰̹̰̬͙̫̯̔̌̓͊̐̀̍͌́̕ ̴̡̡̨̟̙͕͙̺̠̹̝̝̭̜͙̆̉̍̓͌ ̵̨̡̙̺̠̺̮̙̠̫̞̥̺̬̺̎͑ ̵̫̤͚͎̬̽̑͋ ̷̧̢̛̳̦͍̠̳̝̳̖̙̝͓̝̈́ ̶͕̪̟̯̣̤̯͇̥͍̫̱̺̆͗͑̎̀̀̉̍͐̀̀̋̽̚͜ ̷̡̣̞͎̹͖̤̪̈́̈̉͒͂́͐͝ ̴̫͊̒́̑̋̏͛͌́́̂̏̇́͝ ̷̨̧̡̝̠̙̹̖̀̉̕ ̴̨̧̧̛̫̮̹̗̘̜̙͈͈̘͒̈́̀̄̑͑̌̋͑̅̚̚ ̸̧̡̧͙̝͕̺͇͕̓̒̎̿͆̅̆̂̂͛͆̽́̐͘ ̴̢̛̰͎̪͇̣̿̽̂͌̑͊̅̿̔͂͐̓͘͠ͅ ̸͚͓̜͈͙̳͉̬͆ ̴̤͕̳̝̺͉̱̭͈̱̪̠͂̈́̆̓͗̀͘͠͝ ̴̗̀̊̓̉ ̶̨̧̼͓͍͓̣̹͇̭͌͋͐̐̆̅̔̇͋̄̚͝ ̵̨̬̰̮̝͔̈́̑̒̈́̔̇̈́̃̍͝͝ ̶̺̙͍̖͔͙̤̤̩͇͂̅̌͆̒̍̎̈́̚͝ ̸̛̛͍̱̙̥͍͚̫̙̘̩̘̍̃͐͆͒̓̆̔̆͝ ̷̺̺̳̝̥̯̙̜͈̮͖͐͆͋̀̏ ̷͎̥̙̗̩̦̪̹̝̣͊̊̒̄̐͛̍͋̾̆͛͝͠ ̸͉̠̖͙͔͎̟̺̝̙̂͂͛̒̒́ͅ ̶͍̥͈̝̳͐̄̀̋ ̷̧̯̹̘̥̖̣̗͙̼̥̈̓̈́͆̈̀͋̎͋͘͘ ̴̢̧̹̮̹̲̦̝͖͓̜̘͇̘̽̓̋̅̋̓͗͋̓̀͋͜͝ ̷̯̖̙͈̹̞͙͓̰̣͇̆̑̀̇̾̀̅͆͊̀"
 
 local ProtectedGUI = gethui or gethiddenui or get_hidden_ui or get_hui or get_h_ui or function()
-    return CoreGui
+    return ProtectedFolder
 end
 
 function AC_BypassLibrary:Protect_gui(Instance)
-    Instance.Parent = ProtectedGUI -- Prevents the GUI from getting detected by Anti-Cheat systems.
+    Instance.Parent = ProtectedGUI
 end
 
 return AC_BypassLibrary

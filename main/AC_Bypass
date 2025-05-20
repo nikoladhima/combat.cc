@@ -54,12 +54,22 @@ local Old; Old = hookfunction(getrenv().debug.info, newcclosure(function(...)
 end))
 setthreadidentity(7)
 
-local _0x2f3e,_0x5b9d,_0x42f0=_0x3f45 or _0x1b89 or function(_0x3378)return _0x3378 end
-local _0x209e=_0x2f3e(game:GetService("CoreGui"))
-local _0x4a27=Instance.new("Folder")
-_0x4a27.Parent=_0x209e
-_0x4a27.Name=" ̸̛̗͓̓̾̋͊̆̑͗̐̋̆́͘̚͝ͅ ̶̨̡̡̘͓̺͕̤͍́̑̋̓̏̓͊́́͂̈́ ̶͍̫̤͚̙͓̻͛̏͜͜ ̷̗͙̖͉͇̤͓͕̀̅́͜ ̸̛̼̗̭̞̙͖̐͌͒͗̚͘ ̵̧̢̧̢̯͉̜̙͈̉̈́͌̀́̋̎̐̈́̀͘͜͝͝͝ ̸̰͖̙͌͊̀̍͑̄̍̈́ ̷̢̩̩̼̦̪̘̍͊̏̋̽̃̕͝ͅ ̸̞̃̎͒̀̒͘ ̵͉̬̣̘̘̱̳̝͖̩̭̣̥̲͊̏́͌͌̄̅̌̀̈̚͜ ̸̳̤̰̹̰̬͙̫̯̔̌̓͊̐̀̍͌́̕ ̴̡̡̨̟̙͕͙̺̠̹̝̝̭̜͙̆̉̍̓͌ ̵̨̡̙̺̠̺̮̙̠̫̞̥̺̬̺̎͑ ̵̫̤͚͎̬̽̑͋ ̷̧̢̛̳̦͍̠̳̝̳̖̙̝͓̝̈́ ̶͕̪̟̯̣̤̯͇̥͍̫̱̺̆͗͑̎̀̀̉̍͐̀̀̋̽̚͜ ̷̡̣̞͎̹͖̤̪̈́̈̉͒͂́͐͝ ̴̫͊̒́̑̋̏͛͌́́̂̏̇́͝ ̷̨̧̡̝̠̙̹̖̀̉̕ ̴̨̧̧̛̫̮̹̗̘̜̙͈͈̘͒̈́̀̄̑͑̌̋͑̅̚̚ ̸̧̡̧͙̝͕̺͇͕̓̒̎̿͆̅̆̂̂͛͆̽́̐͘ ̴̢̛̰͎̪͇̣̿̽̂͌̑͊̅̿̔͂͐̓͘͠ͅ ̸͚͓̜͈͙̳͉̬͆ ̴̤͕̳̝̺͉̱̭͈̱̪̠͂̈́̆̓͗̀͘͠͝ ̴̗̀̊̓̉ ̶̨̧̼͓͍͓̣̹͇̭͌͋͐̐̆̅̔̇͋̄̚͝ ̵̨̬̰̮̝͔̈́̑̒̈́̔̇̈́̃̍͝͝ ̶̺̙͍̖͔͙̤̤̩͇͂̅̌͆̒̍̎̈́̚͝ ̸̛̛͍̱̙̥͍͚̫̙̘̩̘̍̃͐͆͒̓̆̔̆͝ ̷̺̺̳̝̥̯̙̜͈̮͖͐͆͋̀̏ ̷͎̥̙̗̩̦̪̹̝̣͊̊̒̄̐͛̍͋̾̆͛͝͠ ̸͉̠̖͙͔͎̟̺̝̙̂͂͛̒̒́ͅ ̶͍̥͈̝̳͐̄̀̋ ̷̧̯̹̘̥̖̣̗͙̼̥̈̓̈́͆̈̀͋̎͋͘͘ ̴̢̧̹̮̹̲̦̝͖͓̜̘͇̘̽̓̋̅̋̓͗͋̓̀͋͜͝ ̷̯̖̙͈̹̞͙͓̰̣͇̆̑̀̇̾̀̅͆͊̀"
-local _0x44e5=_0x1c3f or _0x4bb6 or _0x9b6e or _0x5fe9 or _0x73ea
-function AC_BypassLibrary:Protect_gui(_0x4d50)if _0x4d50 and _0x4d50:IsA("GuiObject")then _0x4d50.Parent=_0x44e5 or _0x4a27 else return _0x4d50.Parent==_0x4a27 end end
+local cf = cloneref or clonereference or function(instance : any)
+    return instance
+end
+local CoreGui : CoreGui = cf(game:GetService("CoreGui"))
+local ProtectedFolder = Instance.new("Folder")
+ProtectedFolder.Parent = CoreGui
+ProtectedFolder.Name = " ̸̛̗͓̓̾̋͊̆̑͗̐̋̆́͘̚͝ͅ ̶̨̡̡̘͓̺͕̤͍́̑̋̓̏̓͊́́͂̈́ ̶͍̫̤͚̙͓̻͛̏͜͜ ̷̗͙̖͉͇̤͓͕̀̅́͜ ̸̛̼̗̭̞̙͖̐͌͒͗̚͘ ̵̧̢̧̢̯͉̜̙͈̉̈́͌̀́̋̎̐̈́̀͘͜͝͝͝ ̸̰͖̙͌͊̀̍͑̄̍̈́ ̷̢̩̩̼̦̪̘̍͊̏̋̽̃̕͝ͅ ̸̞̃̎͒̀̒͘ ̵͉̬̣̘̘̱̳̝͖̩̭̣̥̲͊̏́͌͌̄̅̌̀̈̚͜ ̸̳̤̰̹̰̬͙̫̯̔̌̓͊̐̀̍͌́̕ ̴̡̡̨̟̙͕͙̺̠̹̝̝̭̜͙̆̉̍̓͌ ̵̨̡̙̺̠̺̮̙̠̫̞̥̺̬̺̎͑ ̵̫̤͚͎̬̽̑͋ ̷̧̢̛̳̦͍̠̳̝̳̖̙̝͓̝̈́ ̶͕̪̟̯̣̤̯͇̥͍̫̱̺̆͗͑̎̀̀̉̍͐̀̀̋̽̚͜ ̷̡̣̞͎̹͖̤̪̈́̈̉͒͂́͐͝ ̴̫͊̒́̑̋̏͛͌́́̂̏̇́͝ ̷̨̧̡̝̠̙̹̖̀̉̕ ̴̨̧̧̛̫̮̹̗̘̜̙͈͈̘͒̈́̀̄̑͑̌̋͑̅̚̚ ̸̧̡̧͙̝͕̺͇͕̓̒̎̿͆̅̆̂̂͛͆̽́̐͘ ̴̢̛̰͎̪͇̣̿̽̂͌̑͊̅̿̔͂͐̓͘͠ͅ ̸͚͓̜͈͙̳͉̬͆ ̴̤͕̳̝̺͉̱̭͈̱̪̠͂̈́̆̓͗̀͘͠͝ ̴̗̀̊̓̉ ̶̨̧̼͓͍͓̣̹͇̭͌͋͐̐̆̅̔̇͋̄̚͝ ̵̨̬̰̮̝͔̈́̑̒̈́̔̇̈́̃̍͝͝ ̶̺̙͍̖͔͙̤̤̩͇͂̅̌͆̒̍̎̈́̚͝ ̸̛̛͍̱̙̥͍͚̫̙̘̩̘̍̃͐͆͒̓̆̔̆͝ ̷̺̺̳̝̥̯̙̜͈̮͖͐͆͋̀̏ ̷͎̥̙̗̩̦̪̹̝̣͊̊̒̄̐͛̍͋̾̆͛͝͠ ̸͉̠̖͙͔͎̟̺̝̙̂͂͛̒̒́ͅ ̶͍̥͈̝̳͐̄̀̋ ̷̧̯̹̘̥̖̣̗͙̼̥̈̓̈́͆̈̀͋̎͋͘͘ ̴̢̧̹̮̹̲̦̝͖͓̜̘͇̘̽̓̋̅̋̓͗͋̓̀͋͜͝ ̷̯̖̙͈̹̞͙͓̰̣͇̆̑̀̇̾̀̅͆͊̀"
+
+local ProtectedGUI = gethui or gethiddenui or get_hidden_ui or get_hui or get_h_ui
+
+function AC_BypassLibrary:Protect_gui(Instance)
+    if Instance and Instance:IsA("GuiObject") then
+        Instance.Parent = ProtectedGUI or ProtectedFolder
+    else
+        return Instance.Parent == ProtectedFolder
+    end
+end
 
 return AC_BypassLibrary

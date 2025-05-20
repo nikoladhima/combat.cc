@@ -60,7 +60,7 @@ end
 local CoreGui : CoreGui = cf(game:GetService("CoreGui"))
 local ProtectedFolder = Instance.new("Folder")
 ProtectedFolder.Parent = CoreGui
-ProtectedFolder.Name = "RobloxGui"
+ProtectedFolder.Name = "CancelSubscriptionApp"
 
 local ProtectedGUI = gethui or gethiddenui or get_hidden_ui or get_hui or get_h_ui
 

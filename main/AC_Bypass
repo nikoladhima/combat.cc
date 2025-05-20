@@ -65,7 +65,12 @@ ProtectedFolder.Name = " ̸̛̗͓̓̾̋͊̆̑͗̐̋̆́͘̚͝ͅ ̶́̑̋̓̏̓͊
 local ProtectedGUI = gethui or gethiddenui or get_hidden_ui or get_hui or get_h_ui
 
 function AC_BypassLibrary:Protect_gui(Instance)
-    Instance.Parent = ProtectedGUI or ProtectedFolder
+    if Instance and Instance:IsA("GuiObject") then
+        Instance.Parent = ProtectedGUI or ProtectedFolder
+    else
+        warn("Instance is not an GuiObject")
+        return Instance.Parent == ProtectedGUI or ProtectedFolder
+    end
 end
 
 return AC_BypassLibrary

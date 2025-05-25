@@ -12,7 +12,7 @@ local HighlightConnection
 -- // Tracers \\ --
 local TracersEnabled
 -- // Functions \\ --
-function ESPLibrary:CreateHighlight(color)
+function ESPLibrary:CreateHighlight()
     HighlightEnabled = not HighlightEnabled
     local Highlight
     if HighlightEnabled then
@@ -28,7 +28,7 @@ function ESPLibrary:CreateHighlight(color)
             Highlight.Adornee = v.Character
             Highlight.Name = "HighlightESP"
             Highlight.OutlineColor = Color3.fromRGB(0, 0, 0)
-            Highlight.FillColor = color
+            Highlight.FillColor = Color3.fromRGB(255,255,255)
             Highlight.FillTransparency = 0.5
             return Highlight
         end
@@ -39,7 +39,7 @@ function ESPLibrary:CreateHighlight(color)
         Highlight.Adornee = v.Character
         Highlight.Name = "HighlightESP"
         Highlight.OutlineColor = Color3.fromRGB(0, 0, 0)
-        Highlight.FillColor = color
+        Highlight.FillColor = Color3.fromRGB(255,255,255)
         Highlight.FillTransparency = 0.5
         return Highlight
     end

@@ -20,6 +20,7 @@ function AC_BypassLibrary:Protect(Instance)
         Instance.Parent = cloneref(ProtectedFolder)
     end
 end
+function AC_BypassLibrary:BypassAntiCheat()
 -- // Dan FFA Anti-Detection made by nikoleto scripts \\ --
 if tostring(game.GameId) == "7381526759" then
     task.spawn(function()
@@ -73,5 +74,6 @@ local Old; Old = hookfunction(getrenv().debug.info, newcclosure(function(...)
     return Old(...)
 end))
 setthreadidentity(7)
+end
 
 return AC_BypassLibrary

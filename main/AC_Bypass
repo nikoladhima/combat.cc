@@ -13,7 +13,7 @@ ProtectedFolder.Name = "CancelSubscriptionApp"
 
 local ProtectedGUI = gethui or gethiddenui or get_hidden_ui or get_hui or get_h_ui
 
-function AC_BypassLibrary:Protect_gui(Instance)
+function AC_BypassLibrary:Protect(Instance)
     if Instance and Instance:IsA("GuiObject") then
         Instance.Parent = ProtectedGUI or cloneref(ProtectedFolder)
     else

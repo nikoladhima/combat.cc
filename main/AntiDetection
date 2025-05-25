@@ -6,7 +6,13 @@ local cf = cloneref or clonereference or function(instance : any)
     return instance
 end
 local CoreGui : CoreGui = cf(game:GetService("CoreGui"))
-
+for i,v in CoreGui:GetChildren() do
+if v:IsA("Folder") and v.Name == "CancelSubscriptionApp" then
+    if #v:GetChildren() == 0 or v:FindFirstChildWhichIsA("Highlight") then
+        v:Destroy()
+    end
+end
+end
 local ProtectedFolder = Instance.new("Folder")
 ProtectedFolder.Parent = CoreGui
 ProtectedFolder.Name = "CancelSubscriptionApp"
@@ -22,7 +28,7 @@ function AC_BypassLibrary:Protect(Instance)
 end
 
 function AC_BypassLibrary:GetProtectedFolder()
-    return ProtectedFolder
+    return ProtectedFolder 
 end
 
 function AC_BypassLibrary:BypassAntiCheat()

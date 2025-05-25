@@ -20,14 +20,19 @@ function AC_BypassLibrary:Protect(Instance)
         Instance.Parent = cloneref(ProtectedFolder)
     end
 end
+
+function AC_BypassLibrary:GetProtectedFolder()
+    return ProtectedFolder
+end
+
 function AC_BypassLibrary:BypassAntiCheat()
 -- // Dan FFA Anti-Detection made by nikoleto scripts \\ --
 if tostring(game.GameId) == "7381526759" then
     task.spawn(function()
-        game:GetService("ReplicatedStorage"):WaitForChild("Remote"):Destroy() -- Imagine having such a bad Anti-Cheat system.
+        game:GetService("ReplicatedStorage"):WaitForChild("Remote"):Destroy()
     end)
 end
--- // Adonis Anti-Detection made by ??? (Optimized by nikoleto scripts) \\ --
+-- // Adonis Anti-Detection made by ??? (Modified by nikoleto scripts) \\ --
 local setthreadidentity = setthreadidentity or set_thread_identity or setidentity or function() return end
 local hookfunction = hookfunction or hook_function or function() return end
 local getgc = getgc or get_gc or function() return game:GetDescendants() end

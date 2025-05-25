@@ -1,1 +1,69 @@
--- yes
+local AntiDetectionLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/nikoladhima/combat.cc/refs/heads/main/main/AntiDetection"))()
+local ProtectService = cloneref or clonereference or function(instance: any)
+    return instance
+end
+local ProtectedFolder = AntiDetectionLibrary:GetProtectedFolder() 
+local Players : Players = ProtectService(game:GetService("Players"))
+local Draw = Drawing.new or Draw.new
+local ESPLibrary = {}
+-- // Highlights \\ --
+local HighlightEnabled
+local HighlightConnection
+-- // Tracers \\ --
+local TracersEnabled
+-- // Functions \\ --
+function ESPLibrary:CreateHighlight(color)
+    HighlightEnabled = not HighlightEnabled
+    local Highlight
+    if HighlightEnabled then
+        Players.PlayerAdded:Connect(function()
+        for i,v in Players:GetPlayers() do
+            for i,children in ProtectedFolder:GetChildren() do
+                if children:IsA("Highlight") then
+                    children:Destroy()
+                end
+            end
+            Highlight = Instance.new("Highlight")
+            Highlight.Parent = ProtectedFolder
+            Highlight.Adornee = v.Character
+            Highlight.Name = "HighlightESP"
+            Highlight.OutlineColor = Color3.fromRGB(0, 0, 0)
+            Highlight.FillColor = color
+            Highlight.FillTransparency = 0.5
+            return Highlight
+        end
+    end)
+    for i,v in Players:GetPlayers() do
+        Highlight = Instance.new("Highlight")
+        Highlight.Parent = ProtectedFolder
+        Highlight.Adornee = v.Character
+        Highlight.Name = "HighlightESP"
+        Highlight.OutlineColor = Color3.fromRGB(0, 0, 0)
+        Highlight.FillColor = color
+        Highlight.FillTransparency = 0.5
+        return Highlight
+    end
+    else
+        for i,children in ProtectedFolder:GetChildren() do
+            if children:IsA("Highlight") then
+                children:Destroy()
+            end
+        end
+    end
+end
+function ESPLibrary:CreateNameTags()
+    
+end
+function ESPLibrary:CreateTracers()
+    TracersEnabled = not TracersEnabled
+    if not TracersEnabled then return end
+    local Tracer = Draw("Line")
+end
+function ESPLibrary:CreateBoxes()
+    
+end
+function ESPLibrary:CreateHealthBars()
+    
+end
+
+return ESPLibrary

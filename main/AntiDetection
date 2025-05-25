@@ -6,16 +6,9 @@ local cf = cloneref or clonereference or function(instance : any)
     return instance
 end
 local CoreGui : CoreGui = cf(game:GetService("CoreGui"))
-for i,v in CoreGui:GetChildren() do
-if v:IsA("Folder") and v.Name == "CancelSubscriptionApp" then
-    if #v:GetChildren() == 0 or v:FindFirstChildWhichIsA("Highlight") then
-        v:Destroy()
-    end
-end
-end
 local ProtectedFolder = Instance.new("Folder")
 ProtectedFolder.Parent = CoreGui
-ProtectedFolder.Name = "CancelSubscriptionApp"
+ProtectedFolder.Name = "C̶a̴n̸c̸e̶l̷S̶u̶b̶s̷c̵r̶i̶p̶t̷i̵o̵n̴A̸p̸p̴"
 
 local ProtectedGUI = gethui or gethiddenui or get_hidden_ui or get_hui or get_h_ui
 

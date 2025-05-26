@@ -9,6 +9,7 @@ local cloneref = (cloneref or clonereference or function(instance: any)
 end)
 
 local CoreGui: CoreGui = cloneref(game:GetService("CoreGui"))
+local Lighting = game:GetService("Lighting")
 local Players: Players = cloneref(game:GetService("Players"))
 local RunService: RunService = cloneref(game:GetService("RunService"))
 local SoundService: SoundService = cloneref(game:GetService("SoundService"))
@@ -50,7 +51,7 @@ local Library = {
 
     Notifications = {},
 
-    ToggleKeybind = Enum.KeyCode.RightControl,
+    ToggleKeybind = Enum.KeyCode.Insert,
     TweenInfo = TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
     NotifyTweenInfo = TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
 
@@ -586,6 +587,10 @@ ScreenGui.DescendantRemoving:Connect(function(Instance)
     Library:RemoveFromRegistry(Instance)
     Library.DPIRegistry[Instance] = nil
 end)
+
+local BackgroundBlurEffect = Instance.new("BlurEffect")
+BackgroundBlurEffect.Parent = Lighting
+BackgroundBlurEffect.Size = 32
 
 local ModalScreenGui = New("ScreenGui", {
     Enabled = false,
@@ -5293,6 +5298,7 @@ function Library:CreateWindow(WindowInfo)
             ) or Input.KeyCode == Library.ToggleKeybind
         then
             Library.Toggle()
+            BackgroundBlurEffect.Enabled = Library.Toggled
         end
     end))
 

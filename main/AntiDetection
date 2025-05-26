@@ -5,6 +5,7 @@ local cf = cloneref or clonereference or function(instance : any)
     return instance
 end
 local CoreGui : CoreGui = cf(game:GetService("CoreGui"))
+local Players : Players = cf(game:GetService("Players"))
 
 local ProtectedFolder = Instance.new("Folder")
 ProtectedFolder.Parent = CoreGui
@@ -29,9 +30,21 @@ end
 function AC_BypassLibrary:BypassAntiCheat()
 -- // Dan FFA Anti-Detection made by nikoleto scripts \\ --
 if tostring(game.GameId) == "7381526759" then
-    task.spawn(function()
-        game:GetService("ReplicatedStorage"):WaitForChild("Remote"):Destroy()
-    end)
+for i,v in Players.LocalPlayer.Character:GetDescendants() do
+    if v:IsA("LocalScript") then
+        if v.Name ~= "Animate" and v.Name ~= "Revolver" then
+            v:Destroy()
+        end
+    end
+end
+
+Players.LocalPlayer.Character.DescendantAdded:Connect(function(Descendant)
+    if Descendant:IsA("LocalScript") then
+        if Descendant.Name ~= "Animate" and Descendant.Name ~= "Revolver" then
+            Descendant:Destroy()
+        end
+    end
+end)
 end
 -- // Adonis Anti-Detection made by ??? (Modified by nikoleto scripts) \\ --
 local setthreadidentity = setthreadidentity or set_thread_identity or setidentity or function() return end

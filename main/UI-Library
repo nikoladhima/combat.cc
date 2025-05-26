@@ -5298,6 +5298,7 @@ function Library:CreateWindow(WindowInfo)
             ) or Input.KeyCode == Library.ToggleKeybind
         then
             Library.Toggle()
+            ModalScreenGui.Enabled = Library.Toggled
             BackgroundBlurEffect.Enabled = Library.Toggled
         end
     end))

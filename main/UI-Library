@@ -80,7 +80,7 @@ local Library = {
     Signals = {},
     UnloadSignals = {},
 
-    MinSize = Vector2.new(480, 360),
+    MinSize = Vector2.new(1100, 540),
     DPIScale = 1,
     CornerRadius = 4,
 
@@ -104,11 +104,6 @@ local Library = {
 
 if RunService:IsStudio() then 
     return
-else
-    pcall(function()
-        Library.DevicePlatform = UserInputService:GetPlatform()
-    end)
-    Library.MinSize = Vector2.new(480, 360)
 end
 
 local Templates = {
@@ -737,55 +732,6 @@ function Library:SafeCallback(Func: (...any) -> ...any, ...: any)
     end
 end
 
-function Library:MakeDraggable(UI: GuiObject, DragFrame: GuiObject, IgnoreToggled: boolean?, IsMainWindow: boolean?)
-    local StartPos
-    local FramePos
-    local Dragging = false
-    local Changed
-    DragFrame.InputBegan:Connect(function(Input: InputObject)
-        if not IsClickInput(Input) then
-            return
-        end
-
-        StartPos = Input.Position
-        FramePos = UI.Position
-        Dragging = true
-
-        Changed = Input.Changed:Connect(function()
-            if Input.UserInputState ~= Enum.UserInputState.End then
-                return
-            end
-
-            Dragging = false
-            if Changed and Changed.Connected then
-                Changed:Disconnect()
-                Changed = nil
-            end
-        end)
-    end)
-    Library:GiveSignal(UserInputService.InputChanged:Connect(function(Input: InputObject)
-        if
-            (not IgnoreToggled and not Library.Toggled)
-            or (IsMainWindow and Library.CantDragForced)
-            or not (ScreenGui and ScreenGui.Parent)
-        then
-            Dragging = false
-            if Changed and Changed.Connected then
-                Changed:Disconnect()
-                Changed = nil
-            end
-
-            return
-        end
-
-        if Dragging and IsHoverInput(Input) then
-            local Delta = Input.Position - StartPos
-            UI.Position =
-                UDim2.new(FramePos.X.Scale, FramePos.X.Offset + Delta.X, FramePos.Y.Scale, FramePos.Y.Offset + Delta.Y)
-        end
-    end))
-end
-
 function Library:MakeResizable(UI: GuiObject, DragFrame: GuiObject, Callback: () -> ()?)
     local StartPos
     local FrameSize
@@ -952,8 +898,6 @@ function Library:AddDraggableMenu(Name: string)
         PaddingTop = UDim.new(0, 7),
         Parent = Container,
     })
-
-    Library:MakeDraggable(Background, Label, true)
     return Background, Container
 end
 
@@ -3966,13 +3910,7 @@ end
 function Library:CreateWindow(WindowInfo)
     WindowInfo = Library:Validate(WindowInfo, Templates.Window)
     local ViewportSize: Vector2 = workspace.CurrentCamera.ViewportSize
-    if RunService:IsStudio() and ViewportSize.X <= 5 and ViewportSize.Y <= 5 then
-        repeat
-            ViewportSize = workspace.CurrentCamera.ViewportSize
-            task.wait()
-        until ViewportSize.X > 5 and ViewportSize.Y > 5
-    end
-
+    
     local MaxX = ViewportSize.X - 64
     local MaxY = ViewportSize.Y - 64
 
@@ -4011,8 +3949,8 @@ function Library:CreateWindow(WindowInfo)
                 return Library:GetBetterColor(Library.Scheme.BackgroundColor, -1)
             end,
             Name = "Main",
-            Position = WindowInfo.Position,
-            Size = WindowInfo.Size,
+            Position = UDim2.new(0,10,0,-50),
+            Size = UDim2.new(0, 1100, 0, 540),
             Visible = false,
             Parent = ScreenGui,
 
@@ -4056,7 +3994,6 @@ function Library:CreateWindow(WindowInfo)
             Size = UDim2.new(1, 0, 0, 48),
             Parent = MainFrame,
         })
-        Library:MakeDraggable(MainFrame, TopBar, false, true)
 
         --// Title
         local TitleHolder = New("Frame", {

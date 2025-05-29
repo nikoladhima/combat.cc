@@ -1248,8 +1248,9 @@ function Library:AddTooltip(InfoStr: string, DisabledInfoStr: string, HoverInsta
 end
 
 function Library:OnUnload(Callback)
-    table.insert(Library.UnloadSignals, Callback)
     BackgroundBlurEffect:Destroy()
+    print([[    // Unloaded combat.cc || Made by nikoleto scripts - github.com/nikoladhima \\ --]])
+    table.insert(Library.UnloadSignals, Callback)
 end
 
 function Library:Unload()

@@ -7,7 +7,6 @@ end
 local ProtectService = (cloneref or clonereference or function(instance: any)
     return instance
 end)
-
 local cloneref = (cloneref or clonereference or function(instance)
     return instance
 end)
@@ -21,6 +20,13 @@ local UserInputService: UserInputService = ProtectService(game:GetService("UserI
 local TextService: TextService = ProtectService(game:GetService("TextService"))
 local Teams: Teams = ProtectService(game:GetService("Teams"))
 local TweenService: TweenService = ProtectService(game:GetService("TweenService"))
+
+-- Code 001 = Mobile devices (Excluding emulators)
+
+if (UserInputService.KeyboardEnabled and UserInputService.TouchEnabled) or UserInputService.KeyboardEnabled then
+else
+    return Players.LocalPlayer:Kick("Device: Code 001,\nMobile is not supported or keyboard is not plugged in.")
+end
 
 local getgenv = getgenv or function()
     return shared
@@ -41,8 +47,6 @@ local Options = {}
 
 local Library = {
     LocalPlayer = LocalPlayer,
-    DevicePlatform = nil,
-    IsMobile = false,
 
     ScreenGui = nil,
 
@@ -72,8 +76,6 @@ local Library = {
     ForceCheckbox = false,
     ShowToggleFrameInKeybinds = true,
     NotifyOnError = false,
-
-    CantDragForced = false,
 
     Signals = {},
     UnloadSignals = {},
@@ -106,8 +108,7 @@ else
     pcall(function()
         Library.DevicePlatform = UserInputService:GetPlatform()
     end)
-    Library.IsMobile = (Library.DevicePlatform == Enum.Platform.Android or Library.DevicePlatform == Enum.Platform.IOS)
-    Library.MinSize = Library.IsMobile and Vector2.new(480, 240) or Vector2.new(480, 360)
+    Library.MinSize = Vector2.new(480, 360)
 end
 
 local Templates = {
@@ -354,6 +355,10 @@ local function GetTeams()
     end)
 
     return TeamList
+end
+
+function Library:GetPlatform()
+    return UserInputService:GetPlatform()
 end
 
 function Library:UpdateKeybindFrame()
@@ -738,7 +743,7 @@ function Library:MakeDraggable(UI: GuiObject, DragFrame: GuiObject, IgnoreToggle
     local Dragging = false
     local Changed
     DragFrame.InputBegan:Connect(function(Input: InputObject)
-        if not IsClickInput(Input) or IsMainWindow and Library.CantDragForced then
+        if not IsClickInput(Input) then
             return
         end
 
@@ -889,46 +894,6 @@ function Library:MakeOutline(Frame: GuiObject, Corner: number?, ZIndex: number?)
     end
 
     return Holder
-end
-
-function Library:AddDraggableButton(Text: string, Func)
-    local Table = {}
-
-    local Button = New("TextButton", {
-        BackgroundColor3 = "BackgroundColor",
-        Position = UDim2.fromOffset(6, 6),
-        TextSize = 16,
-        ZIndex = 10,
-        Parent = ScreenGui,
-
-        DPIExclude = {
-            Position = true,
-        },
-    })
-    New("UICorner", {
-        CornerRadius = UDim.new(0, Library.CornerRadius - 1),
-        Parent = Button,
-    })
-    Library:MakeOutline(Button, Library.CornerRadius, 9)
-
-    Table.Button = Button
-    Button.MouseButton1Click:Connect(function()
-        Library:SafeCallback(Func, Table)
-    end)
-    Library:MakeDraggable(Button, Button, true)
-
-    function Table:SetText(NewText: string)
-        local X, Y = Library:GetTextBounds(NewText, Library.Scheme.Font, 16)
-
-        Button.Text = NewText
-        Button.Size = UDim2.fromOffset(X * Library.DPIScale * 2, Y * Library.DPIScale * 2)
-        Library:UpdateDPI(Button, {
-            Size = UDim2.fromOffset(X * 2, Y * 2),
-        })
-    end
-    Table:SetText(Text)
-
-    return Table
 end
 
 function Library:AddDraggableMenu(Name: string)
@@ -5069,7 +5034,7 @@ function Library:CreateWindow(WindowInfo)
         MainFrame.Visible = Library.Toggled
         ModalElement.Modal = Library.Toggled
 
-        if Library.Toggled and not Library.IsMobile then
+        if Library.Toggled then
             local OldMouseIconEnabled = UserInputService.MouseIconEnabled
             pcall(function()
                 RunService:UnbindFromRenderStep("ShowCursor")
@@ -5109,27 +5074,6 @@ function Library:CreateWindow(WindowInfo)
 
     if WindowInfo.AutoShow then
         task.spawn(Library.Toggle)
-    end
-
-    if Library.IsMobile then
-        local ToggleButton = Library:AddDraggableButton("Toggle", function()
-            Library:Toggle()
-        end)
-
-        local LockButton = Library:AddDraggableButton("Lock", function(self)
-            Library.CantDragForced = not Library.CantDragForced
-            self:SetText(Library.CantDragForced and "Unlock" or "Lock")
-        end)
-
-        if WindowInfo.MobileButtonsSide == "Right" then
-            ToggleButton.Button.Position = UDim2.new(1, -6, 0, 6)
-            ToggleButton.Button.AnchorPoint = Vector2.new(1, 0)
-
-            LockButton.Button.Position = UDim2.new(1, -6, 0, 46)
-            LockButton.Button.AnchorPoint = Vector2.new(1, 0)
-        else
-            LockButton.Button.Position = UDim2.fromOffset(6, 46)
-        end
     end
 
     --// Execution \\--

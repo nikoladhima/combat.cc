@@ -1248,7 +1248,7 @@ function Library:AddTooltip(InfoStr: string, DisabledInfoStr: string, HoverInsta
 end
 
 function Library:OnUnload(Callback)
-    table.insert(Library.UnloadSignals, Callback and print([[ // Unloaded combat.cc || Made by nikoleto scripts - github.com/nikoladhima \\ --]] and BackgroundBlurEffect:Destroy()))
+    table.insert(Library.UnloadSignals, Callback)
 end
 
 function Library:Unload()
@@ -1260,11 +1260,12 @@ function Library:Unload()
     for _, Callback in pairs(Library.UnloadSignals) do
         Library:SafeCallback(Callback)
     end
-
     Library.Unloaded = true
     ScreenGui:Destroy()
     ModalScreenGui:Destroy()
+    BackgroundBlurEffect:Destroy()
     getgenv().Library = nil
+    print([[ // Unloaded combat.cc || Made by nikoleto scripts - github.com/nikoladhima \\ --]])
 end
 
 local CheckIcon = Library:GetIcon("check")

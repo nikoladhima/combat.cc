@@ -80,7 +80,7 @@ local Library = {
     Signals = {},
     UnloadSignals = {},
 
-    MinSize = Vector2.new(1100, 540),
+    MinSize = Vector2.new(715, 415),
     DPIScale = 1,
     CornerRadius = 4,
 
@@ -160,7 +160,6 @@ local Templates = {
         Size = UDim2.fromOffset(720, 600),
         IconSize = UDim2.fromOffset(30, 30),
         AutoShow = true,
-        Center = true,
         Resizable = true,
         CornerRadius = 4,
         NotifySide = "Right",
@@ -3982,10 +3981,6 @@ function Library:CreateWindow(WindowInfo)
                 Library:MakeLine(MainFrame, Info)
             end
             Library:MakeOutline(MainFrame, WindowInfo.CornerRadius, 0)
-        end
-
-        if WindowInfo.Center then
-            MainFrame.Position = UDim2.new(0.5, -MainFrame.Size.X.Offset / 2, 0.5, -MainFrame.Size.Y.Offset / 2)
         end
 
         --// Top Bar \\-

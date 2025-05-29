@@ -4,19 +4,23 @@ if not isfolder("combat.cc") then
     makefolder("combat.cc")
 end
 
-local cloneref = (cloneref or clonereference or function(instance: any)
+local ProtectService = (cloneref or clonereference or function(instance: any)
     return instance
 end)
 
-local CoreGui: CoreGui = cloneref(game:GetService("CoreGui"))
+local cloneref = (cloneref or clonereference or function(instance)
+    return instance
+end)
+
+local CoreGui: CoreGui = ProtectService(game:GetService("CoreGui"))
 local Lighting = game:GetService("Lighting")
-local Players: Players = cloneref(game:GetService("Players"))
-local RunService: RunService = cloneref(game:GetService("RunService"))
-local SoundService: SoundService = cloneref(game:GetService("SoundService"))
-local UserInputService: UserInputService = cloneref(game:GetService("UserInputService"))
-local TextService: TextService = cloneref(game:GetService("TextService"))
-local Teams: Teams = cloneref(game:GetService("Teams"))
-local TweenService: TweenService = cloneref(game:GetService("TweenService"))
+local Players: Players = ProtectService(game:GetService("Players"))
+local RunService: RunService = ProtectService(game:GetService("RunService"))
+local SoundService: SoundService = ProtectService(game:GetService("SoundService"))
+local UserInputService: UserInputService = ProtectService(game:GetService("UserInputService"))
+local TextService: TextService = ProtectService(game:GetService("TextService"))
+local Teams: Teams = ProtectService(game:GetService("Teams"))
+local TweenService: TweenService = ProtectService(game:GetService("TweenService"))
 
 local getgenv = getgenv or function()
     return shared
@@ -588,9 +592,10 @@ ScreenGui.DescendantRemoving:Connect(function(Instance)
     Library.DPIRegistry[Instance] = nil
 end)
 
-local BackgroundBlurEffect = Instance.new("BlurEffect")
+local BackgroundBlurEffect = cloneref(Instance.new("BlurEffect"))
 BackgroundBlurEffect.Parent = Lighting
 BackgroundBlurEffect.Size = 32
+BackgroundBlurEffect.Enabled = false
 
 local ModalScreenGui = New("ScreenGui", {
     Enabled = false,
@@ -1244,6 +1249,7 @@ end
 
 function Library:OnUnload(Callback)
     table.insert(Library.UnloadSignals, Callback)
+    BackgroundBlurEffect:Destroy()
 end
 
 function Library:Unload()
@@ -5284,7 +5290,6 @@ function Library:CreateWindow(WindowInfo)
         --// Set Last Tab to Current One
         LastTab = Library.ActiveTab
     end)
-
     Library:GiveSignal(UserInputService.InputBegan:Connect(function(Input: InputObject)
         if UserInputService:GetFocusedTextBox() then
             return

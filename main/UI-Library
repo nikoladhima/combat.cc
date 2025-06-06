@@ -4968,7 +4968,7 @@ function Library:CreateWindow(WindowInfo)
             end)
             RunService:BindToRenderStep("ShowCursor", Enum.RenderPriority.Last.Value, function()
                 if LocalPlayer.CameraMaxZoomDistance == 0.5 or LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson then
-                UserInputService.MouseIconEnabled = false
+                UserInputService.MouseIconEnabled = true
                 else
                 UserInputService.MouseIconEnabled = not Library.ShowCustomCursor
                 end

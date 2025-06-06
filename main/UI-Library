@@ -870,7 +870,6 @@ function Library:AddDraggableButton(Text: string, Func)
     Button.MouseButton1Click:Connect(function()
         Library:SafeCallback(Func, Table)
     end)
-    Library:MakeDraggable(Button, Button, true)
 
     function Table:SetText(NewText: string)
         local X, Y = Library:GetTextBounds(NewText, Library.Scheme.Font, 16)
@@ -942,8 +941,6 @@ function Library:AddDraggableMenu(Name: string)
         PaddingTop = UDim.new(0, 7),
         Parent = Container,
     })
-
-    Library:MakeDraggable(Background, Label, true)
     return Background, Container
 end
 
@@ -4046,7 +4043,6 @@ function Library:CreateWindow(WindowInfo)
             Size = UDim2.new(1, 0, 0, 48),
             Parent = MainFrame,
         })
-        Library:MakeDraggable(MainFrame, TopBar, false, true)
 
         --// Title
         local TitleHolder = New("Frame", {

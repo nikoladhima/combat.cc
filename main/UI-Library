@@ -5189,7 +5189,7 @@ local function OnPlayerChange()
         if Dropdown.Type == "Dropdown" and Dropdown.SpecialType == "Player" then
             Dropdown:SetValues(Dropdown.ExcludeLocalPlayer and ExcludedPlayerList or PlayerList)
         end
-    end
+    en
 end
 local function OnTeamChange()
     local TeamList = GetTeams()

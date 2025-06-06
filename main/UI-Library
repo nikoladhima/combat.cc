@@ -22,9 +22,7 @@ local Teams: Teams = ProtectService(game:GetService("Teams"))
 local TweenService: TweenService = ProtectService(game:GetService("TweenService"))
 
 if (UserInputService.KeyboardEnabled and UserInputService.TouchEnabled) or UserInputService.KeyboardEnabled then
-    task.spawn(function()
-        return "Device supported."
-    end)
+    print("Device supported.")
 else
     return Players.LocalPlayer:Kick("Device: Code 001,\nMobile is not supported or keyboard is not plugged in.")
 end

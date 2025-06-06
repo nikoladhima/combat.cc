@@ -21,9 +21,10 @@ local TextService: TextService = ProtectService(game:GetService("TextService"))
 local Teams: Teams = ProtectService(game:GetService("Teams"))
 local TweenService: TweenService = ProtectService(game:GetService("TweenService"))
 
--- Code 001 = Mobile devices (Excluding emulators)
-
 if (UserInputService.KeyboardEnabled and UserInputService.TouchEnabled) or UserInputService.KeyboardEnabled then
+    task.spawn(function()
+        return "Device supported."
+    end)
 else
     return Players.LocalPlayer:Kick("Device: Code 001,\nMobile is not supported or keyboard is not plugged in.")
 end
@@ -80,7 +81,7 @@ local Library = {
     Signals = {},
     UnloadSignals = {},
 
-    MinSize = Vector2.new(715, 415),
+    MinSize = Vector2.new(480, 360),
     DPIScale = 1,
     CornerRadius = 4,
 
@@ -104,6 +105,11 @@ local Library = {
 
 if RunService:IsStudio() then 
     return
+else
+    pcall(function()
+        Library.DevicePlatform = UserInputService:GetPlatform()
+    end)
+    Library.MinSize = Vector2.new(480, 360)
 end
 
 local Templates = {
@@ -160,6 +166,7 @@ local Templates = {
         Size = UDim2.fromOffset(720, 600),
         IconSize = UDim2.fromOffset(30, 30),
         AutoShow = true,
+        Center = true,
         Resizable = true,
         CornerRadius = 4,
         NotifySide = "Right",
@@ -841,6 +848,46 @@ function Library:MakeOutline(Frame: GuiObject, Corner: number?, ZIndex: number?)
     return Holder
 end
 
+function Library:AddDraggableButton(Text: string, Func)
+    local Table = {}
+
+    local Button = New("TextButton", {
+        BackgroundColor3 = "BackgroundColor",
+        Position = UDim2.fromOffset(6, 6),
+        TextSize = 16,
+        ZIndex = 10,
+        Parent = ScreenGui,
+
+        DPIExclude = {
+            Position = true,
+        },
+    })
+    New("UICorner", {
+        CornerRadius = UDim.new(0, Library.CornerRadius - 1),
+        Parent = Button,
+    })
+    Library:MakeOutline(Button, Library.CornerRadius, 9)
+
+    Table.Button = Button
+    Button.MouseButton1Click:Connect(function()
+        Library:SafeCallback(Func, Table)
+    end)
+    Library:MakeDraggable(Button, Button, true)
+
+    function Table:SetText(NewText: string)
+        local X, Y = Library:GetTextBounds(NewText, Library.Scheme.Font, 16)
+
+        Button.Text = NewText
+        Button.Size = UDim2.fromOffset(X * Library.DPIScale * 2, Y * Library.DPIScale * 2)
+        Library:UpdateDPI(Button, {
+            Size = UDim2.fromOffset(X * 2, Y * 2),
+        })
+    end
+    Table:SetText(Text)
+
+    return Table
+end
+
 function Library:AddDraggableMenu(Name: string)
     local Background = Library:MakeOutline(ScreenGui, Library.CornerRadius, 10)
     Background.AutomaticSize = Enum.AutomaticSize.Y
@@ -897,6 +944,8 @@ function Library:AddDraggableMenu(Name: string)
         PaddingTop = UDim.new(0, 7),
         Parent = Container,
     })
+
+    Library:MakeDraggable(Background, Label, true)
     return Background, Container
 end
 
@@ -3909,7 +3958,13 @@ end
 function Library:CreateWindow(WindowInfo)
     WindowInfo = Library:Validate(WindowInfo, Templates.Window)
     local ViewportSize: Vector2 = workspace.CurrentCamera.ViewportSize
-    
+    if RunService:IsStudio() and ViewportSize.X <= 5 and ViewportSize.Y <= 5 then
+        repeat
+            ViewportSize = workspace.CurrentCamera.ViewportSize
+            task.wait()
+        until ViewportSize.X > 5 and ViewportSize.Y > 5
+    end
+
     local MaxX = ViewportSize.X - 64
     local MaxY = ViewportSize.Y - 64
 
@@ -3948,8 +4003,8 @@ function Library:CreateWindow(WindowInfo)
                 return Library:GetBetterColor(Library.Scheme.BackgroundColor, -1)
             end,
             Name = "Main",
-            Position = UDim2.new(0,10,0,-50),
-            Size = UDim2.new(0, 1100, 0, 540),
+            Position = WindowInfo.Position,
+            Size = WindowInfo.Size,
             Visible = false,
             Parent = ScreenGui,
 
@@ -3983,12 +4038,17 @@ function Library:CreateWindow(WindowInfo)
             Library:MakeOutline(MainFrame, WindowInfo.CornerRadius, 0)
         end
 
+        if WindowInfo.Center then
+            MainFrame.Position = UDim2.new(0.5, -MainFrame.Size.X.Offset / 2, 0.5, -MainFrame.Size.Y.Offset / 2)
+        end
+
         --// Top Bar \\-
         local TopBar = New("Frame", {
             BackgroundTransparency = 1,
             Size = UDim2.new(1, 0, 0, 48),
             Parent = MainFrame,
         })
+        Library:MakeDraggable(MainFrame, TopBar, false, true)
 
         --// Title
         local TitleHolder = New("Frame", {
@@ -4068,15 +4128,20 @@ function Library:CreateWindow(WindowInfo)
             })
         end
 
+        local MoveIcon = Library:GetIcon("move")
+        if MoveIcon then
             New("ImageLabel", {
                 AnchorPoint = Vector2.new(1, 0.5),
-                Image = "rbxassetid://80687076972333",
+                Image = MoveIcon.Url,
                 ImageColor3 = "OutlineColor",
+                ImageRectOffset = MoveIcon.ImageRectOffset,
+                ImageRectSize = MoveIcon.ImageRectSize,
                 Position = UDim2.new(1, -10, 0.5, 0),
                 Size = UDim2.fromOffset(28, 28),
                 SizeConstraint = Enum.SizeConstraint.RelativeYY,
                 Parent = TopBar,
             })
+        end
 
         --// Bottom Bar \\--
         local BottomBar = New("Frame", {

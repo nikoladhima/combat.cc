@@ -4974,7 +4974,7 @@ function Library:CreateWindow(WindowInfo)
                 end
 
                 Cursor.Position = UDim2.fromOffset(Mouse.X, Mouse.Y)
-                Cursor.Visible = true--Library.ShowCustomCursor
+                Cursor.Visible = Library.ShowCustomCursor
 
                 if not (Library.Toggled and ScreenGui and ScreenGui.Parent) then
                     if LocalPlayer.CameraMaxZoomDistance == 0.5 or LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson then
@@ -5189,7 +5189,7 @@ local function OnPlayerChange()
         if Dropdown.Type == "Dropdown" and Dropdown.SpecialType == "Player" then
             Dropdown:SetValues(Dropdown.ExcludeLocalPlayer and ExcludedPlayerList or PlayerList)
         end
-    en
+    end
 end
 local function OnTeamChange()
     local TeamList = GetTeams()

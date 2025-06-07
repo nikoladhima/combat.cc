@@ -4951,79 +4951,58 @@ function Library:CreateWindow(WindowInfo)
         return Tab
     end
 
-function Library:Toggle(Value: boolean?)
-    -- Determine new state
-    local newState
-    if typeof(Value) == "boolean" then
-        newState = Value
-    else
-        newState = not Library.Toggled
-    end
-    
-    -- Only proceed if state is actually changing
-    if newState == Library.Toggled then return end
-    
-    -- Update the toggled state
-    Library.Toggled = newState
-    
-    -- Update main frame visibility
-    MainFrame.Visible = Library.Toggled
-    ModalElement.Modal = Library.Toggled
-    
-    -- Handle mouse and cursor state
-    if Library.Toggled and not Library.IsMobile then
-    task.defer(function()
-        UserInputService.MouseIconEnabled = false
-        UserInputService.MouseBehavior = Enum.MouseBehavior.LockCurrentPosition
-    end)
-        -- First ensure mouse is in default state
-        UserInputService.MouseIconEnabled = true
-        UserInputService.MouseBehavior = Enum.MouseBehavior.Default
-        
-        -- Clear any existing render step
-        pcall(function()
-            RunService:UnbindFromRenderStep("ShowCursor")
-        end)
-        
-        -- Set up custom cursor handling
-        RunService:BindToRenderStep("ShowCursor", Enum.RenderPriority.First.Value + 1, function()
-            if Library.Toggled and ScreenGui and ScreenGui.Parent then
-                -- Lock mouse behavior and show custom cursor
-                UserInputService.MouseIconEnabled = false
-                UserInputService.MouseBehavior = Enum.MouseBehavior.LockCurrentPosition
-                Cursor.Position = UDim2.fromOffset(Mouse.X + 1, Mouse.Y + 1)
-                Cursor.Visible = true
-            else
-                -- Clean up when UI is closed
-                UserInputService.MouseIconEnabled = true
-                UserInputService.MouseBehavior = Enum.MouseBehavior.Default
-                Cursor.Visible = false
+    function Library:Toggle(Value: boolean?)
+        if typeof(Value) == "boolean" then
+            Library.Toggled = Value
+        else
+            Library.Toggled = not Library.Toggled
+        end
+
+        MainFrame.Visible = Library.Toggled
+        ModalElement.Modal = Library.Toggled
+
+        if Library.Toggled then
+            local OldMouseIconEnabled = UserInputService.MouseIconEnabled
+            pcall(function()
                 RunService:UnbindFromRenderStep("ShowCursor")
-            end
-        end)
-    else
-        -- Clean up when closing
-        UserInputService.MouseIconEnabled = true
-        UserInputService.MouseBehavior = Enum.MouseBehavior.Default
-        Cursor.Visible = false
-        
-        -- Close all open menus
-        TooltipLabel.Visible = false
-        for _, Option in pairs(Library.Options) do
-            if Option.Type == "ColorPicker" then
-                Option.ColorMenu:Close()
-                Option.ContextMenu:Close()
-            elseif Option.Type == "Dropdown" or Option.Type == "KeyPicker" then
-                Option.Menu:Close()
+            end)
+            RunService:BindToRenderStep("ShowCursor", Enum.RenderPriority.Last.Value, function()
+                if LocalPlayer.CameraMaxZoomDistance >= 0.5 or LocalPlayer.CameraMode ~= Enum.CameraMode.LockFirstPerson then
+                    UserInputService.MouseIconEnabled = true
+                    Cursor.Visible = false
+                    return
+                end
+                if LocalPlayer.CameraMaxZoomDistance == 0.5 or LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson then
+                UserInputService.MouseIconEnabled = true
+                else
+                UserInputService.MouseIconEnabled = not Library.ShowCustomCursor
+                end
+
+                Cursor.Position = UDim2.fromOffset(Mouse.X, Mouse.Y)
+                Cursor.Visible = Library.ShowCustomCursor
+
+                if not (Library.Toggled and ScreenGui and ScreenGui.Parent) then
+                    if LocalPlayer.CameraMaxZoomDistance == 0.5 or LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson then
+                        UserInputService.MouseIconEnabled = false
+                    else
+                        UserInputService.MouseIconEnabled = OldMouseIconEnabled
+                    end
+                    Cursor.Visible = false
+                    RunService:UnbindFromRenderStep("ShowCursor")
+                end
+            end)
+        elseif not Library.Toggled then
+            TooltipLabel.Visible = false
+            for _, Option in pairs(Library.Options) do
+                if Option.Type == "ColorPicker" then
+                    Option.ColorMenu:Close()
+                    Option.ContextMenu:Close()
+                elseif Option.Type == "Dropdown" or Option.Type == "KeyPicker" then
+                    Option.Menu:Close()
+                end
             end
         end
-        
-        -- Unbind render step
-        pcall(function()
-            RunService:UnbindFromRenderStep("ShowCursor")
-        end)
     end
-end
 
     if WindowInfo.AutoShow then
         task.spawn(Library.Toggle)

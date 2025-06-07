@@ -4959,9 +4959,8 @@ function Library:CreateWindow(WindowInfo)
         end
 
         MainFrame.Visible = Library.Toggled
-        ModalElement.Visible = Library.Toggled
+        ModalScreenGui.Enabled = Library.Toggled
         if Library.Toggled then
-            local OldMouseIconEnabled = UserInputService.MouseIconEnabled
             pcall(function()
                 RunService:UnbindFromRenderStep("ShowCursor")
             end)
@@ -4977,7 +4976,7 @@ function Library:CreateWindow(WindowInfo)
                     if LocalPlayer.CameraMaxZoomDistance == 0.5 or LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson then
                         UserInputService.MouseIconEnabled = false
                     else
-                        UserInputService.MouseIconEnabled = OldMouseIconEnabled
+                        UserInputService.MouseIconEnabled = true
                     end
                     Cursor.Visible = false
                     RunService:UnbindFromRenderStep("ShowCursor")

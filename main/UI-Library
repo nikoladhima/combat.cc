@@ -4974,7 +4974,7 @@ function Library:CreateWindow(WindowInfo)
                 end
 
                 Cursor.Position = UDim2.fromOffset(Mouse.X, Mouse.Y)
-                Cursor.Visible = Library.ShowCustomCursor
+                Cursor.Visible = false --Library.ShowCustomCursor
 
                 if not (Library.Toggled and ScreenGui and ScreenGui.Parent) then
                     if LocalPlayer.CameraMaxZoomDistance == 0.5 or LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson then

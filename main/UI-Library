@@ -599,7 +599,7 @@ BackgroundBlurEffect.Enabled = false
 local ModalScreenGui = New("ScreenGui", {
     Enabled = false,
     Name = "Modal",
-    DisplayOrder = 999,
+    DisplayOrder = 1,
     ResetOnSpawn = false,
 })
 ParentUI(ModalScreenGui, true)
@@ -609,7 +609,7 @@ local ModalElement = New("TextButton", {
     Modal = false,
     Size = UDim2.fromScale(0, 0),
     Text = "",
-    ZIndex = -999,
+    ZIndex = 1,
     Parent = ModalScreenGui,
 })
 
@@ -4967,6 +4967,22 @@ function Library:CreateWindow(WindowInfo)
                 RunService:UnbindFromRenderStep("ShowCursor")
             end)
             RunService:BindToRenderStep("ShowCursor", Enum.RenderPriority.Last.Value, function()
+                if LocalPlayer.CameraMaxZoomDistance == 0.5 or LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson then
+                UserInputService.MouseIconEnabled = false
+                end
+
+                Cursor.Position = UDim2.fromOffset(Mouse.X, Mouse.Y)
+                Cursor.Visible = false --Library.ShowCustomCursor
+
+                if not (Library.Toggled and ScreenGui and ScreenGui.Parent) then
+                    if LocalPlayer.CameraMaxZoomDistance == 0.5 or LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson then
+                        UserInputService.MouseIconEnabled = false
+                    else
+                        UserInputService.MouseIconEnabled = OldMouseIconEnabled
+                    end
+                    Cursor.Visible = false
+                    RunService:UnbindFromRenderStep("ShowCursor")
+                end
             end)
         elseif not Library.Toggled then
             TooltipLabel.Visible = false

@@ -4968,29 +4968,30 @@ function Library:Toggle(Value: boolean?)
     
     -- Update main frame visibility
     MainFrame.Visible = Library.Toggled
-    
-    -- Set modal state first and wait a frame
     ModalElement.Modal = Library.Toggled
-    task.wait()
     
+    -- Handle mouse and cursor state
     if Library.Toggled and not Library.IsMobile then
+    task.defer(function()
+        UserInputService.MouseIconEnabled = false
+        UserInputService.MouseBehavior = Enum.MouseBehavior.LockCurrentPosition
+    end)
+        -- First ensure mouse is in default state
+        UserInputService.MouseIconEnabled = true
+        UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+        
         -- Clear any existing render step
         pcall(function()
             RunService:UnbindFromRenderStep("ShowCursor")
         end)
         
-        -- Reset mouse state to default
-        UserInputService.MouseIconEnabled = true
-        UserInputService.MouseBehavior = Enum.MouseBehavior.Default
-        task.wait() -- Allow one frame for the change to take effect
-        
         -- Set up custom cursor handling
-        RunService:BindToRenderStep("ShowCursor", Enum.RenderPriority.First.Value, function()
-            -- Only override if our UI is active
+        RunService:BindToRenderStep("ShowCursor", Enum.RenderPriority.First.Value + 1, function()
             if Library.Toggled and ScreenGui and ScreenGui.Parent then
+                -- Lock mouse behavior and show custom cursor
                 UserInputService.MouseIconEnabled = false
                 UserInputService.MouseBehavior = Enum.MouseBehavior.LockCurrentPosition
-                Cursor.Position = UDim2.fromOffset(Mouse.X + 1, Mouse.Y + 1) -- +1 helps with some capture issues
+                Cursor.Position = UDim2.fromOffset(Mouse.X + 1, Mouse.Y + 1)
                 Cursor.Visible = true
             else
                 -- Clean up when UI is closed
@@ -5002,12 +5003,12 @@ function Library:Toggle(Value: boolean?)
         end)
     else
         -- Clean up when closing
-        TooltipLabel.Visible = false
         UserInputService.MouseIconEnabled = true
         UserInputService.MouseBehavior = Enum.MouseBehavior.Default
         Cursor.Visible = false
         
         -- Close all open menus
+        TooltipLabel.Visible = false
         for _, Option in pairs(Library.Options) do
             if Option.Type == "ColorPicker" then
                 Option.ColorMenu:Close()

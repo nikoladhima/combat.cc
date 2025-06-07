@@ -4967,15 +4967,10 @@ function Library:CreateWindow(WindowInfo)
                 RunService:UnbindFromRenderStep("ShowCursor")
             end)
             RunService:BindToRenderStep("ShowCursor", Enum.RenderPriority.Last.Value, function()
-                if LocalPlayer.CameraMaxZoomDistance >= 0.5 or LocalPlayer.CameraMode ~= Enum.CameraMode.LockFirstPerson then
-                    UserInputService.MouseIconEnabled = true
-                    Cursor.Visible = false
-                    return
-                end
                 if LocalPlayer.CameraMaxZoomDistance == 0.5 or LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson then
                 UserInputService.MouseIconEnabled = true
                 else
-                UserInputService.MouseIconEnabled = not Library.ShowCustomCursor
+                UserInputService.MouseIconEnabled = false
                 end
 
                 Cursor.Position = UDim2.fromOffset(Mouse.X, Mouse.Y)

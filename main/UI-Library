@@ -4959,9 +4959,8 @@ function Library:CreateWindow(WindowInfo)
         end
 
         MainFrame.Visible = Library.Toggled
-
+        ModalElement.Visible = Library.Toggled
         if Library.Toggled then
-            ModalElement.Visible = true
             local OldMouseIconEnabled = UserInputService.MouseIconEnabled
             pcall(function()
                 RunService:UnbindFromRenderStep("ShowCursor")
@@ -4985,7 +4984,6 @@ function Library:CreateWindow(WindowInfo)
                 end
             end)
         elseif not Library.Toggled then
-            ModalElement.Visible = false
             TooltipLabel.Visible = false
             for _, Option in pairs(Library.Options) do
                 if Option.Type == "ColorPicker" then

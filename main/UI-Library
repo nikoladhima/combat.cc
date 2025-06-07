@@ -4966,11 +4966,11 @@ function Library:CreateWindow(WindowInfo)
             pcall(function()
                 RunService:UnbindFromRenderStep("ShowCursor")
             end)
-            RunService:BindToRenderStep("ShowCursor", Enum.RenderPriority.Last.Value, function()
-                UserInputService.MouseIconEnabled = not Library.ShowCustomCursor
+            RunService:BindToRenderStep("ShowCursor", Enum.RenderPriority.First.Value, function()
+                UserInputService.MouseIconEnabled = false
 
                 Cursor.Position = UDim2.fromOffset(Mouse.X, Mouse.Y)
-                Cursor.Visible = Library.ShowCustomCursor
+                Cursor.Visible = false
 
                 if not (Library.Toggled and ScreenGui and ScreenGui.Parent) then
                     UserInputService.MouseIconEnabled = OldMouseIconEnabled

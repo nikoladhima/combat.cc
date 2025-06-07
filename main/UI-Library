@@ -4951,7 +4951,7 @@ function Library:CreateWindow(WindowInfo)
         return Tab
     end
 
-    function Library:Toggle(Value: boolean?)
+        function Library:Toggle(Value: boolean?)
         if typeof(Value) == "boolean" then
             Library.Toggled = Value
         else
@@ -4961,27 +4961,19 @@ function Library:CreateWindow(WindowInfo)
         MainFrame.Visible = Library.Toggled
         ModalElement.Modal = Library.Toggled
 
-        if Library.Toggled then
+        if Library.Toggled and not Library.IsMobile then
             local OldMouseIconEnabled = UserInputService.MouseIconEnabled
             pcall(function()
                 RunService:UnbindFromRenderStep("ShowCursor")
             end)
             RunService:BindToRenderStep("ShowCursor", Enum.RenderPriority.Last.Value, function()
-                if LocalPlayer.CameraMaxZoomDistance == 0.5 or LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson then
-                UserInputService.MouseIconEnabled = true
-                else
                 UserInputService.MouseIconEnabled = not Library.ShowCustomCursor
-                end
 
                 Cursor.Position = UDim2.fromOffset(Mouse.X, Mouse.Y)
                 Cursor.Visible = Library.ShowCustomCursor
 
                 if not (Library.Toggled and ScreenGui and ScreenGui.Parent) then
-                    if LocalPlayer.CameraMaxZoomDistance == 0.5 or LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson then
-                        UserInputService.MouseIconEnabled = false
-                    else
-                        UserInputService.MouseIconEnabled = OldMouseIconEnabled
-                    end
+                    UserInputService.MouseIconEnabled = OldMouseIconEnabled
                     Cursor.Visible = false
                     RunService:UnbindFromRenderStep("ShowCursor")
                 end

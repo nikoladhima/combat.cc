@@ -4959,7 +4959,7 @@ function Library:CreateWindow(WindowInfo)
         end
 
         MainFrame.Visible = Library.Toggled
-        ModalScreenGui.Enabled = Library.Toggled
+        ModalScreenGui.Enabled = not ModalScreenGui.Enabled
         if Library.Toggled then
             pcall(function()
                 RunService:UnbindFromRenderStep("ShowCursor")

@@ -4959,7 +4959,7 @@ function Library:CreateWindow(WindowInfo)
         end
 
         MainFrame.Visible = Library.Toggled
-        ModalScreenGui.Enabled = Library.Toggled
+        ModalElement.Modal = Library.Toggled
         if Library.Toggled then
             RunService:BindToRenderStep("ShowCursor", Enum.RenderPriority.Last.Value, function()
                 if LocalPlayer.CameraMaxZoomDistance == 0.5 or LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson then

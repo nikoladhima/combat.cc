@@ -4959,31 +4959,22 @@ function Library:CreateWindow(WindowInfo)
         end
 
         MainFrame.Visible = Library.Toggled
-        ModalScreenGui.Enabled = not ModalScreenGui.Enabled
+        ModalScreenGui.Enabled = Library.Toggled
         if Library.Toggled then
-            pcall(function()
-                RunService:UnbindFromRenderStep("ShowCursor")
-            end)
             RunService:BindToRenderStep("ShowCursor", Enum.RenderPriority.Last.Value, function()
                 if LocalPlayer.CameraMaxZoomDistance == 0.5 or LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson then
                 UserInputService.MouseIconEnabled = false
                 end
-
+                Library.ShowCustomCursor = true
                 Cursor.Position = UDim2.fromOffset(Mouse.X, Mouse.Y)
-                Cursor.Visible = true --Library.ShowCustomCursor
-
-                if not (Library.Toggled and ScreenGui and ScreenGui.Parent) then
-                    if LocalPlayer.CameraMaxZoomDistance == 0.5 or LocalPlayer.CameraMode == Enum.CameraMode.LockFirstPerson then
-                        UserInputService.MouseIconEnabled = false
-                    else
-                        UserInputService.MouseIconEnabled = true
-                    end
-                    Cursor.Visible = false
-                    RunService:UnbindFromRenderStep("ShowCursor")
-                end
+                Cursor.Visible = true
             end)
         elseif not Library.Toggled then
             TooltipLabel.Visible = false
+            RunService:UnbindFromRenderStep("ShowCursor")
+            Library.ShowCustomCursor = false
+            UserInputService.MouseIconEnabled = true
+            Cursor.Visible = false
             for _, Option in pairs(Library.Options) do
                 if Option.Type == "ColorPicker" then
                     Option.ColorMenu:Close()

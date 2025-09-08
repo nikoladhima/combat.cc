@@ -7,7 +7,7 @@
 - Prediction 🌐 [CAMERA AIMBOT & MOUSE AIMBOT]
 - Auto prediction 🌐 [CAMERA AIMBOT & MOUSE AIMBOT]
 - Resolver 🌐 [INSTANTLY RESOLVE ANY ANTILOCK/ANTIAIM]
-- Aimbot Smoothness [MAKES YOUR AIMBOT SMOOTHER] (#Note: Recommended values for Mouse Aimbot are: 3,4,5)
+- Aimbot Smoothness 🌐 [MAKES YOUR AIMBOT SMOOTHER] (#Note: Recommended values for Mouse Aimbot are: 3,4,5)
 - LocalPlayer 🏃‍♂️ [FLY, SPEED & SPINBOT] (#Note: Fly is not supported on Counterblox & Arsenal)
 - AntiLock/AntiAim ⚡ [UNDERGROUND & SKY]
 - Fun stuff 👾 [CHINA HAT & NOCLIP CAMERA]

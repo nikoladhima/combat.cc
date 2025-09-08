@@ -12,6 +12,7 @@
 - AntiLock/AntiAim ⚡ [UNDERGROUND & SKY]
 - Fun stuff 👾 [CHINA HAT & NOCLIP CAMERA]
 - Visuals 👁️ [HIGHLIGHTS, NAMETAGS, TRACERS, 2D BOXES, 3D BOXES & HEALTHBARS] (#Note: Highlight is not supported on Arsenal)
+- Special Features For Supported Games: Arsenal & Kat
 
 ## 🔌Shortened Script
 ```lua

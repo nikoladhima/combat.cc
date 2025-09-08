@@ -1,4 +1,6 @@
 # COMBAT.CC [UNIVERSAL]
+**((( IMPORTANT, PLEASE READ. )))**
+**If you are on a Mobile Device then its recommended to use a keyboard script or an actual keyboard.**
 ⚙️ Features:
 - Camera Aimbot 🎮 [HAS OPTION FOR CAMERA SHAKE/STUTTER]
 - Mouse Aimbot 🎮 [PC ONLY]

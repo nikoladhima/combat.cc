@@ -1,10 +1,10 @@
 # COMBAT.CC [UNIVERSAL]
 ⚡ Features:
 - Camera Aimbot 🎮
-- Mouse Aimbot 
-- Prediction 🌐
-- Auto prediction 🌐
-- Checks ☑️
+- Mouse Aimbot 🎮 [PC ONLY]
+- Prediction 🌐 [CAMERA & MOUSE]
+- Auto prediction 🌐 [CAMERA & MOUSE]
+- Checks ☑️ [TEAM, DEAD ETC..]
 - Player movement 🏃‍♂️
 - Antilock/Antiaim ⚡
 - Visuals 👁️

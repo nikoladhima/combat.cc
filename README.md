@@ -1,5 +1,5 @@
 # COMBAT.CC [UNIVERSAL]
-⚡ Features:
+:cog: Features:
 - Camera Aimbot 🎮 [HAS OPTION FOR CAMERA SHAKE/STUTTER]
 - Mouse Aimbot 🎮 [PC ONLY]
 - TriggerBot 🎮 [HAS DELAY CUSTOMIZATION]

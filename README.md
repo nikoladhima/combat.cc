@@ -1,4 +1,4 @@
-# UNIVERSAL
+# COMBAT.CC [UNIVERSAL]
 ⚡ Features:
 - Camera Aimbot 🎮
 - Mouse Aimbot 

@@ -1,5 +1,18 @@
-# combat.cc
-{{ combat.cc on top }}
+# UNIVERSAL
+⚡ Features:
+- Camera Aimbot 🎮
+- Mouse Aimbot 
+- Prediction 🌐
+- Auto prediction 🌐
+- Checks ☑️
+- Player movement 🏃‍♂️
+- Antilock/Antiaim ⚡
+- Visuals 👁️
+- Player Manipulations 🏃‍♂️
+- Miscellaneous 👾
 
-Not released yet.
-Join the discord: (discord.gg/PnRGjDztBu or dc.gg/nscripts)
+## 🔌Shortened Script
+```lua
+loadstring(game:HttpGet("https://raw.githubusercontent.com/nikoladhima/combat.cc/refs/heads/main/combat.cc.lua"))()
+```
+<br/>

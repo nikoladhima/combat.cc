@@ -1,1 +1,12 @@
+local Library = {}
 
+local Connections = {}
+local Unloaded = false
+
+function Library:Unload()
+end
+
+function Library:Load()
+end
+
+return Library

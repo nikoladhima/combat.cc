@@ -6,19 +6,16 @@
 **If you are on a Mobile Device then its recommended to use a keyboard script or an actual keyboard.**
 
 ## ⚙️ Features:
-- Camera Aimbot 🎮 [HAS OPTION FOR CAMERA SHAKE/STUTTER]
-- Mouse Aimbot 🎮 [PC ONLY]
-- TriggerBot 🎮 [HAS DELAY CUSTOMIZATION]
-- Checks ☑️ [TEAM, DEAD & WALL]
-- Prediction 🌐 [CAMERA AIMBOT & MOUSE AIMBOT]
-- Auto prediction 🌐 [CAMERA AIMBOT & MOUSE AIMBOT]
-- Resolver 🌐 [INSTANTLY RESOLVE ANY VELOCITY ANTILOCK/ANTIAIM]
-- Aimbot Smoothness 🌐 [MAKES YOUR AIMBOT SMOOTHER] (#Note: Recommended values for Mouse Aimbot are: 3,4,5)
-- LocalPlayer 🏃‍♂️ [FLY, SPEED & SPINBOT] (#Note: Fly is disabled on AimBlox to prevent bans)
-- AntiLock/AntiAim ⚡ [UNDERGROUND & SKY]
-- Fun stuff 👾 [CHINA HAT & NOCLIP CAMERA]
-- Visuals 👁️ [HIGHLIGHTS, NAMETAGS, TRACERS, 2D BOXES, 3D BOXES] (#Note: Highlight is not supported on Arsenal)
-- Special Features For Supported Games: CounterBlox, Arsenal & KAT
+- Camera Aimbot 🎮
+- Mouse Aimbot 🎮
+- Silent Aimbot 🎮
+- TriggerBot 🎮
+- Resolver 🌐
+- Movement 🏃‍♂️
+- AntiLock/AntiAim ⚡
+- Fun stuff 👾
+- Visuals 👁️
+- Special Features For Supported Games: Arsenal, CounterBlox & KAT
 
 ## 🔌Shortened Script
 ```lua

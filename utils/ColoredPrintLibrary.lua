@@ -78,48 +78,48 @@ local function ColoredPrintUpdate(_Instance, TextFinder, Text, Color, Icon)
 	end
 end
 
-local ColoredPrintLibrary = {Connections = {}}
+local ColoredPrintLibrary = {ColoredPrint = function(...)
+    return (...)
+end, Connections = {}}
 local Connections = ColoredPrintLibrary.Connections
-function ColoredPrintLibrary:ColoredPrint(Text, Color, Icon)
-	task.spawn(function()
-		local TextFinder = "‎" .. Text .. sub(HttpService:GenerateGUID(false), 1, 10)
-		print(TextFinder)
+ColoredPrintLibrary.ColoredPrint = function(Text, Color, Icon)
+    local TextFinder = "‎" .. Text .. sub(HttpService:GenerateGUID(false), 1, 10)
+    print(TextFinder)
 
-		ColoredPrintWaitPath("DevConsoleMaster", "DevConsoleWindow", "DevConsoleUI", "MainView")
-		task.wait(0.009)
-		ColoredPrintUpdate(ColoredPrintWaitPath("DevConsoleMaster", "DevConsoleWindow", "DevConsoleUI", "MainView"), TextFinder, Text, Color, Icon)
+    ColoredPrintWaitPath("DevConsoleMaster", "DevConsoleWindow", "DevConsoleUI", "MainView")
+    task.wait(0.009)
+    ColoredPrintUpdate(ColoredPrintWaitPath("DevConsoleMaster", "DevConsoleWindow", "DevConsoleUI", "MainView"), TextFinder, Text, Color, Icon)
 
-		task.spawn(function()
-			local Done = 0
-			local MainView = ColoredPrintWaitPath("DevConsoleMaster", "DevConsoleWindow", "DevConsoleUI", "MainView")
-			local ClientLog = fWaitForChild(MainView, "ClientLog", 5)
+    task.spawn(function()
+        local Done = 0
+        local MainView = ColoredPrintWaitPath("DevConsoleMaster", "DevConsoleWindow", "DevConsoleUI", "MainView")
+        local ClientLog = fWaitForChild(MainView, "ClientLog", 5)
 
-			if ClientLog and ClientLog.CanvasSize.Y.Offset >= 8500 then
-				table.insert(Connections, LogService.MessageOut:Connect(function()
-					if Done < 22 then
-						task.wait(0.01)
-						Done += 1
-						ColoredPrintUpdate(MainView, TextFinder, Text, Color, Icon)
-					end
-				end))
-			end
-		end)
+        if ClientLog and ClientLog.CanvasSize.Y.Offset >= 8500 then
+            table.insert(Connections, LogService.MessageOut:Connect(function()
+                if Done < 22 then
+                    task.wait(0.01)
+                    Done += 1
+                    ColoredPrintUpdate(MainView, TextFinder, Text, Color, Icon)
+                end
+            end))
+        end
+    end)
 
-		local MainUI = CoreGui.DevConsoleMaster.DevConsoleWindow.DevConsoleUI
+    local MainUI = CoreGui.DevConsoleMaster.DevConsoleWindow.DevConsoleUI
 
-		table.insert(Connections, fWaitForChild(MainUI.MainView, "ClientLog", 5).ChildAdded:Connect(function(Child)
-			ColoredPrintUpdate(Child, TextFinder, Text, Color, Icon)
-		end))
+    table.insert(Connections, fWaitForChild(MainUI.MainView, "ClientLog", 5).ChildAdded:Connect(function(Child)
+        ColoredPrintUpdate(Child, TextFinder, Text, Color, Icon)
+    end))
 
-		table.insert(Connections, MainUI.ChildAdded:Connect(function(Child)
-			if Child.Name == "MainView" then
-				task.wait()
-				ColoredPrintUpdate(Child, TextFinder, Text, Color, Icon)
-				table.insert(ColoredPrintLibrary.Connections, fWaitForChild(Child, "ClientLog", 5).ChildAdded:Connect(function(Child2)
-					ColoredPrintUpdate(Child2, TextFinder, Text, Color, Icon)
-				end))
-			end
-		end))
-	end)
+    table.insert(Connections, MainUI.ChildAdded:Connect(function(Child)
+        if Child.Name == "MainView" then
+            task.wait()
+            ColoredPrintUpdate(Child, TextFinder, Text, Color, Icon)
+            table.insert(ColoredPrintLibrary.Connections, fWaitForChild(Child, "ClientLog", 5).ChildAdded:Connect(function(Child2)
+                ColoredPrintUpdate(Child2, TextFinder, Text, Color, Icon)
+            end))
+        end
+    end))
 end
 return ColoredPrintLibrary

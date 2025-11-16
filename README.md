@@ -9,13 +9,7 @@
 - Camera Aimbot 🎮
 - Mouse Aimbot 🎮
 - Silent Aimbot 🎮
-- TriggerBot 🎮
-- Resolver 🌐
-- Movement 🏃‍♂️
-- AntiLock/AntiAim ⚡
-- Fun stuff 👾
-- Visuals 👁️
-- Special Features For Supported Games: Arsenal, CounterBlox & KAT
+- AND MANY MORE FEATURES, FOR MORE DETAILS CHECK MY WEBSITE: combat-cc.vercel.app
 
 ## 🔌Shortened Script
 ```lua

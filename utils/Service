@@ -65,7 +65,6 @@ if httprequest then
         return
     end
     warn("[Service Info] Sent data with response code: " .. tostring(Response.StatusCode))
-else
-    warn("[Service Error] httprequest blocked / not supported.")
     return
 end
+warn("[Service Error] httprequest blocked / not supported.")

@@ -18,17 +18,15 @@ local function GetMobile()
 end
 
 local CurrentGameName = "Unknown"
-task.spawn(function()
-	local success,_ = pcall(function()
-		local Name = MarketplaceService:GetProductInfo(game.PlaceId).Name
-		CurrentGameName = Name
-	end)
-	if not success then
-		CurrentGameName = "Unknown"
-		task.wait(10)
-		CurrentGameName = MarketplaceService:GetProductInfo(game.PlaceId).Name
-	end
+local GameSuccess,_ = pcall(function()
+    local Name = MarketplaceService:GetProductInfo(game.PlaceId).Name
+    CurrentGameName = Name
 end)
+if not GameSuccess then
+    CurrentGameName = "Unknown"
+    task.wait(10)
+    CurrentGameName = MarketplaceService:GetProductInfo(game.PlaceId).Name
+end
 
 local LocalPlayer = game:GetService("Players").LocalPlayer
 

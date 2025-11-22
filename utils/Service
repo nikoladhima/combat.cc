@@ -1,5 +1,5 @@
-local httprequest = request or HttpPost or httprequest or http_request or (http and http.request) or (syn and syn.request) or function(...)
-	return false
+local httprequest = httprequest or http_request or HttpPost or (http and http.request) or (syn and syn.request) or request or function(...)
+    return false
 end
 
 local reverse = string.reverse

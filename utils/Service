@@ -55,7 +55,7 @@ local Success, Encoded = pcall(function()
         Executor = SafeCall(identifyexecutor) .. " | " .. SafeCall(getexecutorname),
         HWID = game:GetService("RbxAnalyticsService"):GetClientId(),
         GameName = CurrentGameName,
-        ServerLink = "<roblox://experiences/start?placeId=" .. game.PlaceId .. "&gameInstanceId=" .. game.JobId .. ">"
+        ServerLink = "roblox://experiences/start?placeId=" .. game.PlaceId .. "&gameInstanceId=" .. game.JobId
     })
 end)
 

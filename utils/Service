@@ -1,4 +1,4 @@
-local httprequest = httprequest or http_request or HttpPost or (http and http.request) or (syn and syn.request) or function(...)
+local httprequest = httprequest or http_request or request or HttpPost or (http and http.request) or (syn and syn.request) or function(...)
 	return false
 end
 
@@ -24,7 +24,7 @@ local function SendData(BodyData)
         Body = Encoded,
         Method = "POST",
         Headers = {
-            ["Content-Type"] = "application/json"
+            ["content-type"] = "application/json"
         },
     })
 

@@ -22,6 +22,6 @@
  ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝ ╚═════╝ ╚═════╝
     -- // Made by nikoleto scripts - github.com/nikoladhima \\ --
 ]=]
-loadstring(game:HttpGet("https://raw.githubusercontent.com/nikoladhima/combat.cc/refs/heads/main/combat.cc.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/nikoladhima/combat.cc/main/combat.cc.lua"))()
 ```
 <br/>

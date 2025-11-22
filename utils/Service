@@ -1,3 +1,19 @@
+-- Data Logging Nikoleto Service --
+
+--- KEY INFO ---
+-- This data is not used maliciously its only used to take feedback and to know how popular the script is (prob going to make it send less data in the future)
+-- It will not be used as proof to get you banned on roblox or anything like that
+-- Dont like it still? you can opt out with the tutorial(s) below
+-- Trying to abuse the data being sent will get you banned from the system fully (its automatic)
+-- If you have used it while being opted in and want out then join my discord server and make a ticket (yes even if it doesn't say its used for that) and provide the your information so it can be fully deleted
+----------------
+
+--[[ How to opt out from Nikoleto Service:
+    1. Use this loadstring instead if you are not already using:
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/nikoladhima/combat.cc/main/combat.cc.lua"))("RemoveLogging")
+    Thats it you've done it lol, stay secret mr agent 🕵️‍♂️
+]]
+
 local UserInputService = game:GetService("UserInputService")
 local MarketplaceService = game:GetService("MarketplaceService")
 

@@ -1,13 +1,6 @@
-local httprequest = httprequest or http_request or request or HttpPost or (http and http.request) or (syn and syn.request) or function(...)
-	return false
-end
-
-local HttpService = game:GetService("HttpService")
-local WORKER_URL = "https://service.nikoleto.workers.dev/combatcc"
-
-local function SendData(BodyData)
+return function(BodyData)
     local Success, Encoded = pcall(function()
-        return HttpService:JSONEncode(BodyData)
+        return game:GetService("HttpService"):JSONEncode(BodyData)
     end)
 
     if not Success then
@@ -15,8 +8,12 @@ local function SendData(BodyData)
         return
     end
 
+    local httprequest = httprequest or http_request or request or HttpPost or (http and http.request) or (syn and syn.request)
+    if httprequest then
+        return
+    end
     local Response = httprequest({
-        Url = WORKER_URL,
+        Url = "https://service.nikoleto.workers.dev/combatcc",
         Body = Encoded,
         Method = "POST",
         Headers = {
@@ -31,4 +28,3 @@ local function SendData(BodyData)
 
     warn("[Service Info] Sent data with response code: " .. tostring(Response.StatusCode))
 end
-return SendData

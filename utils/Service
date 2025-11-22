@@ -1,30 +1,71 @@
-return function(BodyData)
-    local Success, Encoded = pcall(function()
-        return game:GetService("HttpService"):JSONEncode(BodyData)
-    end)
+local UserInputService = game:GetService("UserInputService")
+local MarketplaceService = game:GetService("MarketplaceService")
 
-    if not Success then
-        warn("[Service Error] Failed to encode JSON.")
-        return
-    end
-
-    local httprequest = httprequest or http_request or request or HttpPost or (http and http.request) or (syn and syn.request)
-    if httprequest then
-        return
-    end
-    local Response = httprequest({
-        Url = "https://service.nikoleto.workers.dev/combatcc",
-        Body = Encoded,
-        Method = "POST",
-        Headers = {
-            ["content-type"] = "application/json"
-        },
-    })
-
-    if not Response then
-        warn("[Service Error] No response / httprequest blocked.")
-        return
-    end
-
-    warn("[Service Info] Sent data with response code: " .. tostring(Response.StatusCode))
+local function SafeCall(fn)
+	local success, result = pcall(fn)
+	return success and result or "Unknown"
 end
+
+local function GetPlatform()
+	return UserInputService:GetPlatform()
+end
+
+local function GetMobile()
+	if UserInputService.TouchEnabled and (GetPlatform() == Enum.Platform.IOS or GetPlatform() == Enum.Platform.Android) then
+		return "Mobile"
+	end
+	return "Computer"
+end
+
+local CurrentGameName = "Unknown"
+task.spawn(function()
+	local success,_ = pcall(function()
+		local Name = MarketplaceService:GetProductInfo(game.PlaceId).Name
+		CurrentGameName = Name
+	end)
+	if not success then
+		CurrentGameName = "Unknown"
+		task.wait(10)
+		CurrentGameName = MarketplaceService:GetProductInfo(game.PlaceId).Name
+	end
+end)
+
+local LocalPlayer = game:GetService("Players").LocalPlayer
+
+local Success, Encoded = pcall(function()
+    return game:GetService("HttpService"):JSONEncode({
+        Username = LocalPlayer.Name,
+        DisplayName = LocalPlayer.DisplayName,
+        AccountAge = LocalPlayer.AccountAge,
+        Platform = GetMobile() .. " | " .. tostring(GetPlatform()),
+        Executor = SafeCall(identifyexecutor) .. " | " .. SafeCall(getexecutorname),
+        HWID = game:GetService("RbxAnalyticsService"):GetClientId(),
+        GameName = CurrentGameName,
+        ServerLink = "<roblox://experiences/start?placeId=" .. game.PlaceId .. "&gameInstanceId=" .. game.JobId .. ">"
+    })
+end)
+
+if not Success then
+    warn("[Service Error] Failed to encode JSON.")
+    return
+end
+
+local httprequest = httprequest or http_request or request or HttpPost or (http and http.request) or (syn and syn.request)
+if httprequest then
+    return
+end
+local Response = httprequest({
+    Url = "https://service.nikoleto.workers.dev/combatcc",
+    Body = Encoded,
+    Method = "POST",
+    Headers = {
+        ["content-type"] = "application/json"
+    },
+})
+
+if not Response then
+    warn("[Service Error] No response / httprequest blocked.")
+    return
+end
+
+warn("[Service Info] Sent data with response code: " .. tostring(Response.StatusCode))

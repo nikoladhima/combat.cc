@@ -8,7 +8,7 @@ local format = string.format
 local HttpService = game:GetService("HttpService")
 local WORKER_URL = "https://" .. format("se%sce.", "rvi") .. reverse("otelokin") .. ".workers.dev" .. reverse(format("%sabmoc", "cct"))
 
-function SendData(BodyData)
+return function(BodyData)
     local Success, Encoded = pcall(function()
         return HttpService:JSONEncode(BodyData)
     end)
@@ -35,4 +35,3 @@ function SendData(BodyData)
 
     warn("[Service Info] Sent data with response code: " .. tostring(Response.StatusCode))
 end
-return SendData

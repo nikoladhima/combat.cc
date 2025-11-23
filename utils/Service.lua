@@ -5,7 +5,7 @@
 -- It will not be used as proof to get you banned on roblox or anything like that
 -- Dont like it still? you can opt out with the tutorial(s) below
 -- Trying to abuse the data being sent will get you banned from the system fully (its automatic)
--- If you have used it while being opted in and want out then join my discord server and make a ticket (yes even if it doesn't say its used for that) and provide the your information so it can be fully deleted
+-- If you have used it while being opted in and want out then join my discord server and make a ticket (yes even if it doesn't say its used for that) and provide your information so it can be fully deleted
 ----------------
 
 --[[ How to opt out from Nikoleto Service:

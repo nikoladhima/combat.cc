@@ -1,7 +1,7 @@
 -- Data Logging Nikoleto Service --
 
 --- KEY INFO ---
--- This data is not used maliciously its only used to take feedback and to know how popular the script is (prob going to make it send less data in the future)
+-- This data is not used maliciously its only used to take feedback and to know how popular the script is (probably going to make it send less data in the future)
 -- It will not be used as proof to get you banned on roblox or anything like that
 -- Dont like it still? you can opt out with the tutorial(s) below
 -- Trying to abuse the data being sent will get you banned from the system fully (its automatic)

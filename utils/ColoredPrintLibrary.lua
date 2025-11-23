@@ -14,13 +14,11 @@ local round = math.round
 local fWaitForChild = game.WaitForChild
 
 local function ColoredPrintWaitPath(Instance1, Instance2, Instance3, Instance4)
-    task.spawn(function()
-        local Path = CoreGui
-        for _,InstanceName in next, {Instance1, Instance2, Instance3, Instance4} do
-            Path = fWaitForChild(Path, InstanceName, 1000)
-        end
-        return Path
-    end)
+	local Path = CoreGui
+	for _,InstanceName in next, {Instance1, Instance2, Instance3, Instance4} do
+		Path = fWaitForChild(Path, InstanceName, 1000)
+	end
+	return Path
 end
 
 local function ColoredPrintSetIcon(ImageInstance, IconData, DefaultColor)

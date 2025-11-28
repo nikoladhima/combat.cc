@@ -14,6 +14,10 @@
     Thats it you've done it lol, stay secret mr agent 🕵️‍♂️
 ]]
 
+local cloneref = cloneref or clone_ref or clonereference or clone_reference or function(...)
+	return (...)
+end
+
 local UserInputService = game:GetService("UserInputService")
 local MarketplaceService = game:GetService("MarketplaceService")
 

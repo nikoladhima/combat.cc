@@ -18,8 +18,8 @@ local cloneref = cloneref or clone_ref or clonereference or clone_reference or f
 	return (...)
 end
 
-local UserInputService = game:GetService("UserInputService")
-local MarketplaceService = game:GetService("MarketplaceService")
+local UserInputService = cloneref(game:GetService("UserInputService"))
+local MarketplaceService = cloneref(game:GetService("MarketplaceService"))
 
 local function SafeCall(fn)
 	local success, result = pcall(fn)

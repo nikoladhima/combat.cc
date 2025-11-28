@@ -48,7 +48,7 @@ if not GameSuccess then
     CurrentGameName = MarketplaceService:GetProductInfo(game.PlaceId).Name
 end
 
-local LocalPlayer = game:GetService("Players").LocalPlayer
+local LocalPlayer = cloneref(game:GetService("Players")).LocalPlayer
 
 local Success, Encoded = pcall(function()
     return game:GetService("HttpService"):JSONEncode({

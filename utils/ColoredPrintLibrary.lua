@@ -4,7 +4,7 @@ end
 
 local CoreGui = cloneref(game:GetService("CoreGui"))
 local HttpService = cloneref(game:GetService("HttpService"))
-local LogService = game:GetService("LogService")
+local LogService = cloneref(game:GetService("LogService"))
 
 local sub = string.sub
 local find = string.find

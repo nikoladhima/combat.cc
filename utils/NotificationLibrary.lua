@@ -1,5 +1,5 @@
 local cloneref = cloneref or clone_ref or clonereference or clone_reference or function(...)
-	return ...
+	return (...)
 end
 
 local CoreGui = cloneref(game:GetService("CoreGui"))

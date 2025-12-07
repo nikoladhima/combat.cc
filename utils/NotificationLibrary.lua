@@ -4,11 +4,7 @@ end
 
 local CoreGui = cloneref(game:GetService("CoreGui"))
 
-local function Create(Type)
-	if type(Type) ~= "string" then
-		warn("Argument #1 isn't a string (Function Create(Arg), String expected, got " .. type(Type) .. "). Automatically Converting to string.")
-		Type = tostring(Type)
-	end
+local function Create(Type : string)
 	return cloneref(Instance.new(Type))
 end
 

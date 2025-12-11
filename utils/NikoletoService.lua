@@ -9,7 +9,7 @@
 ----------------
 
 --[[ How to opt out from Nikoleto Service:
-    1. Use this loadstring instead if you are not already using:
+    1. Use this loadstring instead:
     loadstring(game:HttpGet("https://raw.githubusercontent.com/nikoladhima/combat.cc/main/combat.cc.lua"))("RemoveLogging")
     Thats it you've done it lol, stay secret mr agent 🕵️‍♂️
 ]]

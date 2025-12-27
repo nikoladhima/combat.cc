@@ -10,7 +10,7 @@
 - Camera Aimbot 🎮
 - Mouse Aimbot 🎮
 - Silent Aimbot 🎮
-- AND MANY MORE FEATURES, FOR MORE DETAILS CHECK MY WEBSITE: combat-cc.vercel.app
+- AND MANY MORE FEATURES, FOR MORE DETAILS CHECK MY WEBSITE: https://combat-cc.vercel.app
 
 ## 🔌Shortened Script
 ```lua

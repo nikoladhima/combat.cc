@@ -13,6 +13,9 @@
 - Camera Aimbot 🎮
 - Mouse Aimbot 🎮
 - Silent Aimbot 🎮
+- TriggerBot 🎮
+- Player Manipulation 🌐
+- Visuals 👁️
 - AND MANY MORE FEATURES, FOR MORE DETAILS CHECK MY WEBSITE: https://combat-cc.vercel.app
 
 ## 🔌Shortened Script

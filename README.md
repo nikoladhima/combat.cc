@@ -2,9 +2,10 @@
 
 ## COMBAT.CC [UNIVERSAL]
 
-**((( IMPORTANT, PLEASE READ. )))**
-**If you are on a Mobile Device then its recommended to use a keyboard script or an actual keyboard.**
-**This script only works in games that use the "Character" property under every Player, this means that this script will NOT work in some games such as Phantom Forces, Bad Business & Frontlines but there are only a few games like this so combat.cc is still the best Universal Aimbot script.**
+> [!IMPORTANT]
+> **Join my [discord server](https://discord.gg/DwRT2nH93D) if you find any bugs or have issues with the scripts**
+> **If you are on a Mobile Device then its recommended to use a keyboard script or an actual keyboard.**
+> **This script only works in games that use the "Character" property under every Player, this means that this script will NOT work in some games such as Phantom Forces, Bad Business & Frontlines but there are only a few games like this so combat.cc is still the best Universal Aimbot script.**
 
 ## ⚙️ Features:
 - Camera Aimbot 🎮

@@ -7,7 +7,7 @@
 > **If you are on a Mobile Device then its recommended to use a keyboard script or an actual keyboard.**
 
 > [!WARNING]
-> **This script only works in games that use the "Character" property under every Player, this means that this script will NOT work in some games like Phantom Forces, Bad Business & Frontlines but there are only a few games like this.**
+> **This script only works in games that use the "Character" property under every Player, this means that this script will NOT work in some games like Phantom Forces, Bad Business & Frontlines but you shouldn't worry because there are only a few games like this.**
 
 ## ⚙️ Features:
 - Camera Aimbot 🎮

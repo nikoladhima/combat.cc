@@ -14,8 +14,7 @@
 - Mouse Aimbot 🎮
 - Silent Aimbot 🎮
 - TriggerBot 🎮
-- Player Manipulation 🌐
-- Visuals 👁️
+- Client Manipulation 🌐
 - AND MANY MORE FEATURES, FOR MORE DETAILS CHECK MY WEBSITE: https://combat-cc.vercel.app
 
 ## 🔌Shortened Script

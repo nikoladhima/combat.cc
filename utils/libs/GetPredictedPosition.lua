@@ -1,6 +1,6 @@
 local PredictionSettings = (...)
 if PredictionSettings and type(PredictionSettings) == "table" then
-	return function(AimbotType, Position, AssemblyLinearVelocity)
+	local function GetPredictedPosition(AimbotType, Position, AssemblyLinearVelocity)
 		local PredictionConfiguration = PredictionSettings[AimbotType]
 		local AimbotConfiguration = PredictionConfiguration.AimbotConfiguration
 
@@ -15,6 +15,7 @@ if PredictionSettings and type(PredictionSettings) == "table" then
 
 		return Position
 	end
+	return GetPredictedPosition
 else
     print("[nikoletoscripts/combat.cc]: Failed to find Prediction Settings")
 end

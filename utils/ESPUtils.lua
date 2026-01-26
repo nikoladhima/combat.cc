@@ -68,4 +68,40 @@ function ESPUtils:Nil()
     end)
 end
 
+function ESPUtils.HideAll(ESP)
+	local Chams = ESP.Chams
+	if Chams then
+		if Chams.Highlight then
+			Chams.Highlight:Enabled(false)
+		end
+		if Chams.Wireframes then
+			for _,Box in next, Chams.Wireframes do
+				Box:Visible(false)
+			end
+		end
+	end
+
+	ESP.HeadDot:VisibleNilCheck(false)
+	ESP.HeadTag:VisibleNilCheck(false)
+	ESP.Tracer:VisibleNilCheck(false)
+	ESP.Arrow:VisibleNilCheck(false)
+	ESP.Box2D:VisibleNilCheck(false)
+	ESP.HealthBarOutline:VisibleNilCheck(false)
+	ESP.HealthBarFill:VisibleNilCheck(false)
+
+	local Box3DLines = ESP.Box3D
+	if Box3DLines then
+		for _,Line in next, Box3DLines do
+			Line:Visible(false)
+		end
+	end
+
+	local SkeletonLines = ESP.Skeleton
+	if SkeletonLines then
+		for _,Line in next, SkeletonLines do
+			Line:Visible(false)
+		end
+	end
+end
+
 return ESPUtils

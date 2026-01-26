@@ -28,6 +28,12 @@ function ESPUtils:Visible(State)
     return self:Set("Visible", State)
 end
 
+function ESPUtils:VisibleNilCheck(State)
+    if self then
+        return self:Set("Visible", State)
+    end
+end
+
 function ESPUtils:Enabled(State)
     return self:Set("Enabled", State)
 end

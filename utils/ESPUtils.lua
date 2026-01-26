@@ -33,12 +33,6 @@ function ESPUtils:Visible(State)
     return self:Set("Visible", State)
 end
 
-function ESPUtils:VisibleNilCheck(State)
-    if self then
-        return self:Set("Visible", State)
-    end
-end
-
 function ESPUtils:Enabled(State)
     return self:Set("Enabled", State)
 end
@@ -109,13 +103,33 @@ function ESPUtils.HideAll(ESP)
         end
 	end
 
-	ESP.HeadDot:VisibleNilCheck(false)
-	ESP.HeadTag:VisibleNilCheck(false)
-	ESP.Tracer:VisibleNilCheck(false)
-	ESP.Arrow:VisibleNilCheck(false)
-	ESP.Box2D:VisibleNilCheck(false)
-	ESP.HealthBarOutline:VisibleNilCheck(false)
-	ESP.HealthBarFill:VisibleNilCheck(false)
+    if ESP.HeadDot then
+        ESP.HeadDot:Visible(false)
+    end
+
+    if ESP.HeadTag then
+        ESP.HeadTag:Visible(false)
+    end
+
+    if ESP.Tracer then
+	    ESP.Tracer:Visible(false)
+    end
+
+    if ESP.Arrow then
+        ESP.Arrow:Visible(false)
+    end
+
+    if ESP.Box2D then
+        ESP.Box2D:Visible(false)
+    end
+
+    if ESP.HealthBarOutline then
+        ESP.HealthBarOutline:Visible(false)
+    end
+
+    if ESP.HealthBarFill then
+        ESP.HealthBarFill:Visible(false)
+    end
 
 	local Box3DLines = ESP.Box3D
 	if Box3DLines then

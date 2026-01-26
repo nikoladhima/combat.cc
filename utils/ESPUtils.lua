@@ -102,20 +102,11 @@ function ESPUtils:Nil()
 end
 
 function ESPUtils.HideAll(ESP)
-	local Chams = ESP.Chams
-	if Chams then
-		if Chams.Highlight then
-            if Chams.Highlight.Enabled ~= false then
-                Chams.Highlight.Enabled = false
-            end
-		end
-		if Chams.Wireframes then
-			for _,Box in next, Chams.Wireframes do
-				if Box.Visible ~= false then
-                    Box.Visible = false
-                end
-			end
-		end
+	local Cham = ESP.Cham
+	if Cham then
+        if Cham.Enabled ~= false then
+            Cham.Enabled = false
+        end
 	end
 
 	ESP.HeadDot:VisibleNilCheck(false)

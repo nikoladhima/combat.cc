@@ -72,11 +72,15 @@ function ESPUtils.HideAll(ESP)
 	local Chams = ESP.Chams
 	if Chams then
 		if Chams.Highlight then
-			Chams.Highlight:Enabled(false)
+            if Chams.Highlight.Enabled ~= false then
+                Chams.Highlight.Enabled = false
+            end
 		end
 		if Chams.Wireframes then
 			for _,Box in next, Chams.Wireframes do
-				Box:Visible(false)
+				if Box.Visible ~= false then
+                    Box.Visible = false
+                end
 			end
 		end
 	end

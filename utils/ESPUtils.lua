@@ -24,6 +24,11 @@ function ESPUtils:Set(Property, Value)
     return self
 end
 
+function ESPUtils:SetInstant(Property, Value)
+    self.DrawingObject[Property] = Value
+    return self
+end
+
 function ESPUtils:Visible(State)
     return self:Set("Visible", State)
 end
@@ -60,6 +65,30 @@ end
 
 function ESPUtils:Radius(Radius)
     return self:Set("Radius", Radius)
+end
+
+function ESPUtils:Position(Position)
+    return self:SetInstant("Position", Position)
+end
+
+function ESPUtils:From(From)
+    return self:SetInstant("From", From)
+end
+
+function ESPUtils:To(To)
+    return self:SetInstant("To", To)
+end
+
+function ESPUtils:PointA(PointA)
+    return self:SetInstant("PointA", PointA)
+end
+
+function ESPUtils:PointB(PointB)
+    return self:SetInstant("PointB", PointB)
+end
+
+function ESPUtils:PointC(PointC)
+    return self:SetInstant("PointC", PointC)
 end
 
 function ESPUtils:Nil()

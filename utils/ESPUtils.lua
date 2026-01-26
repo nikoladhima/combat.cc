@@ -2,9 +2,19 @@ local ESPUtils = {}
 ESPUtils.__index = ESPUtils
 
 function ESPUtils.new(DrawingObject)
-    local self = setmetatable({}, ESPUtils)
-    self.DrawingObject = DrawingObject
-    return self
+    local Proxy = {}
+    Proxy.DrawingObject = DrawingObject
+    return setmetatable(Proxy, {
+        __index = function(self, key)
+            if ESPUtils[key] then
+                return ESPUtils[key]
+            end
+            return self.DrawingObject[key]
+        end,
+        __newindex = function(self, key, value)
+            self.DrawingObject[key] = value
+        end
+    })
 end
 
 function ESPUtils:Set(Property, Value)
@@ -40,6 +50,10 @@ end
 
 function ESPUtils:Transparency(Alpha)
     return self:Set("Transparency", Alpha)
+end
+
+function ESPUtils:Radius(Radius)
+    return self:Set("Radius", Radius)
 end
 
 return ESPUtils

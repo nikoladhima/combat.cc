@@ -67,6 +67,10 @@ function ESPUtils:Radius(Radius)
     return self:Set("Radius", Radius)
 end
 
+function ESPUtils:Text(Text)
+    return self:Set("Text", Text)
+end
+
 function ESPUtils:Position(Position)
     return self:SetInstant("Position", Position)
 end

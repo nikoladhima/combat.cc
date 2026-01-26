@@ -104,4 +104,11 @@ function ESPUtils.HideAll(ESP)
 	end
 end
 
+function ESPUtils.GetDistanceSquared(Point1, Point2)
+    local DeltaX = Point1.X - Point2.X
+    local DeltaY = Point1.Y - Point2.Y
+    local DeltaZ = Point1.Z - Point2.Z
+    return DeltaX * DeltaX + DeltaY * DeltaY + DeltaZ * DeltaZ
+end
+
 return ESPUtils

@@ -57,7 +57,9 @@ function ESPUtils:Radius(Radius)
 end
 
 function ESPUtils:Nil()
-    self:Remove()
+    return pcall(function()
+        self:Remove()
+    end)
 end
 
 return ESPUtils

@@ -56,4 +56,8 @@ function ESPUtils:Radius(Radius)
     return self:Set("Radius", Radius)
 end
 
+function ESPUtils:Nil()
+    self:Remove()
+end
+
 return ESPUtils

@@ -29,12 +29,16 @@ function ESPUtils:SetInstant(Property, Value)
     return self
 end
 
+function ESPUtils:Enabled(State)
+    return self:Set("Enabled", State)
+end
+
 function ESPUtils:Visible(State)
     return self:Set("Visible", State)
 end
 
-function ESPUtils:Enabled(State)
-    return self:Set("Enabled", State)
+function ESPUtils:Center(State)
+    return self:Set("Center", State)
 end
 
 function ESPUtils:Size(Size)

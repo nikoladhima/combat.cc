@@ -101,39 +101,56 @@ end
 
 function ESPUtils.HideAll(ESP)
 	local Cham = ESP.Cham
-	if Cham then
-        if Cham.Enabled ~= false then
-            Cham.Enabled = false
-        end
+	if Cham and Cham.Enabled ~= false then
+		Cham.Enabled = false
 	end
 
-    if ESP.HeadDot then
+	if ESP.HeadDot then
         ESP.HeadDot:Visible(false)
     end
 
-    if ESP.HeadTag then
-        ESP.HeadTag:Visible(false)
+	if ESP.Tracer then
+        ESP.Tracer:Visible(false)
     end
 
-    if ESP.Tracer then
-	    ESP.Tracer:Visible(false)
-    end
-
-    if ESP.Arrow then
+	if ESP.Arrow then
         ESP.Arrow:Visible(false)
     end
 
-    if ESP.Box2D then
+	if ESP.Box2D then
         ESP.Box2D:Visible(false)
     end
 
-    if ESP.HealthBarOutline then
+	if ESP.HealthBarOutline then
         ESP.HealthBarOutline:Visible(false)
     end
 
-    if ESP.HealthBarFill then
+	if ESP.HealthBarFill then
         ESP.HealthBarFill:Visible(false)
     end
+
+	if ESP.HeadTag then
+        ESP.HeadTag:Visible(false)
+    end
+
+	if ESP.NameTag then
+        ESP.NameTag:Visible(false)
+    end
+
+	if ESP.DistanceTag then
+        ESP.DistanceTag:Visible(false)
+    end
+
+	if ESP.WeaponTag then
+        ESP.WeaponTag:Visible(false)
+    end
+
+	local BoxRounded = ESP.Box2DRounded
+	if BoxRounded then
+		for _, Circ in next, BoxRounded do
+			Circ:Visible(false)
+		end
+	end
 
 	local Box3DLines = ESP.Box3D
 	if Box3DLines then

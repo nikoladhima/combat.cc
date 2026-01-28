@@ -109,6 +109,10 @@ function ESPUtils.HideAll(ESP)
         ESP.HeadDot:Visible(false)
     end
 
+	if ESP.HeadTag then
+        ESP.HeadTag:Visible(false)
+    end
+
 	if ESP.Tracer then
         ESP.Tracer:Visible(false)
     end
@@ -121,6 +125,13 @@ function ESPUtils.HideAll(ESP)
         ESP.Box2D:Visible(false)
     end
 
+	local Box3DLines = ESP.Box3D
+	if Box3DLines then
+		for _,Line in next, Box3DLines do
+			Line:Visible(false)
+		end
+	end
+
 	if ESP.HealthBarOutline then
         ESP.HealthBarOutline:Visible(false)
     end
@@ -128,36 +139,6 @@ function ESPUtils.HideAll(ESP)
 	if ESP.HealthBarFill then
         ESP.HealthBarFill:Visible(false)
     end
-
-	if ESP.HeadTag then
-        ESP.HeadTag:Visible(false)
-    end
-
-	if ESP.NameTag then
-        ESP.NameTag:Visible(false)
-    end
-
-	if ESP.DistanceTag then
-        ESP.DistanceTag:Visible(false)
-    end
-
-	if ESP.WeaponTag then
-        ESP.WeaponTag:Visible(false)
-    end
-
-	local BoxRounded = ESP.Box2DRounded
-	if BoxRounded then
-		for _, Circ in next, BoxRounded do
-			Circ:Visible(false)
-		end
-	end
-
-	local Box3DLines = ESP.Box3D
-	if Box3DLines then
-		for _,Line in next, Box3DLines do
-			Line:Visible(false)
-		end
-	end
 
 	local SkeletonLines = ESP.Skeleton
 	if SkeletonLines then

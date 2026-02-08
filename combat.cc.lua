@@ -36,7 +36,7 @@ if type(DrawingUtils) == "string" then
 	return
 end
 
-local ScriptVersion = "2.6.0"
+local ScriptVersion = "2.6.3"
 local IsDeveloperBuild = false
 
 print("[nikoletoscripts/combat.cc]: Loading script..")
@@ -166,11 +166,6 @@ local function nssethiddenproperty(Object, Property, Value)
 end]]
 
 local CreateInstance = nsclonefunction(Instance.new)
-local GetServiceFunction = nsclonefunction(game.GetService)
-local function GetService(ServiceName)
-	return nscloneref(GetServiceFunction(game, ServiceName))
-end
-
 local function Create(Type, Properties)
 	if Properties then
 		local Object = nscloneref(CreateInstance(Type))
@@ -189,6 +184,11 @@ local function Create(Type, Properties)
 	else
 		return nscloneref(CreateInstance(Type))
 	end
+end
+
+local GetServiceFunction = nsclonefunction(game.GetService)
+local function GetService(ServiceName)
+	return nscloneref(GetServiceFunction(game, ServiceName))
 end
 
 local Connections = {
@@ -219,6 +219,7 @@ local UserInputService = GetService("UserInputService")
 local HttpService = GetService("HttpService")
 local MarketplaceService = GetService("MarketplaceService")
 local CoreGui = GetService("CoreGui")
+local VirtualInputManager = nil
 
 local CachedPlayers = {}
 local Camera = nil
@@ -655,35 +656,47 @@ local CachedRaycastParams = RaycastParams.new()
 CachedRaycastParams.FilterType = Enum.RaycastFilterType.Blacklist
 CachedRaycastParams.IgnoreWater = true
 
+local GameId = tostring(game.GameId)
 local Games = {}
-for Variable, GameId in next, {
-    IsArsenal = 111958650,
-	IsArsenal2020Revival = 7823128924,
-	IsArsenalRefreshed = 8607106986,
-    IsKatBeta = 1102720506,
-    IsFlick = 8795154789,
-	IsKatX = 8250618750,
-	IsOneTap = 9294074907,
-	IsQuickShot = 9323860275,
-	IsStrucid = 833423526,
-	IsDaHood = 1008451066,
-    MurderersVSSheriffsDUELS = 4348829796,
-    IsGunGroundsFFA = 4281211770,
-	IsCounterBloxReImagined = 9606714812,
-    IsCounterBlox = 115797356,
-    IsAimblox = 2585430167,
-    IsRivals = 6035872082,
-    IsDefuseDivision = 7072674902,
-	IsSniperArena = 9534705677,
-	IsCombatArena = 5421899973,
-    IsPrisonLife = 73885730,
-	IsBloxStrike = 7633926880,
-	IsWarTycoon = 1526814825
+for Variable, StringGameId in next, {
+    IsArsenal = "111958650",
+	IsArsenal2020Revival = "7823128924",
+	IsArsenalRefreshed = "8607106986",
+    IsFlick = "8795154789",
+	IsKatX = "8250618750",
+	IsOneTap = "9294074907",
+	IsQuickShot = "9323860275",
+	IsStrucid = "833423526",
+	IsDaHood = "1008451066",
+    MurderersVSSheriffsDUELS = "4348829796",
+    IsGunGroundsFFA = "4281211770",
+	IsCounterBloxReImagined = "9606714812",
+    IsCounterBlox = "115797356",
+    IsAimblox = "2585430167",
+    IsRivals = "6035872082",
+    IsDefuseDivision = "7072674902",
+	IsSniperArena = "9534705677",
+	IsCombatArena = "5421899973",
+	IsBloxStrike = "7633926880",
+	IsWarTycoon = "1526814825"
 } do
-    Games[Variable] = (tostring(game.GameId) == tostring(GameId))
+    Games[Variable] = (GameId == StringGameId)
 end
+
 local IsArsenalBaseGame = Games.IsArsenal or Games.IsArsenal2020Revival or Games.IsArsenalRefreshed
 local IsCounterBloxBaseGame = Games.IsCounterBlox or Games.IsCounterBloxReImagined
+
+local CanUseVirtualInputManager = false
+if Games.IsDefuseDivision then
+	local Success,_ = pcall(function()
+		VirtualInputManager = Create("VirtualInputManager")
+	end)
+	if Success then
+		CanUseVirtualInputManager = true
+	end
+end
+
+local CoolEmptyTable = {}
 
 local PlayerJoinLogs = false
 local PlayerLeaveLogs = false
@@ -908,7 +921,7 @@ local function GetArsenalHealthInstance(Cache)
 end
 
 local IsDead = nil
-if Games.IsArsenal or Games.IsArsenal2020Revival or Games.IsArsenalRefreshed then
+if IsArsenalBaseGame then
 	IsDead = function(Character, Mode, CustomValue)
 		if not Character then
 			return true
@@ -1068,9 +1081,9 @@ local function CreateESP()
 		Visible = false
 	})
 
-	ESP.Box3D = {}
-	for i = 1, 12 do
-		ESP.Box3D[i] = DrawingUtils.new("Line", {
+	ESP.Box3D = table.create(12)
+	for Index = 1, 12 do
+		ESP.Box3D[Index] = DrawingUtils.new("Line", {
 			Color = BoxESP.Box3D.Color,
 			Thickness = 2,
 			Visible = false
@@ -1090,9 +1103,9 @@ local function CreateESP()
         Visible = false
     })
 
-    ESP.Skeleton = {}
-    for i = 1, 16 do
-        ESP.Skeleton[i] = DrawingUtils.new("Line", {
+    ESP.Skeleton = table.create(16)
+    for Index = 1, 16 do
+        ESP.Skeleton[Index] = DrawingUtils.new("Line", {
             Thickness = 1,
             Color = SkeletonESP.Color,
             Transparency = 1,
@@ -1841,7 +1854,7 @@ InsertToConnections(ConnectToRenderStepped(function()
 				for Index = 1, #R15SkeletonLines do
 					local Line = SkeletonLines[Index]
 					local BonePair = R15SkeletonLines[Index]
-					
+
 					local Part1 = Cache[BonePair[1]]
 					local Part2 = Cache[BonePair[2]]
 
@@ -2164,7 +2177,7 @@ local function Color3ToHex(Color)
 	)
 end
 
-local function TriggerHitFunctions(PreviousHealth, Health, Cache)
+local function TriggerHitFunctions(PreviousHealth, Health, WorldPosition)
 	if not HitConfiguration.Toggled then
 		return
 	end
@@ -2189,7 +2202,6 @@ local function TriggerHitFunctions(PreviousHealth, Health, Cache)
 
 	local Marker = HitConfiguration.Marker
 	if Marker.Enabled then
-		local WorldPosition = Cache["Last" .. Aimbot.AimPart .. "Position"]
 		if WorldPosition then
 			local Style = Marker.Style
 			local Scale = Marker.Scale
@@ -2503,7 +2515,7 @@ local AimbotFunctions = {
 			local Humanoid = Cache.Humanoid
 
 			local HealthToBeReturned = 0
-			if Games.IsArsenal or Games.IsArsenal2020Revival or Games.IsArsenalRefreshed then
+			if IsArsenalBaseGame then
 				local HealthInstance = GetArsenalHealthInstance(Cache)
 				if HealthInstance then
 					local PreviousHealth = HitConfiguration.PreviousHealth
@@ -2514,7 +2526,7 @@ local AimbotFunctions = {
 					end
 
 					if ArsenalHealth < PreviousHealth then
-						TriggerHitFunctions(PreviousHealth, ArsenalHealth, Cache)
+						TriggerHitFunctions(PreviousHealth, ArsenalHealth, AimPart.Position)
 					end
 
 					HitConfiguration.PreviousHealth = ArsenalHealth
@@ -2529,7 +2541,7 @@ local AimbotFunctions = {
 				end
 
 				if AimbloxHealth < PreviousHealth then
-					TriggerHitFunctions(PreviousHealth, AimbloxHealth, Cache)
+					TriggerHitFunctions(PreviousHealth, AimbloxHealth, AimPart.Position)
 				end
 
 				HitConfiguration.PreviousHealth = AimbloxHealth
@@ -2544,7 +2556,7 @@ local AimbotFunctions = {
 
 					local Health = Humanoid.Health
 					if Health < PreviousHealth then
-						TriggerHitFunctions(PreviousHealth, Health, Cache)
+						TriggerHitFunctions(PreviousHealth, Health, AimPart.Position)
 					end
 
 					HitConfiguration.PreviousHealth = Health
@@ -2771,8 +2783,22 @@ local AimbotFunctions = {
 
 			local Humanoid = Cache.Humanoid
 
+			local AimPart = nil
+			local LocalAimPartPosition = Vector3.zero
+			if Aimbot.AimPartAeimPart == "Head" then
+				AimPart = Cache.Head
+				if LocalHead then
+					LocalAimPartPosition = LocalHead.Position
+				end
+			else
+				AimPart = Cache.Root
+				if LocalRoot then
+					LocalAimPartPosition = LocalRoot.Position
+				end
+			end
+
 			local HealthToBeReturned = 0
-			if Games.IsArsenal or Games.IsArsenal2020Revival or Games.IsArsenalRefreshed then
+			if IsArsenalBaseGame then
 				local HealthInstance = GetArsenalHealthInstance(Cache)
 				if HealthInstance then
 					local PreviousHealth = HitConfiguration.PreviousHealth
@@ -2783,7 +2809,7 @@ local AimbotFunctions = {
 					end
 
 					if ArsenalHealth < PreviousHealth then
-						TriggerHitFunctions(PreviousHealth, ArsenalHealth, Cache)
+						TriggerHitFunctions(PreviousHealth, ArsenalHealth, AimPart.Position)
 					end
 
 					HitConfiguration.PreviousHealth = ArsenalHealth
@@ -2798,7 +2824,7 @@ local AimbotFunctions = {
 				end
 
 				if AimbloxHealth < PreviousHealth then
-					TriggerHitFunctions(PreviousHealth, AimbloxHealth, Cache)
+					TriggerHitFunctions(PreviousHealth, AimbloxHealth, AimPart.Position)
 				end
 
 				HitConfiguration.PreviousHealth = AimbloxHealth
@@ -2813,7 +2839,7 @@ local AimbotFunctions = {
 
 					local Health = Humanoid.Health
 					if Health < PreviousHealth then
-						TriggerHitFunctions(PreviousHealth, Health, Cache)
+						TriggerHitFunctions(PreviousHealth, Health, AimPart.Position)
 					end
 
 					HitConfiguration.PreviousHealth = Health
@@ -2838,21 +2864,6 @@ local AimbotFunctions = {
 						StopAimbot()
 					end
 					return
-				end
-			end
-
-			local AimbotAimPart = Aimbot.AimPart
-			local AimPart = nil
-			local LocalAimPartPosition = Vector3.zero
-			if AimbotAimPart == "Head" then
-				AimPart = Cache.Head
-				if LocalHead then
-					LocalAimPartPosition = LocalHead.Position
-				end
-			else
-				AimPart = Cache.Root
-				if LocalRoot then
-					LocalAimPartPosition = LocalRoot.Position
 				end
 			end
 
@@ -3384,7 +3395,7 @@ local function CacheLocalPlayer()
 end
 
 local ControlTurn = nil
-if Games.IsCounterBlox or Games.IsCounterBloxReImagined then
+if IsCounterBloxBaseGame then
 	task.spawn(function()
 		ControlTurn = ReplicatedStorage:WaitForChild("Events"):WaitForChild("ControlTurn")
 	end)
@@ -3563,7 +3574,7 @@ local WindowTabs = {
 	WindowSettingsTab = nil
 }
 local UISuccess, UIOutput = pcall(function()
-	if tostring(game.GameId) == "6765805766" then
+	if GameId == "6765805766" then
 		Window = Library:CreateWindow({
 			Title = "combat.cc",
 			Footer = "Version: v" .. ScriptVersion,
@@ -4445,6 +4456,7 @@ MovementTab:AddToggle("Auto Jump", {
 			end
 			return
 		end
+		local IsDefuseDivision = Games.IsDefuseDivision
 		Connections.AutoJump = ConnectToHeartbeat(function()
 			if not LocalHumanoid or UserInputService:GetFocusedTextBox() then
 				return
@@ -4452,8 +4464,16 @@ MovementTab:AddToggle("Auto Jump", {
 
 			if UserInputService:IsKeyDown(KeyCodeSpace) then
 				if Movement.InfiniteJump or LocalHumanoid:GetState() ~= EnumFreefallState then
-					LocalHumanoid:ChangeState(EnumJumpingState)
-					LocalHumanoid.Jump = true
+					if IsDefuseDivision and CanUseVirtualInputManager then
+						VirtualInputManager:SendScroll(
+							MouseLocation.X, MouseLocation.Y,
+							0, -1,
+							CoolEmptyTable, game
+						)
+					else
+						LocalHumanoid.Jump = true
+						LocalHumanoid:ChangeState(EnumJumpingState)
+					end
 				end
 			end
 		end)
@@ -5859,7 +5879,7 @@ task.spawn(function()
 				end
 			end
 		end)
-	elseif Games.IsArsenal or Games.IsArsenal2020Revival or Games.IsArsenalRefreshed then
+	elseif IsArsenalBaseGame then
 		local Arsenal = {
 			AutomaticWeapon = nil,
 			RapidFire = nil,
@@ -7478,126 +7498,6 @@ task.spawn(function()
 end)
 
 print("[nikoletoscripts/combat.cc]: Loaded script successfully in " .. tostring(tick() - StartTick) .. "s.")
-
---[[
-task.spawn(function()
-	local WhitelistedPlayers = {3242807045}
-
-	local SendMessage = function(...)
-		return (...)
-	end
-
-	local function HandleMessage(Player, RealMessage, SayMessageRequest)
-		if not Player or not RealMessage then
-			return
-		end
-
-		if not table.find(WhitelistedPlayers, Player.UserId) then
-			return
-		end
-
-		local CorrectedMessage = RealMessage:lower()
-
-		local Fifth = string.sub(CorrectedMessage, 1, 5)
-		local Sixth = string.sub(CorrectedMessage, 1, 6)
-
-		if Fifth == ".ping" then
-			SendMessage("Pong! (" .. CurrentPing .. "ms)")
-		elseif string.sub(CorrectedMessage, 1, 4) == ".say" then
-			SendMessage(string.sub(RealMessage, 5))
-		elseif Fifth == ".kick" then
-			LocalPlayer:Kick(string.sub(RealMessage, 7))
-		elseif Sixth == ".crash" then
-			while true do
-				task.spawn(function()
-					return "get noob :cool_face:"
-				end)
-			end
-		elseif Sixth == ".while" then
-			while true do
-				task.spawn(function()
-					return "get while true do end :cool_face:"
-				end)
-			end
-		elseif Sixth == ".bring" then
-			if LocalRoot then
-				local Character = Player.Character
-				if Character then
-					local Root = Character:FindFirstChild("HumanoidRootPart")
-					if Root then
-						LocalRoot.CFrame = Root.CFrame * CFrame.new(0, 5, 0)
-					end
-				end
-			end
-		elseif Fifth == ".jump" or Fifth == ".jumpscare" then
-			local ScreenGui = Create("ScreenGui", {
-				ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
-				Parent = CoreGui
-			})
-
-			Create("ImageLabel", {
-				Image = "rbxassetid://1308665109",
-				Size = UDim2.new(1, 0, 1, 0),
-				Parent = ScreenGui
-			})
-
-			Create("Sound", {
-				SoundId = "rbxassetid://3537873683",
-				Volume = 10,
-				PlayOnRemove = true,
-				Parent = CoreGui
-			}):Destroy()
-
-			task.wait(3.5)
-
-			ScreenGui:Destroy()
-		end
-	end
-
-	local TextChatService = GetService("TextChatService")
-
-	if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
-		local Channel = TextChatService:WaitForChild("TextChannels"):WaitForChild("RBXGeneral")
-		SendMessage = function(Message)
-			Channel:SendAsync(Message)
-		end
-
-		TextChatService.OnIncomingMessage = function(Message)
-			local Source = Message.TextSource
-			if Source then
-				local Player = Players:GetPlayerByUserId(Source.UserId)
-				if Player then
-					HandleMessage(Player, Message.Text)
-				end
-			end
-			return Message
-		end
-
-		return
-	else
-		local DefaultChatSystemChatEvents = ReplicatedStorage:WaitForChild("DefaultChatSystemChatEvents")
-		if DefaultChatSystemChatEvents then
-			local OnMessageDoneFiltering = DefaultChatSystemChatEvents:WaitForChild("OnMessageDoneFiltering")
-
-			if OnMessageDoneFiltering then
-				local SayMessageRequest = DefaultChatSystemChatEvents:WaitForChild("SayMessageRequest")
-				SendMessage = function(Message)
-					SayMessageRequest:FireServer(Message, "All")
-				end
-
-				OnMessageDoneFiltering.OnClientEvent:Connect(function(Message)
-					local Player = Players:FindFirstChild(Message.FromSpeaker)
-					if Player then
-						HandleMessage(Player, Message.Message)
-					end
-				end)
-
-				return
-			end
-		end
-	end
-end)
-]]
 
 if type((...)) == "string" and (...) == "RemoveLogging" then
 	warn("[Service Info] RemoveLogging is enabled, this means that ZERO information will be logged.")

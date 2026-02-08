@@ -1,1 +1,1 @@
-return "2.5.3early"
+return "2.6.0"

@@ -36,7 +36,7 @@ if type(DrawingUtils) == "string" then
 	return
 end
 
-local ScriptVersion = "2.6.3"
+local ScriptVersion = "2.6.7"
 local IsDeveloperBuild = false
 
 print("[nikoletoscripts/combat.cc]: Loading script..")

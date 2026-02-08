@@ -5545,17 +5545,11 @@ local function Unload(Message)
 	Lighting.ExposureCompensation = World.OldExposureCompensation
 	Lighting.Ambient = World.OldAmbient
 
-	if LocalCharacter then
-		if World.HasAppliedCharacterTransparency then
-			for _,Object in ipairs(LocalCharacter:GetDescendants()) do
-				if Object:IsA("BasePart") then
-					Object.Transparency = (Object.Name == "HumanoidRootPart") and 1 or 0
-				end
+	if LocalCharacter and World.HasAppliedCharacterTransparency then
+		for _,Object in ipairs(LocalCharacter:GetDescendants()) do
+			if Object:IsA("BasePart") then
+				Object.Transparency = (Object.Name == "HumanoidRootPart") and 1 or 0
 			end
-		end
-
-		if LocalCharacter:FindFirstChild("ns__CharacterHighlight") then
-			LocalCharacter:FindFirstChild("ns__CharacterHighlight"):Destroy()
 		end
 	end
 

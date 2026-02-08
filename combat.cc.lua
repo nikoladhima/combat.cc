@@ -31,7 +31,7 @@ end
 
 local UtilsRepo = "https://raw.githubusercontent.com/nikoladhima/combat.cc/main/utils/"
 local DrawingUtils = nsloadstring(UtilsRepo .. "DrawingUtils.luau", DrawingNew)
-if DrawingUtils == "Failed to get Drawing function." then
+if type(DrawingUtils) == "string" then
 	warn(DrawingUtils)
 	return
 end

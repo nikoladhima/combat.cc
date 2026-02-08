@@ -1,7 +1,29 @@
+local DrawingNew = (...)
+
+if not DrawingNew then
+    return "Failed to get Drawing function."
+end
+
 local DrawingUtils = {}
 DrawingUtils.__index = DrawingUtils
 
-function DrawingUtils.new(DrawingObject)
+function DrawingUtils.new(Type, Properties)
+    local DrawingObject = DrawingNew(Type)
+
+	if Properties then
+		for Property, Value in next, Properties do
+			local Success, Error = pcall(function()
+				if DrawingObject[Property] then
+					DrawingObject[Property] = Value
+				end
+			end)
+
+			if not Success then
+				print("[DEBUG] Error setting", Property, "on", Type .. ":", Error)
+			end
+		end
+	end
+
     return setmetatable({
         DrawingObject = DrawingObject
     }, DrawingUtils)
@@ -15,7 +37,11 @@ DrawingUtils.__newindex = function(self, Key, Value)
     self.DrawingObject[Key] = Value
 end
 
-for _,Property in ipairs({"Visible", "Center", "Size", "Color", "Filled", "Thickness", "Transparency", "Radius", "Text"}) do
+for _,Property in ipairs({
+    "Visible", "Center", "Size", "Color",
+    "Filled", "Thickness", "Transparency",
+    "Radius", "Text"
+}) do
     DrawingUtils[Property] = function(self, Value)
         if self.DrawingObject[Property] ~= Value then
             self.DrawingObject[Property] = Value
@@ -24,7 +50,10 @@ for _,Property in ipairs({"Visible", "Center", "Size", "Color", "Filled", "Thick
     end
 end
 
-for _,Property in ipairs({"Position", "From", "To", "PointA", "PointB", "PointC"}) do
+for _,Property in ipairs({
+    "Position", "From", "To",
+    "PointA", "PointB", "PointC"
+}) do
     DrawingUtils[Property] = function(self, Value)
         self.DrawingObject[Property] = Value
         return self
@@ -52,7 +81,7 @@ function DrawingUtils.HideAll(ESP)
         end
 
         if Index == "Box3D" or Index == "Skeleton" then
-            for _,Line in next, Index do
+            for _, Line in next, Object do
                 Line:Visible(false)
             end
             continue

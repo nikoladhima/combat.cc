@@ -1,14 +1,15 @@
-local FPS = {Value = 0, Connection = nil}
+local FPS = {Value = 0, Connection = nil, Stats = nil}
 local Script = (...)
 
 local RunService = Script[1]
 local Stats = Script[2]
 
 if RunService and Stats then
+	FPS.Stats = Stats
     local Success,_ = pcall(function()
 		local Heartbeat = Stats:WaitForChild("Workspace"):WaitForChild("Heartbeat")
         FPS.Connection = RunService.RenderStepped:Connect(function()
-			FPS.Value = Heartbeat:GetValue()
+			FPS.Value = math.floor(Heartbeat:GetValue())
         end)
     end)
 
@@ -24,4 +25,4 @@ function FPS:Disconnect()
     FPS.Connection = nil
 end
 
-return FPS, Stats
+return FPS

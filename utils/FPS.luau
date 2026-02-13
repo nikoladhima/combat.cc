@@ -1,5 +1,5 @@
 local FPS = {Value = 0, Connection = nil, Stats = nil}
-local Script = {...}
+local Script = (...)
 
 local RunService = Script[1]
 local Stats = Script[2]

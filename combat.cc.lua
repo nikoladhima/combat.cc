@@ -1,5 +1,13 @@
-if workspace.DistributedGameTime < 3 then
-	task.wait(3 - workspace.DistributedGameTime)
+
+local IsRoblox,_ = pcall(function()
+	if workspace.DistributedGameTime < 3 then
+		task.wait(3 - workspace.DistributedGameTime)
+	end
+end)
+
+if not IsRoblox then
+	print("twin ts NOT roblox 😭🥀")
+	return
 end
 
 local Running = true
@@ -19,11 +27,9 @@ local DrawingSuccess,_ = pcall(function()
 end)
 assert(DrawingSuccess, "Exploit not supported.")
 
-local function nsloadstring(Url, ...)
-	local VariableArguments = (...)
-
+local function nsloadstring(Url, Argument)
 	local Success, Result = pcall(function()
-		return loadstring(game:HttpGet(Url))(VariableArguments)
+		return loadstring(game:HttpGet(Url))(Argument)
 	end)
 
 	return Success and Result or {Value = "Unknown"}
@@ -36,7 +42,7 @@ if type(DrawingUtils) == "string" then
 	return
 end
 
-local ScriptVersion = "2.6.7"
+local ScriptVersion = "2.7.0"
 local IsDeveloperBuild = false
 
 print("[nikoletoscripts/combat.cc]: Loading script..")
@@ -262,6 +268,8 @@ local R6Bottom = Vector3.new(0, -0.5, 0)
 local CFrameZero = CFrame.new(0, 0, 0)
 local FixedBottomCenter = Vector2.zero
 
+local IsMouseAndKeyboardPreferredInput = UserInputService.PreferredInput == Enum.PreferredInput.KeyboardAndMouse
+
 local Aimbot = {
 	Toggled = false,
 	Enabled = false,
@@ -486,6 +494,15 @@ local SelectedPlayer = nil
 local ESPObjects = {}
 
 local ESPToggled = false
+
+local ESPDynamicRefreshRate = true
+local ESPRefreshRate = 60
+local ESPAccumulator = 0
+
+local ESPPerformanceMode = false
+
+local ESPDistanceCheck = 2000
+local ESPForcefieldCheck = false
 local ESPWallCheck = false
 local ESPTeamCheck = false
 
@@ -513,13 +530,12 @@ local HeadDotESP = {
 	Transparency = 1
 }
 
-local HeadTagESP = {
+local HeadTagESP, TagBuffer = {
 	Enabled = false,
 	Color = Color3.fromRGB(255, 255, 255),
 	Dropdown = "Name",
 	Transparency = 1
-}
-local TagBuffer = {}
+}, {}
 
 local TracerESP = {
 	Enabled = false,
@@ -537,7 +553,7 @@ local ArrowESP = {
 	Transparency = 1
 }
 
-local BoxESP = {
+local BoxESP, BoxPointScreen, BoxPointOnScreen, Box3DOffsets, Box3DEdges = {
 	Box2D = {
 		Enabled = false,
 		Color = Color3.fromRGB(255, 255, 255),
@@ -549,19 +565,12 @@ local BoxESP = {
 		Color = Color3.fromRGB(255, 255, 255),
 		Transparency = 1
 	}
-}
-
-local BoxPointScreen = table.create(8)
-local BoxPointOnScreen = table.create(8)
-
-local Box3DOffsets = {
+}, table.create(8), table.create(8), {
 	Vector3.new(-2, 3, -1.5), Vector3.new(2, 3, -1.5),
     Vector3.new(-2, -3, -1.5), Vector3.new(2, -3, -1.5),
     Vector3.new(-2, 3, 1.5), Vector3.new(2, 3, 1.5),
 	Vector3.new(-2, -3, 1.5), Vector3.new(2, -3, 1.5)
-}
-
-local Box3DEdges = {
+}, {
 	{1,2}, {2,4}, {4,3}, {3,1},
 	{5,6}, {6,8}, {8,7}, {7,5},
 	{1,5}, {2,6}, {3,7}, {4,8}
@@ -574,16 +583,12 @@ local HealthBarESP = {
 	Transparency = 1
 }
 
-local SkeletonESP = {
+local SkeletonESP, SkeletonCachePoints, SkeletonCacheVisible, R15SkeletonLines = {
 	Enabled = false,
 	Color = Color3.fromRGB(255, 255, 255),
 	Thickness = 1,
 	Transparency = 1
-}
-local SkeletonCachePoints = {}
-local SkeletonCacheVisible = {}
-
-local R15SkeletonLines = {
+}, table.create(32), table.create(32), {
     {"Head", "UpperTorso"},
     {"UpperTorso", "LowerTorso"},
 
@@ -678,7 +683,9 @@ for Variable, StringGameId in next, {
 	IsSniperArena = "9534705677",
 	IsCombatArena = "5421899973",
 	IsBloxStrike = "7633926880",
-	IsWarTycoon = "1526814825"
+	IsWarTycoon = "1526814825",
+	IsDefusal = "6993600665",
+	IsAladiaPvP = "8050914790"
 } do
     Games[Variable] = (GameId == StringGameId)
 end
@@ -889,6 +896,34 @@ elseif Games.IsKatX then
 
 		return false
 	end
+elseif Games.IsDefusal then
+	IsEnemy = function(Player)
+		if not Player then
+			return false
+		end
+
+		local LocalTeam = LocalPlayer:GetAttribute("Team")
+
+		if not LocalTeam then
+			return false
+		end
+
+		if LocalTeam == "Spectator" then
+			return true
+		end
+
+		local PlayerTeam = Player:GetAttribute("Team")
+
+		if not PlayerTeam or PlayerTeam == "Spectator" then
+			return false
+		end
+
+		if LocalTeam ~= PlayerTeam then
+			return true
+		end
+
+		return false
+	end
 elseif Games.IsRivals then
 	IsEnemy = function(Player)
 		if not Player then
@@ -954,7 +989,7 @@ if IsArsenalBaseGame then
 
 		return false, HealthValue
 	end
-elseif Games.IsAimblox or Games.IsSniperArena then
+elseif Games.IsSniperArena or Games.IsAimblox or Games.IsDefusal then
 	IsDead = function(Character, Mode, CustomValue)
 		if not Character then
 			return true, 0
@@ -1000,6 +1035,28 @@ elseif Games.IsDefuseDivision then
 		end
 
 		if Humanoid.Health <= 0 then
+			return true
+		end
+
+		return false
+	end
+elseif Games.IsAladiaPvP then
+	IsDead = function(Character, Mode, CustomValue)
+		if not Character then
+			return true
+		end
+
+		local Cache = CachedPlayers[Players:GetPlayerFromCharacter(Character)]
+		if not Cache then
+			return true
+		end
+
+		local Humanoid = Cache.Humanoid
+		if not Humanoid then
+			return true
+		end
+
+		if Humanoid.Health <= ((Mode == "Custom") and CustomValue or 1) then
 			return true
 		end
 
@@ -1421,37 +1478,16 @@ task.spawn(function()
 	end
 end)
 
-local CurrentFPS = nsloadstring(UtilsRepo .. "FPS.lua", RunService)
+local CurrentFPS = nsloadstring(UtilsRepo .. "FPS.luau", {RunService, GetService("Stats")})
 local CurrentPing = 0
-local RawCurrentPing = 0
 
 task.spawn(function()
-	local DataPing = GetService("Stats").Network.ServerStatsItem["Data Ping"]
-	local SavedCurrentFPS = CurrentFPS.Value
-	local Ping = DataPing:GetValue()
-	CurrentPing = math.floor(Ping)
-	RawCurrentPing = Ping
-
-	while true do
-		if not Running then
-			break
-		end
-
-		local CurrentFPSValue = CurrentFPS.Value
-		if SavedCurrentFPS ~= CurrentFPSValue then
-			SavedCurrentFPS = CurrentFPSValue
-			Ping = DataPing:GetValue()
-			CurrentPing = math.floor(Ping)
-			RawCurrentPing = Ping
-		end
-
-		task.wait()
-	end
+	local DataPing = CurrentFPS.Stats:WaitForChild("Network"):WaitForChild("ServerStatsItem")["Data Ping"]
+	InsertToConnections(ConnectToRenderStepped(function()
+		CurrentPing = DataPing:GetValue()
+		Watermark:SetText("[nikoletoscripts/combat.cc] | " .. CurrentGameName .. " | FPS: " .. CurrentFPS.Value .. " | Ping: " .. math.floor(CurrentPing))
+	end))
 end)
-
-InsertToConnections(ConnectToRenderStepped(function()
-	Watermark:SetText("[nikoletoscripts/combat.cc] | " .. CurrentGameName .. " | FPS: " .. CurrentFPS.Value .. " | Ping: " .. CurrentPing)
-end))
 
 local function SetSize(DrawingObject, Size)
 	if DrawingObject.Size ~= Size then
@@ -1483,7 +1519,10 @@ local function UpdateFOVCircle(FOVCircle, FOVCircleTable, AimbotTable)
 	):Visible(AimbotTable.Toggled and FOVCircleTable.Enabled)
 end
 
-local function CanRenderVisually(Player, Cache, Character, Humanoid, Head, Root, IsArsenal, IsArsenal2020Revival, IsArsenalRefreshed, IsAimblox)
+local HideESP = DrawingUtils.HideAll
+local GetDistanceSquared = DrawingUtils.GetDistanceSquared
+
+local function CanRenderVisually(Player, Character, Head, Root)
 	if not Player or not Character or not Root or not Head then
 		return false, 0, Vector3.zero
 	end
@@ -1499,6 +1538,10 @@ local function CanRenderVisually(Player, Cache, Character, Humanoid, Head, Root,
 
 	local RootPosition = Root.Position
 	if LocalRoot then
+		if GetDistanceSquared(LocalRoot.Position, RootPosition) > (ESPDistanceCheck * ESPDistanceCheck) then
+			return false, CustomGameHealth, RootPosition
+		end
+
 		if ESPWallCheck and IsBehindWall(LocalRoot.Position, RootPosition, Character) then
 			return false, CustomGameHealth, RootPosition
 		end
@@ -1507,12 +1550,31 @@ local function CanRenderVisually(Player, Cache, Character, Humanoid, Head, Root,
 	return true, CustomGameHealth, RootPosition
 end
 
-local HideESP = DrawingUtils.HideAll
-local GetDistanceSquared = DrawingUtils.GetDistanceSquared
-
-InsertToConnections(ConnectToRenderStepped(function()
+InsertToConnections(ConnectToRenderStepped(function(DeltaTime)
 	UpdateFOVCircle(AimbotFOVCircles.FOVCircle, Aimbot.FOVCircle, Aimbot)
 	UpdateFOVCircle(AimbotFOVCircles.S_FOVCircle, SilentAimbot.FOVCircle, SilentAimbot)
+
+	if ESPPerformanceMode then
+		local Interval = 1 / 60
+
+		ESPAccumulator += DeltaTime
+
+		if ESPAccumulator < Interval then
+			return
+		end
+
+		ESPAccumulator -= Interval
+	elseif not ESPDynamicRefreshRate then
+		local Interval = 1 / ESPRefreshRate
+
+		ESPAccumulator += DeltaTime
+
+		if ESPAccumulator < Interval then
+			return
+		end
+
+		ESPAccumulator -= Interval
+	end
 
 	if not ESPToggled or not Camera then
 		for _,Cache in next, CachedPlayers do
@@ -1575,11 +1637,10 @@ InsertToConnections(ConnectToRenderStepped(function()
 	local SkeletonThickness = SkeletonESP.Thickness
 	local SkeletonTransparency = SkeletonESP.Transparency
 
-	local IsArsenal = Games.IsArsenal
-	local IsArsenal2020Revival = Games.IsArsenal2020Revival
-	local IsArsenalRefreshed = Games.IsArsenalRefreshed
 	local IsDefuseDivision = Games.IsDefuseDivision
+	local IsSniperArena = Games.IsSniperArena
 	local IsAimblox = Games.IsAimblox
+	local IsDefusal = Games.IsDefusal
 
 	for Player, Cache in next, CachedPlayers do
 		local ESP = Cache.ESP
@@ -1592,9 +1653,7 @@ InsertToConnections(ConnectToRenderStepped(function()
 		local Head = Cache.Head
 		local Root = Cache.Torso or Cache.Root
 
-		local CanRenderState, CustomGameHealth, RootPosition = CanRenderVisually(
-			Player, Cache, Character, Humanoid, Head, Root, IsArsenal, IsArsenal2020Revival, IsArsenalRefreshed, IsAimblox
-		)
+		local CanRenderState, CustomGameHealth, RootPosition = CanRenderVisually(Player, Character, Humanoid, Head, Root)
 
 		if not CanRenderState then
 			HideESP(ESP)
@@ -1714,9 +1773,7 @@ InsertToConnections(ConnectToRenderStepped(function()
 								end
 								OptionText = ToolName
 							elseif Option == "Health" then
-								if IsArsenalBaseGame then
-									OptionText = tostring(CustomGameHealth)
-								elseif IsAimblox then
+								if IsArsenalBaseGame or IsSniperArena or IsAimblox or IsDefusal then
 									OptionText = CustomGameHealth .. " Health"
 								else
 									OptionText = math.floor(Humanoid.Health) .. " Health"
@@ -1851,21 +1908,38 @@ InsertToConnections(ConnectToRenderStepped(function()
 
 		if SkeletonEnabled and RootOnScreen then
 			if RigTypeIsR15 then
+				table.clear(SkeletonCachePoints)
+				table.clear(SkeletonCacheVisible)
+
 				for Index = 1, #R15SkeletonLines do
 					local Line = SkeletonLines[Index]
 					local BonePair = R15SkeletonLines[Index]
-
 					local Part1 = Cache[BonePair[1]]
 					local Part2 = Cache[BonePair[2]]
 
 					if Part1 and Part2 then
-						local PositionOne, OnScreenOne = WorldToViewportPoint(Part1.Position)
-						local PositionTwo, OnScreenTwo = WorldToViewportPoint(Part2.Position)
+						local Position1 = SkeletonCachePoints[Part1]
+						local Visible1 = SkeletonCacheVisible[Part1]
 
-						if OnScreenOne and OnScreenTwo then
+						if not Visible1  then
+							Position1, Visible1 = WorldToViewportPoint(Part1.Position)
+							SkeletonCachePoints[Part1] = Position1
+							SkeletonCacheVisible[Part1] = Visible1
+						end
+
+						local Position2 = SkeletonCachePoints[Part2]
+						local Visible2 = SkeletonCacheVisible[Part2]
+
+						if not Visible2 then
+							Position2, Visible2 = WorldToViewportPoint(Part2.Position)
+							SkeletonCachePoints[Part2] = Position2
+							SkeletonCacheVisible[Part2] = Visible2
+						end
+
+						if Visible1 and Visible2 then
 							Line:Color(SkeletonColor):Thickness(SkeletonThickness):Transparency(
 								SkeletonTransparency
-							):From(PositionOne):To(PositionTwo):Visible(true)
+							):From(Position1):To(Position2):Visible(true)
 						else
 							Line:Visible(false)
 						end
@@ -1879,57 +1953,51 @@ InsertToConnections(ConnectToRenderStepped(function()
 				end
 			else
 				local Torso = Cache.Torso
-
 				if Torso then
 					local TorsoCFrame = Torso.CFrame
 					local TorsoSize = Torso.Size
 
-					local NeckWorldPosition = TorsoCFrame:PointToWorldSpace(TorsoSize * R6Neck)
-					local WaistWorldPosition = TorsoCFrame:PointToWorldSpace(TorsoSize * R6Waist)
-
-					local NeckScreenPosition, NeckOnScreen = WorldToViewportPoint(NeckWorldPosition)
-					local WaistScreen, WaistOnScreen = WorldToViewportPoint(WaistWorldPosition)
+					local NeckPosition, NeckVisible = WorldToViewportPoint(TorsoCFrame:PointToWorldSpace(TorsoSize * R6Neck))
+					local WaistPosition, WaistVisible = WorldToViewportPoint(TorsoCFrame:PointToWorldSpace(TorsoSize * R6Waist))
 
 					local SpineLine = SkeletonLines[1]
-					if NeckOnScreen and WaistOnScreen then
+					if NeckVisible and WaistVisible then
 						SpineLine:Color(SkeletonColor):Thickness(SkeletonThickness):Transparency(
 							SkeletonTransparency
-						):From(NeckScreenPosition):To(WaistScreen):Visible(true)
+						):From(NeckPosition):To(WaistPosition):Visible(true)
 					else
 						SpineLine:Visible(false)
 					end
 
 					local NeckLine = SkeletonLines[2]
-					if NeckOnScreen and HeadOnScreen then
+					if NeckVisible and HeadOnScreen then
 						NeckLine:Color(SkeletonColor):Thickness(SkeletonThickness):Transparency(
 							SkeletonTransparency
-						):From(NeckScreenPosition):To(HeadScreen):Visible(true)
+						):From(NeckPosition):To(HeadScreen):Visible(true)
 					else
 						NeckLine:Visible(false)
 					end
 
 					local LeftArm = Cache["Left Arm"]
 					local LeftShoulderLine, LeftArmLine = SkeletonLines[3], SkeletonLines[4]
-
 					if LeftArm then
 						local LeftArmCFrame = LeftArm.CFrame
 						local LeftArmSize = LeftArm.Size
+						local Position1, Visible1 = WorldToViewportPoint(LeftArmCFrame:PointToWorldSpace(LeftArmSize * R6Top))
+						local Position2, Visible2 = WorldToViewportPoint(LeftArmCFrame:PointToWorldSpace(LeftArmSize * R6Bottom))
 
-						local ShoulderScreen, ShoulderOnScreen = WorldToViewportPoint(LeftArmCFrame:PointToWorldSpace(LeftArmSize * R6Top))
-						local HandScreen, HandOnScreen = WorldToViewportPoint(LeftArmCFrame:PointToWorldSpace(LeftArmSize * R6Bottom))
-
-						if NeckOnScreen and ShoulderOnScreen then
+						if NeckVisible and Visible1 then
 							LeftShoulderLine:Color(SkeletonColor):Thickness(SkeletonThickness):Transparency(
 								SkeletonTransparency
-							):From(NeckScreenPosition):To(ShoulderScreen):Visible(true)
+							):From(NeckPosition):To(Position1):Visible(true)
 						else
 							LeftShoulderLine:Visible(false)
 						end
 
-						if ShoulderOnScreen and HandOnScreen then
+						if Visible1 and Visible2 then
 							LeftArmLine:Color(SkeletonColor):Thickness(SkeletonThickness):Transparency(
 								SkeletonTransparency
-							):From(ShoulderScreen):To(HandScreen):Visible(true)
+							):From(Position1):To(Position2):Visible(true)
 						else
 							LeftArmLine:Visible(false)
 						end
@@ -1940,26 +2008,22 @@ InsertToConnections(ConnectToRenderStepped(function()
 
 					local RightArm = Cache["Right Arm"]
 					local RightShoulderLine, RightArmLine = SkeletonLines[5], SkeletonLines[6]
-
 					if RightArm then
 						local RightArmCFrame = RightArm.CFrame
 						local RightArmSize = RightArm.Size
+						local Position1, Visible1 = WorldToViewportPoint(RightArmCFrame:PointToWorldSpace(RightArmSize * R6Top))
+						local Position2, Visible2 = WorldToViewportPoint(RightArmCFrame:PointToWorldSpace(RightArmSize * R6Bottom))
 
-						local ShoulderScreen, ShoulderOnScreen = WorldToViewportPoint(RightArmCFrame:PointToWorldSpace(RightArmSize * R6Top))
-						local HandScreen, HandOnScreen = WorldToViewportPoint(RightArmCFrame:PointToWorldSpace(RightArmSize * R6Bottom))
-
-						if NeckOnScreen and ShoulderOnScreen then
+						if NeckVisible and Visible1 then
 							RightShoulderLine:Color(SkeletonColor):Thickness(SkeletonThickness):Transparency(
 								SkeletonTransparency
-							):From(NeckScreenPosition):To(ShoulderScreen):Visible(true)
+							):From(NeckPosition):To(Position1):Visible(true)
 						else
 							RightShoulderLine:Visible(false)
 						end
 
-						if ShoulderOnScreen and HandOnScreen then
-							RightArmLine:Color(SkeletonColor):Thickness(SkeletonThickness):Transparency(
-								SkeletonTransparency
-							):From(ShoulderScreen):To(HandScreen):Visible(true)
+						if Visible1 and Visible2 then
+							RightArmLine:Color(SkeletonColor):Thickness(SkeletonThickness):Transparency(SkeletonTransparency):From(Position1):To(Position2):Visible(true)
 						else
 							RightArmLine:Visible(false)
 						end
@@ -1970,26 +2034,24 @@ InsertToConnections(ConnectToRenderStepped(function()
 
 					local LeftLeg = Cache["Left Leg"]
 					local LeftHipLine, LeftLegLine = SkeletonLines[7], SkeletonLines[8]
-
 					if LeftLeg then
 						local LeftLegCFrame = LeftLeg.CFrame
 						local LeftLegSize = LeftLeg.Size
+						local Position1, Visible1 = WorldToViewportPoint(LeftLegCFrame:PointToWorldSpace(LeftLegSize * R6Top))
+						local Position2, Visible2 = WorldToViewportPoint(LeftLegCFrame:PointToWorldSpace(LeftLegSize * R6Bottom))
 
-						local HipScreen, HipOnScreen = WorldToViewportPoint(LeftLegCFrame:PointToWorldSpace(LeftLegSize * R6Top))
-						local LeftLegScreen, LeftLegOnScreen = WorldToViewportPoint(LeftLegCFrame:PointToWorldSpace(LeftLegSize * R6Bottom))
-
-						if WaistOnScreen and HipOnScreen then
+						if WaistVisible and Visible1 then
 							LeftHipLine:Color(SkeletonColor):Thickness(SkeletonThickness):Transparency(
 								SkeletonTransparency
-							):From(WaistScreen):To(HipScreen):Visible(true)
+							):From(WaistPosition):To(Position1):Visible(true)
 						else
 							LeftHipLine:Visible(false)
 						end
 
-						if HipOnScreen and LeftLegOnScreen then
+						if Visible1 and Visible2 then
 							LeftLegLine:Color(SkeletonColor):Thickness(SkeletonThickness):Transparency(
 								SkeletonTransparency
-							):From(HipScreen):To(LeftLegScreen):Visible(true)
+							):From(Position1):To(Position2):Visible(true)
 						else
 							LeftLegLine:Visible(false)
 						end
@@ -2000,41 +2062,34 @@ InsertToConnections(ConnectToRenderStepped(function()
 
 					local RightLeg = Cache["Right Leg"]
 					local RightHipLine, RightLegLine = SkeletonLines[9], SkeletonLines[10]
-
 					if RightLeg then
 						local RightLegCFrame = RightLeg.CFrame
 						local RightLegSize = RightLeg.Size
+						local Position1, Visible1 = WorldToViewportPoint(RightLegCFrame:PointToWorldSpace(RightLegSize * R6Top))
+						local Position2, Visible2 = WorldToViewportPoint(RightLegCFrame:PointToWorldSpace(RightLegSize * R6Bottom))
 
-						local HipScreen, HipOnScreen = WorldToViewportPoint(RightLegCFrame:PointToWorldSpace(RightLegSize * R6Top))
-						local RightLegScreen, RightLegOnScreen = WorldToViewportPoint(RightLegCFrame:PointToWorldSpace(RightLegSize * R6Bottom))
-
-						if WaistOnScreen and HipOnScreen then
+						if WaistVisible and Visible1 then
 							RightHipLine:Color(SkeletonColor):Thickness(SkeletonThickness):Transparency(
 								SkeletonTransparency
-							):From(WaistScreen):To(HipScreen):Visible(true)
+							):From(WaistPosition):To(Position1):Visible(true)
 						else
 							RightHipLine:Visible(false)
 						end
 
-						if HipOnScreen and RightLegOnScreen then
+						if Visible1 and Visible2 then
 							RightLegLine:Color(SkeletonColor):Thickness(SkeletonThickness):Transparency(
 								SkeletonTransparency
-							):From(HipScreen):To(RightLegScreen):Visible(true)
+							):From(Position1):To(Position2):Visible(true)
 						else
 							RightLegLine:Visible(false)
 						end
 					else
-						RightHipLine:Visible(false)
-						RightLegLine:Visible(false)
+						RightHipLine:Visible(false); RightLegLine:Visible(false)
 					end
 				else
 					for Index = 1, 10 do
 						SkeletonLines[Index]:Visible(false)
 					end
-				end
-
-				for Index = 11, #SkeletonLines do
-					SkeletonLines[Index]:Visible(false)
 				end
 			end
 		else
@@ -2042,24 +2097,21 @@ InsertToConnections(ConnectToRenderStepped(function()
 				SkeletonLines[Index]:Visible(false)
 			end
 		end
-
-        table.clear(SkeletonCachePoints)
-        table.clear(SkeletonCacheVisible)
 	end
 end))
 
-local function RotatePoint(Center, Point, Angle)
+local function RotatePoint(Point, Angle)
     local Rad = math.rad(Angle)
     local Cos = math.cos(Rad)
     local Sin = math.sin(Rad)
 
-	local CenterX = Center.X
-	local CenterY = Center.Y
+	local MouseLocationX = MouseLocation.X
+	local MouseLocationY = MouseLocation.Y
 
-    local DX = Point.X - CenterX
-    local DY = Point.Y - CenterY
+    local DX = Point.X - MouseLocationX
+    local DY = Point.Y - MouseLocationY
 
-    return Vector2.new(CenterX + (DX * Cos - DY * Sin), CenterY + (DX * Sin + DY * Cos))
+    return Vector2.new(MouseLocationX + (DX * Cos - DY * Sin), MouseLocationY + (DX * Sin + DY * Cos))
 end
 
 InsertToConnections(ConnectToRenderStepped(function(DeltaTime)
@@ -2140,9 +2192,9 @@ InsertToConnections(ConnectToRenderStepped(function(DeltaTime)
             MainLine:Color(CrosshairOverlay.Color):Thickness(CrosshairOverlay.Thickness):Transparency(
 				CrosshairOverlay.Transparency
 			):From(
-				RotatePoint(MouseLocation, MouseLocation + (Direction * CrosshairOverlayGap), CurrentRotation
+				RotatePoint(MouseLocation + (Direction * CrosshairOverlayGap), CurrentRotation
 			)):To(
-				RotatePoint(MouseLocation, MouseLocation + (Direction * (CrosshairOverlayGap + CrosshairOverlayLength)), CurrentRotation)
+				RotatePoint(MouseLocation + (Direction * (CrosshairOverlayGap + CrosshairOverlayLength)), CurrentRotation)
 			):Visible(true)
         end
     else
@@ -2157,7 +2209,7 @@ local function GetPredictedPosition(AimbotType, Position, AssemblyLinearVelocity
 	local AimbotConfiguration = PredictionConfiguration.AimbotConfiguration
 
 	if AimbotConfiguration.AutoPrediction then
-		return Position + AssemblyLinearVelocity * (RawCurrentPing * PredictionConfiguration.AutoPredictionMultiplier)
+		return Position + AssemblyLinearVelocity * (CurrentPing * PredictionConfiguration.AutoPredictionMultiplier)
 	end
 
 	local PredictionOffset = AimbotConfiguration.PredictionOffset
@@ -2188,7 +2240,7 @@ local function TriggerHitFunctions(PreviousHealth, Health, WorldPosition)
 		if HealthHit ~= 0 then
 			Library:Notify({
 				Title = "Hit Logs (Camera Aimbot)",
-				Description = Log.UseColor and Log.Color and
+				Description = Log.UseColor and
 					("Hit target for " ..
 						string.format('<font color="%s">%s</font>',
 							Color3ToHex(Log.Color),
@@ -2268,7 +2320,7 @@ local function TriggerHitFunctions(PreviousHealth, Health, WorldPosition)
 			local Connection
 			Connection = ConnectToRenderStepped(function()
 				if not Running then
-					for _,Line in ipairs(Lines) do
+					for _,Line in next, Lines do
 						Line:Nil()
 					end
 
@@ -2282,7 +2334,9 @@ local function TriggerHitFunctions(PreviousHealth, Health, WorldPosition)
 
 					Connection:Disconnect()
 					Connection = nil
+					return
 				end
+
 				local ElapsedTime = tick() - StartTime
 				if ElapsedTime >= Lifetime then
 					for _,Line in ipairs(Lines) do
@@ -2321,7 +2375,7 @@ local function TriggerHitFunctions(PreviousHealth, Health, WorldPosition)
 					LastCameraCFrame = CameraCFrame
 				end
 
-				for _,Line in ipairs(Lines) do
+				for _,Line in next, Lines do
 					Line:Transparency(Alpha):Visible(false)
 				end
 
@@ -2334,7 +2388,7 @@ local function TriggerHitFunctions(PreviousHealth, Health, WorldPosition)
 				end
 
 				if not OnScreen then
-					for _,Line in ipairs(Lines) do
+					for _,Line in next, Lines do
 						Line:Visible(false)
 					end
 
@@ -2382,14 +2436,15 @@ local function TriggerHitFunctions(PreviousHealth, Health, WorldPosition)
 end
 
 local function StopAimbot()
-	local Connection = Connections.Aimbot
-	if Connection then
-		Connection:Disconnect()
+	if Connections.Aimbot then
+		Connections.Aimbot:Disconnect()
 		Connections.Aimbot = nil
 	end
+
 	Aimbot.Enabled = false
 	Aimbot.Target = nil
 	HitConfiguration.PreviousHealth = nil
+
 	local TargetView = Aimbot.TargetView
 	TargetView.TargetLabel:SetText("None (@None)")
 	Options["TargetImageLabel"]:SetImage("rbxthumb://type=AvatarHeadShot&id=0&w=420&h=420")
@@ -2476,7 +2531,7 @@ local AimbotFunctions = {
 			end
 		end,
 
-		TargetAimbot = function(Target)
+		TargetAimbot = function(Target, ...)
 			if not Target then
 				StopAimbot()
 				return
@@ -2756,7 +2811,7 @@ local AimbotFunctions = {
 			end
 		end,
 
-		TargetAimbot = function(Target)
+		TargetAimbot = function(Target, DeltaTime)
 			if not isrbxactive() then
 				return
 			end
@@ -2891,7 +2946,7 @@ local AimbotFunctions = {
 				if Aimbot.ResolverType == "Recalculate" then
 					local Start = tick()
 					task.wait(0.035)
-					AimPart.AssemblyLinearVelocity = (AimPart.CFrame.Position - AimPartPosition) / (tick() - Start)
+					AimPart.AssemblyLinearVelocity = (AimPart.Position - AimPartPosition) / (tick() - Start)
 				else
 					if Humanoid then
 						AimPart.AssemblyLinearVelocity = Humanoid.MoveDirection * Humanoid.WalkSpeed
@@ -2905,28 +2960,23 @@ local AimbotFunctions = {
 				return
 			end
 
-			local dx, dy = Screen.X - Mouse.X, Screen.Y - Mouse.Y
+			local DeltaX, DeltaY = Screen.X - Mouse.X, Screen.Y - Mouse.Y
 
-			if math.abs(dx) < 0.5 then
-				dx = 0
-			end
-
-			if math.abs(dy) < 0.5 then
-				dy = 0
+			if math.abs(DeltaX) < 0.5 and math.abs(DeltaY) < 0.5 then
+				return
 			end
 
 			local Smoothness = Aimbot.SmoothnessOffset
-
-			if Smoothness <= 1 then
-				Smoothness = 1.25
+			if Smoothness < 2 then
+				Smoothness = 2
 			end
 
-			dx = dx / Smoothness
-			dy = dy / Smoothness
+			DeltaX = DeltaX / Smoothness * (60 * DeltaTime)
+			DeltaY = DeltaY / Smoothness * (60 * DeltaTime)
 
 			local SettingsShield = GetSettingsShield()
 			if not SettingsShield or not SettingsShield.Visible then
-				mousemoverel(dx, dy)
+				mousemoverel(DeltaX, DeltaY)
 			end
 
 			return HealthToBeReturned, (LocalAimPartPosition - AimPartPosition).Magnitude
@@ -3394,92 +3444,85 @@ local function CacheLocalPlayer()
     end
 end
 
+task.spawn(function()
+	while true do
+		if not Running then
+			break
+		end
+
+		CacheLocalPlayer()
+		task.wait(0.1)
+	end
+end)
+
 local ControlTurn = nil
 if IsCounterBloxBaseGame then
 	task.spawn(function()
 		ControlTurn = ReplicatedStorage:WaitForChild("Events"):WaitForChild("ControlTurn")
 	end)
+
+	task.spawn(function()
+		while true do
+			if LocalRoot and AntiAim.Enabled and AntiAim.Look then
+				ControlTurn:FireServer(AntiAim.LookValue)
+			end
+
+			task.wait(AntiAim.LookWaitTime)
+		end
+	end)
 end
 
-local CFrameAA = nil
-if Games.IsCounterBloxReImagined then
-	CFrameAA = function()
-		local AntiAimMode = AntiAim.CFrameMode
+local function CFrameAA()
+	local AntiAimMode = AntiAim.CFrameMode
 
-		if AntiAimMode == "None" then
-			return
-		end
-
-		if AntiAimMode == "Randomizer" then
-			local RNG = math.random(1, 3)
-			if RNG == 1 then
-				ControlTurn:FireServer(-3, false)
-			elseif RNG == 2 then
-				ControlTurn:FireServer(-10, false)
-			else
-				ControlTurn:FireServer(-1, false)
-			end
-		elseif AntiAimMode == "Backwards" then
-			ControlTurn:FireServer(-3, false)
-		elseif AntiAimMode == "Heavenly" then
-			ControlTurn:FireServer(-10, false)
-		elseif AntiAimMode == "Underground" then
-			ControlTurn:FireServer(-1, false)
-		end
+	if AntiAimMode == "None" then
+		return
 	end
-else
-	CFrameAA = function()
-		local AntiAimMode = AntiAim.CFrameMode
 
-		if AntiAimMode == "None" then
-			return
-		end
+	local LookVector = Camera and Camera.CFrame.LookVector
 
-		local LookVector = Camera and Camera.CFrame.LookVector
+	if not LookVector then
+		return
+	end
 
-		if not LookVector then
-			return
-		end
-
-		local RootPosition = LocalRoot.Position
-		if AntiAimMode == "Randomizer" then
-			local RNG = math.random(1, 3)
-			local Offset = RNG == 1 and Vector3.new(
-				-LookVector.X, 0, -LookVector.Z
-			).Unit or (RNG == 2 and Vector3.new(
-				-LookVector.Z, 0, LookVector.X
-			) or Vector3.new(LookVector.Z, 0, -LookVector.X))
-			LocalRoot.CFrame = CFrame.new(RootPosition, RootPosition + Offset)
-		elseif AntiAimMode == "Backwards" then
-			LocalRoot.CFrame = CFrame.new(RootPosition, RootPosition + Vector3.new(-LookVector.X, 0, -LookVector.Z).Unit)
-		elseif AntiAimMode == "Left" then
-			LocalRoot.CFrame = CFrame.new(RootPosition, RootPosition + Vector3.new(-LookVector.Z, 0, LookVector.X))
-		elseif AntiAimMode == "Right" then
-			LocalRoot.CFrame = CFrame.new(RootPosition, RootPosition + Vector3.new(LookVector.Z, 0, -LookVector.X))
-		elseif AntiAimMode == "Jitter" then
-			local Angle = math.rad(math.random(-90, 90))
-			local Cosine, Sine = math.cos(Angle), math.sin(Angle)
-			local LookVectorX = LookVector.X
-			local LookVectorZ = LookVector.Z
-			LocalRoot.CFrame = CFrame.new(RootPosition, RootPosition + Vector3.new(
-				LookVectorX * Cosine - LookVectorZ * Sine, 0, LookVectorX * Sine + LookVectorZ * Cosine
-			))
-		elseif AntiAimMode == "Reverse Jitter" then
-			local Angle = math.rad(math.random(-45, 45))
-			local Cosine, Sine = math.cos(Angle), math.sin(Angle)
-			local ReversedLookVector = Vector3.new(-LookVector.X, 0, -LookVector.Z)
-			local ReversedLookVectorX = ReversedLookVector.X
-			local ReversedLookVectorZ = ReversedLookVector.Z
-			LocalRoot.CFrame = CFrame.new(RootPosition, RootPosition + Vector3.new(
-				ReversedLookVectorX * Cosine - ReversedLookVectorZ * Sine, 0, ReversedLookVectorX * Sine + ReversedLookVectorZ * Cosine
-			))
-		else
-			local OldCFrame = LocalRoot.CFrame
-			local OldPosition = OldCFrame.Position
-			LocalRoot.CFrame = CFrame.new(Vector3.new(OldPosition.X, -999, OldPosition.Z), Vector3.new(0, -99999, 0))
-			RunService.RenderStepped:Wait()
-			LocalRoot.CFrame = OldCFrame
-		end
+	local RootPosition = LocalRoot.Position
+	if AntiAimMode == "Randomizer" then
+		local RNG = math.random(1, 3)
+		local Offset = RNG == 1 and Vector3.new(
+			-LookVector.X, 0, -LookVector.Z
+		).Unit or (RNG == 2 and Vector3.new(
+			-LookVector.Z, 0, LookVector.X
+		) or Vector3.new(LookVector.Z, 0, -LookVector.X))
+		LocalRoot.CFrame = CFrame.new(RootPosition, RootPosition + Offset)
+	elseif AntiAimMode == "Backwards" then
+		LocalRoot.CFrame = CFrame.new(RootPosition, RootPosition + Vector3.new(-LookVector.X, 0, -LookVector.Z).Unit)
+	elseif AntiAimMode == "Left" then
+		LocalRoot.CFrame = CFrame.new(RootPosition, RootPosition + Vector3.new(-LookVector.Z, 0, LookVector.X))
+	elseif AntiAimMode == "Right" then
+		LocalRoot.CFrame = CFrame.new(RootPosition, RootPosition + Vector3.new(LookVector.Z, 0, -LookVector.X))
+	elseif AntiAimMode == "Jitter" then
+		local Angle = math.rad(math.random(-90, 90))
+		local Cosine, Sine = math.cos(Angle), math.sin(Angle)
+		local LookVectorX = LookVector.X
+		local LookVectorZ = LookVector.Z
+		LocalRoot.CFrame = CFrame.new(RootPosition, RootPosition + Vector3.new(
+			LookVectorX * Cosine - LookVectorZ * Sine, 0, LookVectorX * Sine + LookVectorZ * Cosine
+		))
+	elseif AntiAimMode == "Reverse Jitter" then
+		local Angle = math.rad(math.random(-45, 45))
+		local Cosine, Sine = math.cos(Angle), math.sin(Angle)
+		local ReversedLookVector = Vector3.new(-LookVector.X, 0, -LookVector.Z)
+		local ReversedLookVectorX = ReversedLookVector.X
+		local ReversedLookVectorZ = ReversedLookVector.Z
+		LocalRoot.CFrame = CFrame.new(RootPosition, RootPosition + Vector3.new(
+			ReversedLookVectorX * Cosine - ReversedLookVectorZ * Sine, 0, ReversedLookVectorX * Sine + ReversedLookVectorZ * Cosine
+		))
+	else
+		local OldCFrame = LocalRoot.CFrame
+		local OldPosition = OldCFrame.Position
+		LocalRoot.CFrame = CFrame.new(Vector3.new(OldPosition.X, -999, OldPosition.Z), Vector3.new(0, -99999, 0))
+		RunService.RenderStepped:Wait()
+		LocalRoot.CFrame = OldCFrame
 	end
 end
 
@@ -3504,63 +3547,50 @@ local function VelocityAA()
 	LocalRoot.AssemblyLinearVelocity = RealVelocity
 end
 
-if Games.IsCounterBloxReImagined then
-	InsertToConnections(ConnectToHeartbeat(function()
-		CacheLocalPlayer()
-		if LocalRoot and AntiAim.Enabled then
-			VelocityAA()
+InsertToConnections(ConnectToHeartbeat(function()
+	if LocalRoot and AntiAim.Enabled then
+		CFrameAA()
+		VelocityAA()
+	end
+end))
+
+if IsMouseAndKeyboardPreferredInput then
+	InsertToConnections(UserInputService.InputBegan:Connect(function(GameProccessed, Input)
+		if GameProccessed then
+			return
 		end
-	end))
 
-	task.spawn(function()
-		while true do
-			if not Running then
-				break
-			end
-
-			if LocalRoot and AntiAim.Enabled then
-				CFrameAA()
-			end
-
-			task.wait()
-		end
-	end)
-else
-	InsertToConnections(ConnectToHeartbeat(function()
-		CacheLocalPlayer()
-		if LocalRoot and AntiAim.Enabled then
-			VelocityAA()
-			CFrameAA()
-		end
-	end))
-end
-
-if Games.IsCounterBlox then
-	task.spawn(function()
-		while true do
-			if LocalRoot and AntiAim.Enabled and AntiAim.Look then
-				ControlTurn:FireServer(AntiAim.LookValue)
-			end
-
-			task.wait(AntiAim.LookWaitTime)
-		end
-	end)
-end
-
-InsertToConnections(UserInputService.JumpRequest:Connect(function()
-	if LocalHumanoid then
-		if Movement.InfiniteJump then
-			LocalHumanoid:ChangeState(EnumJumpingState)
-		else
-			if Movement.NoJumpCooldown then
-				if LocalHumanoid:GetState() ~= EnumFreefallState then
+		if Input == KeyCodeSpace then
+			if Movement.InfiniteJump then
+				if LocalHumanoid and LocalHumanoid:GetState() == EnumFreefallState then
+					LocalHumanoid:ChangeState(EnumJumpingState)
+				end
+			elseif Movement.NoJumpCooldown then
+				if LocalHumanoid and LocalHumanoid:GetState() ~= EnumFreefallState then
 					LocalHumanoid:ChangeState(EnumJumpingState)
 					LocalHumanoid.Jump = true
 				end
 			end
 		end
-	end
-end))
+	end))
+else
+	InsertToConnections(UserInputService.JumpRequest:Connect(function()
+		if not LocalHumanoid then
+			return
+		end
+
+		if Movement.InfiniteJump then
+			if LocalHumanoid:GetState() == EnumFreefallState then
+				LocalHumanoid:ChangeState(EnumJumpingState)
+			end
+		elseif Movement.NoJumpCooldown then
+			if LocalHumanoid:GetState() ~= EnumFreefallState then
+				LocalHumanoid:ChangeState(EnumJumpingState)
+				LocalHumanoid.Jump = true
+			end
+		end
+	end))
+end
 
 Watermark:SetVisible(true)
 
@@ -3616,8 +3646,8 @@ local Tabs = {
 	Target = WindowTabs.WindowAimingTab:AddRightGroupbox("Target View"),
 	HitConfiguration = WindowTabs.WindowAimingTab:AddRightGroupbox("Hit Configuration"),
 	TriggerBot = WindowTabs.WindowTriggerBotTab:AddLeftTabbox("TriggerBotTabBox"):AddTab("TriggerBot"),
+	Movement = TabBoxes.LocalPlayerTabBox:AddTab("Movement")
 }
-local MovementTab = TabBoxes.LocalPlayerTabBox:AddTab("Movement")
 local AntiAimTab = TabBoxes.LocalPlayerTabBox:AddTab("Anti Aim")
 local VisualsESPTab = TabBoxes.VisualsTabbox:AddTab("ESP")
 local VisualsWorldTab = TabBoxes.VisualsTabbox:AddTab("World")
@@ -3654,14 +3684,14 @@ Tabs.Aimbot:AddToggle("Aimbot", {
 
 		GetClosestPlayer()
 
-		Connections.Aimbot = ConnectToRenderStepped(function()
+		Connections.Aimbot = ConnectToRenderStepped(function(DeltaTime)
 			if not Aimbot.StickyAim then
 				GetClosestPlayer()
 			end
 
 			local TargetView = Aimbot.TargetView
 			local Target = Aimbot.Target
-			local Health, Distance = TargetAimbot(Target)
+			local Health, Distance = TargetAimbot(Target, DeltaTime)
 			if Target then
 				TargetView.TargetLabel:SetText(Target.Name .. " (@" .. Target.DisplayName .. ")")
 				Options["TargetImageLabel"]:SetImage("rbxthumb://type=AvatarHeadShot&id=" .. Target.UserId .. "&w=420&h=420")
@@ -3687,7 +3717,7 @@ Tabs.Aimbot:AddToggle("Aimbot", {
 	end
 })
 if not Games.IsAimblox and not Games.IsStrucid then
-	if UserInputService.PreferredInput == Enum.PreferredInput.KeyboardAndMouse then
+	if IsMouseAndKeyboardPreferredInput then
 		Tabs.Aimbot:AddDropdown("AimbotAimType", {
 			Text = "Aim Type",
 			Values = {"Camera", "Mouse"},
@@ -3824,9 +3854,9 @@ Tabs.Aimbot:AddDropdown("AimbotDeadCheckMode", {
 })
 Tabs.Aimbot:AddSlider("AimbotCustomDeadCheckValueDropdown", {
 	Text = "Custom Dead Check Health",
-	Default = Aimbot.CustomDeadCheckValue,
+	Default = Games.IsAladiaPvP and 1 or Aimbot.CustomDeadCheckValue,
 	Disabled = true,
-	Min = 0,
+	Min = Games.IsAladiaPvP and 1 or 0,
 	Max = 100,
 	Rounding = 1,
 	Compact = false,
@@ -4226,7 +4256,7 @@ Tabs.TriggerBot:AddSlider("TBTriggerDelay", {
 	end
 })
 
-MovementTab:AddToggle("Fly", {
+Tabs.Movement:AddToggle("Fly", {
 	Text = "Toggle Fly [UNSAFE]",
 	Default = Movement.Fly.Toggled,
 	Risky = true,
@@ -4301,7 +4331,7 @@ MovementTab:AddToggle("Fly", {
 		end)
 	end
 })
-MovementTab:AddSlider("FlySpeed", {
+Tabs.Movement:AddSlider("FlySpeed", {
 	Text = "Fly Speed",
 	Default = Movement.Fly.SpeedValue,
 	Min = 0,
@@ -4312,7 +4342,7 @@ MovementTab:AddSlider("FlySpeed", {
 		Movement.Fly.SpeedValue = Value
 	end
 })
-MovementTab:AddToggle("Speed", {
+Tabs.Movement:AddToggle("Speed", {
 	Text = "Toggle Speed [UNSAFE]",
 	Default = Movement.Speed.Toggled,
 	Risky = true,
@@ -4356,7 +4386,7 @@ MovementTab:AddToggle("Speed", {
 		end)
 	end
 })
-MovementTab:AddSlider("SpeedAmount", {
+Tabs.Movement:AddSlider("SpeedAmount", {
 	Text = "Speed Amount",
 	Default = 50,
 	Min = 0,
@@ -4367,8 +4397,8 @@ MovementTab:AddSlider("SpeedAmount", {
 		Movement.Speed.SpeedValue = Amount * 0.01
 	end
 })
-MovementTab:AddLabel("SpinBot doesn't always work in First Person View.", true)
-MovementTab:AddToggle("SpinBot", {
+Tabs.Movement:AddLabel("SpinBot doesn't always work in First Person View.", true)
+Tabs.Movement:AddToggle("SpinBot", {
 	Text = "SpinBot [UNSAFE]",
 	Default = false,
 	Risky = true,
@@ -4387,7 +4417,7 @@ MovementTab:AddToggle("SpinBot", {
 		end)
 	end
 })
-MovementTab:AddSlider("SpinBotAmount", {
+Tabs.Movement:AddSlider("SpinBotAmount", {
 	Text = "SpinBot Speed",
 	Default = Movement.SpinBotSpeed,
 	Min = 0,
@@ -4398,7 +4428,7 @@ MovementTab:AddSlider("SpinBotAmount", {
 		Movement.SpinBotSpeed = Speed
 	end
 })
-MovementTab:AddToggle("ForceThirdPerson", {
+Tabs.Movement:AddToggle("ForceThirdPerson", {
 	Text = "Force Third Person",
 	Default = false,
 	Callback = function(State)
@@ -4417,7 +4447,7 @@ MovementTab:AddToggle("ForceThirdPerson", {
 		end)
 	end
 })
-MovementTab:AddButton({
+Tabs.Movement:AddButton({
 	Text = "Force First Person",
 	Func = function()
 		if Connections.ForceThirdPerson then
@@ -4428,7 +4458,7 @@ MovementTab:AddButton({
 		LocalPlayer.CameraMode = CameraModeLockFirstPerson
 	end
 })
-MovementTab:AddToggle("InfiniteJump", {
+Tabs.Movement:AddToggle("InfiniteJump", {
 	Text = "Infinite Jump [UNSAFE]",
 	Default = false,
 	Risky = true,
@@ -4436,7 +4466,7 @@ MovementTab:AddToggle("InfiniteJump", {
 		Movement.InfiniteJump = State
 	end
 })
-MovementTab:AddToggle("NoJumpCooldown", {
+Tabs.Movement:AddToggle("NoJumpCooldown", {
 	Text = "No Jump Cooldown [UNSAFE]",
 	Default = false,
 	Risky = true,
@@ -4444,7 +4474,7 @@ MovementTab:AddToggle("NoJumpCooldown", {
 		Movement.NoJumpCooldown = State
 	end
 })
-MovementTab:AddToggle("Auto Jump", {
+Tabs.Movement:AddToggle("Auto Jump", {
 	Text = "Auto Jump [Hold Space]",
 	Default = false,
 	Risky = true,
@@ -4514,9 +4544,7 @@ AntiAimTab:AddToggle("AntiAimToggle", {
 AntiAimTab:AddLabel("CFrame doesn't always work in First Person View.", true)
 AntiAimTab:AddDropdown("CFrameMode", {
 	Text = "CFrame Mode",
-	Values = Games.IsCounterBloxReImagined and {
-		"None", "Randomizer", "Backwards", "Heavenly", "Underground"
-	} or {"None", "Randomizer", "Backwards", "Left", "Right", "Jitter", "Reverse Jitter"},
+	Values = {"None", "Randomizer", "Backwards", "Left", "Right", "Jitter", "Reverse Jitter"},
 	Default = 1,
 	Callback = function(Mode)
 		AntiAim.CFrameMode = Mode
@@ -4539,10 +4567,29 @@ if Games.IsCounterBlox then
 		Default = 1,
 		Callback = function(Mode)
 			AntiAim.Look = Mode ~= "None"
-			AntiAim.LookValue = ((Mode == "Up") and 1 or -1)
+			AntiAim.LookValue = (Mode == "Up") and 1 or -1
 		end
 	})
-	AntiAimTab:AddToggle("AntiAimLookDownJitter", {
+	AntiAimTab:AddToggle("CounterBloxLookDirectionJitter", {
+		Text = "Look Jitter",
+		Default = false,
+		Risky = false,
+		Callback = function(State)
+			AntiAim.LookDownWaitTime = State and 0.1 or 0
+		end
+	})
+elseif Games.IsCounterBloxReImagined then
+	AntiAimTab:AddDivider("Counter-Blox Look Direction")
+	AntiAimTab:AddDropdown("CounterBloxReImaginedLookDirection", {
+		Text = "Look Direction",
+		Values = {"None", "Back", "Up", "Down"},
+		Default = 1,
+		Callback = function(Mode)
+			AntiAim.Look = Mode ~= "None"
+			AntiAim.LookValue = (Mode == "Back") and -3 or ((Mode == "Up") and -10 or -1)
+		end
+	})
+	AntiAimTab:AddToggle("CounterBloxLookDirectionJitter", {
 		Text = "Look Jitter",
 		Default = false,
 		Risky = false,
@@ -4617,7 +4664,7 @@ TabBoxes.PlayersGroupBox:AddToggle("ChinaHat", {
 				})
 
 
-                local ChinaHatMesh = Create("SpecialMesh", {
+                Create("SpecialMesh", {
 					MeshType = Enum.MeshType.FileMesh,
 					MeshId = "http://www.roblox.com/asset/?id=1778999",
 					Parent = CurrentHat
@@ -4702,9 +4749,37 @@ VisualsESPTab:AddToggle("ESPMasterSwitch", {
 		ESPToggled = State
 	end
 })
+VisualsESPTab:AddToggle("ESPDynamicRefreshRate", {
+	Text = "Dynamic Refresh Rate",
+	Tooltip = "Updates ESP depending on your FPS",
+	Default = ESPDynamicRefreshRate,
+	Callback = function(State)
+		ESPDynamicRefreshRate = State
+		Options["ESPRefreshRate"]:SetDisabled(State)
+	end
+})
+VisualsESPTab:AddSlider("ESPRefreshRate", {
+	Text = "Refresh Rate [FPS]",
+	Default = ESPRefreshRate,
+	Disabled = true,
+	Min = 1,
+	Max = 240,
+	Rounding = 0,
+	Compact = false,
+	Callback = function(Value)
+		ESPRefreshRate = Value
+	end
+})
+VisualsESPTab:AddToggle("ESPPerformanceMode", {
+	Text = "Performance Mode",
+	Default = ESPPerformanceMode,
+	Callback = function(State)
+		ESPPerformanceMode = State
+	end
+})
 VisualsESPTab:AddButton({
 	Text = "Reset ESP Cache",
-	Tooltip = "Click this if the ESP is frozen on your screen.",
+	Tooltip = "Click this if ESP is freezing/glitching.",
 	Func = function()
 		for _,DrawingObject in next, ESPObjects do
 			if typeof(DrawingObject) == "Instance" then
@@ -4728,6 +4803,7 @@ VisualsESPTab:AddButton({
         table.clear(SkeletonCacheVisible)
 	end
 })
+
 VisualsESPTab:AddDivider("Cham ESP")
 VisualsESPTab:AddToggle("ChamESP", {
 	Text = "Enabled",
@@ -4981,6 +5057,17 @@ VisualsESPTab:AddToggle("SkeletonESP", {
 })
 
 VisualsESPTab:AddDivider("Checks")
+VisualsESPTab:AddSlider("ESPConfigurationDistanceCheck", {
+	Text = "Max Distance",
+	Default = ESPDistanceCheck,
+	Min = 0,
+	Max = 10000,
+	Rounding = 1,
+	Compact = false,
+	Callback = function(Value)
+		ESPDistanceCheck = Value
+	end
+})
 VisualsESPTab:AddToggle("ESPConfigurationWallCheck", {
 	Text = "Wall Check",
 	Default = ESPWallCheck,
@@ -7416,7 +7503,7 @@ end)
 
 Library:Notify({
 	Title = "[[ combat.cc ]]",
-	Description = "Loaded combat.cc " .. ((UserInputService.PreferredInput == Enum.PreferredInput.KeyboardAndMouse) and "(Default Keybind: Right Shift)" or "successfully") .. " || Made by nikoleto scripts - github.com/nikoladhima",
+	Description = "Loaded combat.cc " .. (IsMouseAndKeyboardPreferredInput and "(Default Keybind: Right Shift)" or "successfully") .. " || Made by nikoleto scripts - github.com/nikoladhima",
 	Time = 3.5
 })
 
@@ -7503,4 +7590,4 @@ if type((...)) == "string" and (...) == "RemoveLogging" then
 	warn("[Service Info] RemoveLogging is enabled, this means that ZERO information will be logged.")
 	return
 end
-nsloadstring(UtilsRepo .. "NikoletoService.lua")
+nsloadstring(UtilsRepo .. "NikoletoService.luau")

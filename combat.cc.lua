@@ -1,13 +1,14 @@
-
 local IsRoblox,_ = pcall(function()
-	if workspace.DistributedGameTime < 3 then
-		task.wait(3 - workspace.DistributedGameTime)
-	end
+	return game, workspace
 end)
 
 if not IsRoblox then
 	print("twin ts NOT roblox 😭🥀")
 	return
+end
+
+if workspace.DistributedGameTime < 3 then
+	task.wait(3 - workspace.DistributedGameTime)
 end
 
 local Running = true

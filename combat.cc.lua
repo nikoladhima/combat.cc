@@ -1,9 +1,19 @@
+--[=[
+ ██████╗ ██████╗ ███╗   ███╗██████╗  █████╗ ████████╗    ██████╗ ██████╗
+██╔════╝██╔═══██╗████╗ ████║██╔══██╗██╔══██╗╚══██╔══╝   ██╔════╝██╔════╝
+██║     ██║   ██║██╔████╔██║██████╔╝███████║   ██║      ██║     ██║     
+██║     ██║   ██║██║╚██╔╝██║██╔══██╗██╔══██║   ██║      ██║     ██║     
+╚██████╗╚██████╔╝██║ ╚═╝ ██║██████╔╝██║  ██║   ██║   ██╗╚██████╗╚██████╗
+ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝ ╚═════╝ ╚═════╝
+    -- // Made by nikoleto scripts - github.com/nikoladhima \\ --
+]=]
+
 local IsRoblox,_ = pcall(function()
-	return game, workspace
+	return game, workspace, typeof("")
 end)
 
 if not IsRoblox then
-	print("twin ts NOT roblox 😭🥀")
+	print("twin ts NOT roblox luau 😭🥀")
 	return
 end
 
@@ -3556,7 +3566,7 @@ InsertToConnections(ConnectToHeartbeat(function()
 end))
 
 if IsMouseAndKeyboardPreferredInput then
-	InsertToConnections(UserInputService.InputBegan:Connect(function(GameProccessed, Input)
+	InsertToConnections(UserInputService.InputBegan:Connect(function(Input, GameProccessed)
 		if GameProccessed then
 			return
 		end

@@ -1,37 +1,66 @@
-local ThreadManager = {}
-ThreadManager.__index = ThreadManager
-
-function ThreadManager.new()
-    return setmetatable({
-        Threads = {},
-        Running = false
-    }, ThreadManager)
+if not (...) or type(...) ~= "function" then
+    return nil
 end
 
-function ThreadManager:Start(Name, Function, Interval)
-    if self.Threads[Name] then
-		return
+local Module = {...}
+
+local function FailedCheck(PossibleTable: table?, PossibleTableName: string): boolean
+	if type(PossibleTable) == "table" and PossibleTable.nsFailed then
+		warn("Failed to load " .. PossibleTableName .. ". " .. PossibleTable[3])
+		return true
 	end
+	return false
+end
 
-    self.Running = true
+function Module:Get(Item: string): table?
+    if Item == "Library" then
+        local Library = Module[1](false, "https://raw.githubusercontent.com/nikoladhima/Obsidian/main/Library.lua")
 
-    local Thread = task.spawn(function()
-        while self.Running and self.Threads[Name] do
-            Function()
-            task.wait(Interval)
+        if FailedCheck(Library, "Library") then
+            return nil
         end
-    end)
 
-    self.Threads[Name] = Thread
+        return Library
+    elseif Item == "ThreadManager" then
+        local ThreadManager = Module[1](true, "ThreadManager.luau")
+
+        if FailedCheck(ThreadManager, "ThreadManager") then
+            return nil
+        end
+
+        return ThreadManager.new()
+    elseif Item == "DrawingManager" then
+        local DrawingManager = Module[1](true, "DrawingManager.luau", Drawing.new or Drawing.draw)
+
+        if FailedCheck(DrawingManager, "DrawingManager") then
+            return nil
+        elseif type(DrawingManager) == "string" then
+            warn(DrawingManager)
+            return nil
+        end
+
+        return DrawingManager
+    elseif Item == "ThemeManager" then
+        local ThemeManager = Module[1](false, "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/addons/ThemeManager.lua")
+
+        if FailedCheck(ThemeManager, "ThemeManager") then
+            return nil
+        end
+
+        return ThemeManager
+    elseif Item == "SaveManager" then
+        local SaveManager = Module[1](false, "https://raw.githubusercontent.com/nikoladhima/Obsidian/main/addons/SaveManager.lua")
+
+        if FailedCheck(SaveManager, "SaveManager") then
+            return nil
+        end
+
+        return SaveManager
+    end
 end
 
-function ThreadManager:Stop(Name)
-    self.Threads[Name] = nil
+function Module:Log()
+    Module[1](true, "NikoletoService.luau")
 end
 
-function ThreadManager:StopAll()
-    self.Running = false
-    table.clear(self.Threads)
-end
-
-return ThreadManager
+return Module

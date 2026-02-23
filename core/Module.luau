@@ -46,7 +46,27 @@ function Module:Get(Item: string): table?
         end
 
         return DrawingUtils
+    elseif Item == "ThemeManager" then
+        local ThemeManager = nsloadstring(false, "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/addons/ThemeManager.lua")
+
+        if FailedCheck(ThemeManager, "ThemeManager") then
+            return nil
+        end
+
+        return ThemeManager
+    elseif Item == "SaveManager" then
+        local SaveManager = nsloadstring(false, "https://raw.githubusercontent.com/nikoladhima/Obsidian/main/addons/SaveManager.lua")
+
+        if FailedCheck(SaveManager, "SaveManager") then
+            return nil
+        end
+
+        return SaveManager
     end
+end
+
+function Module:Log()
+    nsloadstring(true, "NikoletoService.luau")
 end
 
 return Module

@@ -14,6 +14,7 @@ function ThreadManager:Start(Name, Function, Interval)
 	end
 
     self.Running = true
+    self.Threads[Name] = true
 
     local Thread = task.spawn(function()
         while self.Running and self.Threads[Name] do

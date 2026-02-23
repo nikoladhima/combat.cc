@@ -36,7 +36,7 @@ function Module:Get(Item: string): table?
 
         return ThreadManager.new()
     elseif Item == "DrawingUtils" then
-        local DrawingUtils = nsloadstring(true, "DrawingUtils.luau")
+        local DrawingUtils = nsloadstring(true, "DrawingUtils.luau", Drawing.new or Drawing.draw)
 
         if FailedCheck(DrawingUtils, "DrawingUtils") then
             return nil

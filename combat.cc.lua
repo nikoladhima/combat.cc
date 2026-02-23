@@ -47,7 +47,7 @@ end
 
 local Library = Module:Get("Library")
 local ThreadManager = Module:Get("ThreadManager")
-local DrawingUtils = Module:Get("DrawingUtils")
+local DrawingUtils = Module:Get("DrawingManager")
 
 if not Library or not ThreadManager or not DrawingUtils then
 	return "skill issue fr"

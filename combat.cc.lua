@@ -8,76 +8,73 @@
     -- // Made by nikoleto scripts - github.com/nikoladhima \\ --
 ]=]
 
-local IsRoblox,_ = pcall(function()
-	return game, workspace, typeof("")
-end)
-
-if not IsRoblox then
-	print("twin ts NOT roblox luau 😭🥀")
-	return
-end
+--!optimize 2
+--!native
 
 if workspace.DistributedGameTime < 3 then
 	task.wait(3 - workspace.DistributedGameTime)
 end
 
-local Running = true
 local StartTick = tick()
+local Running = true
 
-assert(Drawing, "Exploit not supported.")
-
-local DrawingNew = Drawing.new or Drawing.draw
-assert(DrawingNew, "Exploit not supported.")
-
-local DrawingSuccess,_ = pcall(function()
+local DrawingNew = Drawing and (Drawing.new or Drawing.draw)
+assert(pcall(function()
 	DrawingNew("Circle"):Remove()
 	DrawingNew("Text"):Remove()
 	DrawingNew("Line"):Remove()
 	DrawingNew("Triangle"):Remove()
 	DrawingNew("Square"):Remove()
-end)
-assert(DrawingSuccess, "Exploit not supported.")
-
-local function nsloadstring(Url, Argument)
-	local Success, Result = pcall(function()
-		return loadstring(game:HttpGet(Url))(Argument)
-	end)
-
-	return Success and Result or {Value = "Unknown"}
-end
-
-local UtilsRepo = "https://raw.githubusercontent.com/nikoladhima/combat.cc/main/utils/"
-local DrawingUtils = nsloadstring(UtilsRepo .. "DrawingUtils.luau", DrawingNew)
-if type(DrawingUtils) == "string" then
-	warn(DrawingUtils)
-	return
-end
-
-local ScriptVersion = "2.7.0"
-local IsDeveloperBuild = false
+end), "Exploit not supported.")
 
 print("[nikoletoscripts/combat.cc]: Loading script..")
 
+local function nsloadstring(UseUtilsRepository: boolean, Url: string, Argument: any): any
+	local Success, Result = pcall(function()
+		return loadstring(game:HttpGet(
+            UseUtilsRepository and "https://raw.githubusercontent.com/nikoladhima/combat.cc/main/utils/" .. Url or Url
+        ))(Argument)
+	end)
+
+	return Success and Result or {nsFailed = true, Value = "Unknown", tostring(Result)}
+end
+
+local Module = nsloadstring(false, "https://raw.githubusercontent.com/nikoladhima/combat.cc/main/core/Module.luau", nsloadstring)
+if not Module or (type(Module) == "table" and Module.nsFailed) then
+	warn("Failed to load Module: " .. Module[3])
+	return
+end
+
+local Library = Module:Get("Library")
+local ThreadManager = Module:Get("ThreadManager")
+local DrawingUtils = Module:Get("DrawingUtils")
+
+if not Library or not ThreadManager or not DrawingUtils then
+	return "skill issue fr"
+end
+
+local ScriptVersion = "2.8.0"
+
 local FileFunctions = {
-    listfiles = listfiles or list_files or function(...)
+    listfiles = listfiles or list_files or function(...): {string}
         return {}
     end,
-    makefolder = makefolder or make_folder or createfolder or create_folder or function(...)
+    makefolder = makefolder or make_folder or createfolder or create_folder or function(...): boolean
         return true
     end,
-    isfolder = isfolder or is_folder or function(...)
+    isfolder = isfolder or is_folder or function(...): boolean
         return false
     end,
-    isfile = isfile or is_file or function(...)
+    isfile = isfile or is_file or function(...): boolean
         return false
     end,
-    readfile = readfile or read_file or readfileasync or readfile_async or read_file_async or function(...)
+    readfile = readfile or read_file or readfileasync or readfile_async or read_file_async or function(...): string
         return "{}"
     end,
-    writefile = writefile or write_file or writefileasync or writefile_async or write_file_async or function(...)
+    writefile = writefile or write_file or writefileasync or writefile_async or write_file_async or function(...): boolean
         return true
     end,
-    delfile = delfile or del_file or deletefile or delete_file or function(...)
+    delfile = delfile or del_file or deletefile or delete_file or function(...): boolean
         return true
     end
 }
@@ -90,19 +87,15 @@ if not FileFunctions.isfolder("combat.cc/Sounds") then
 	FileFunctions.makefolder("combat.cc/Sounds")
 end
 
-local Library = nsloadstring("https://raw.githubusercontent.com/nikoladhima/Obsidian/main/Library.lua")
 local Options = Library.Options
 local Toggles = Library.Toggles
 local Watermark = Library:AddDraggableLabel("[nikoletoscripts/combat.cc] | Unknown | 0 | 0")
-local ThemeManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/deividcomsono/Obsidian/main/addons/ThemeManager.lua"))()
-local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/nikoladhima/Obsidian/main/addons/SaveManager.lua"))()
---local InstanceUtils = nsloadstring(UtilsRepo .. "InstanceUtils.luau")
 
-local identifyexecutor = identifyexecutor or identify_executor or getexecutorname or get_executor_name or function()
+local identifyexecutor = identifyexecutor or identify_executor or getexecutorname or get_executorname or get_executor_name or function(): string
 	return "Unknown"
 end
 
-local isrbxactive = isrbxactive or is_rbx_active or function()
+local isrbxactive = isrbxactive or is_rbxactive or is_rbx_active or function()
 	return true
 end
 
@@ -110,8 +103,8 @@ local mouse1press = mouse1press or mouse1_press or mouse_1_press
 local mouse1release = mouse1release or mouse1_release or mouse_1_release
 local mousemoverel = mousemoverel or mouse_moverel or mousemove_rel or mouse_move_rel or MouseMoveRel or setmousepos or set_mouse_pos
 
-local newcclosure = newcclosure or new_cclosure or newc_closure or new_c_closure or function(...)
-	return (...)
+local newcclosure = newcclosure or new_cclosure or newc_closure or new_c_closure or function(Function: (any) -> any): (any) -> any
+	return Function
 end
 
 if identifyexecutor():lower():find("solara") then
@@ -121,16 +114,16 @@ end
 local hookmetamethod = hookmetamethod or hook_metamethod or hook_metamethod or hook_meta_method
 local getnamecallmethod = getnamecallmethod or getnamecall_method or get_namecallmethod or get_namecall_method
 
-local setfflagFunction = setfflag or set_fflag
-local function nssetfflag(...)
+local setfflagFunction = setfflag or set_fflag or set_fastflag or set_fast_flag
+local function nssetfflag(FastFlag: string, Value: string): (boolean, string?)
 	if not setfflagFunction then
 		return false, "function missing"
 	end
-	return pcall(setfflagFunction, ...)
+	return pcall(setfflagFunction, FastFlag, Value)
 end
 
 local clonefunctionFunction = clonefunction or clone_function or copyfunction or copy_function
-local nsclonefunction = function(Function)
+local nsclonefunction = function(Function: (any) -> any): (any) -> any
 	if not clonefunctionFunction then
 		return Function
 	end
@@ -140,7 +133,7 @@ local nsclonefunction = function(Function)
 end
 
 local clonerefFunction = cloneref or clone_ref or clonereference or clone_reference
-local nscloneref = function(Object)
+local nscloneref = function< T >(Object: T): T
 	if not clonerefFunction then
 		return Object
 	end
@@ -150,10 +143,11 @@ local nscloneref = function(Object)
 end
 
 local getcustomassetFunction = getcustomasset or get_customasset or get_custom_asset
-local function nsgetcustomasset(File)
+local function nsgetcustomasset(File: string): string
 	if not getcustomassetFunction then
 		return "rbxassetid://0"
 	end
+
 	local Success, Result = pcall(getcustomassetFunction, File)
 	return Success and Result or "rbxassetid://0"
 end
@@ -183,7 +177,7 @@ local function nssethiddenproperty(Object, Property, Value)
 end]]
 
 local CreateInstance = nsclonefunction(Instance.new)
-local function Create(Type, Properties)
+local function Create(Type: string, Properties: {[string]: any}?): Instance
 	if Properties then
 		local Object = nscloneref(CreateInstance(Type))
 
@@ -204,7 +198,7 @@ local function Create(Type, Properties)
 end
 
 local GetServiceFunction = nsclonefunction(game.GetService)
-local function GetService(ServiceName)
+local function GetService(ServiceName: string): ServiceProvider
 	return nscloneref(GetServiceFunction(game, ServiceName))
 end
 
@@ -269,6 +263,7 @@ local KeyCodeRightControl = Enum.KeyCode.RightControl
 local EnumFreefallState = Enum.HumanoidStateType.Freefall
 local EnumJumpingState = Enum.HumanoidStateType.Jumping
 
+local ProfileStudsOffsetWorldSpace = Vector3.new(0, 1.75, 0)
 local Vector3PlusHoundredY = Vector3.new(0, 100, 0)
 local Vector3MinusHoundredY = Vector3.new(0, -100, 0)
 local ESPHeadOffset = Vector3.new(0, 1.5, 0)
@@ -277,7 +272,7 @@ local R6Waist = Vector3.new(0, -0.5, 0)
 local R6Top = Vector3.new(0, 0.5, 0)
 local R6Bottom = Vector3.new(0, -0.5, 0)
 local CFrameZero = CFrame.new(0, 0, 0)
-local FixedBottomCenter = Vector2.zero
+local FixedBottomCenter = Vector2.new(0, 0, 0)
 
 local IsMouseAndKeyboardPreferredInput = UserInputService.PreferredInput == Enum.PreferredInput.KeyboardAndMouse
 
@@ -386,6 +381,7 @@ local TriggerBot = {
 
 	Target = nil,
 
+	ForceFieldCheck = false,
 	TeamCheck = false,
 	DeadCheck = false,
 	DeadCheckMode = "Universal",
@@ -512,8 +508,8 @@ local ESPAccumulator = 0
 
 local ESPPerformanceMode = false
 
-local ESPDistanceCheck = 2000
-local ESPForcefieldCheck = false
+local ESPDistanceCheck = 4000000
+local ESPForceFieldCheck = false
 local ESPWallCheck = false
 local ESPTeamCheck = false
 
@@ -546,7 +542,7 @@ local HeadTagESP, TagBuffer = {
 	Color = Color3.fromRGB(255, 255, 255),
 	Dropdown = "Name",
 	Transparency = 1
-}, {}
+}, table.create(6)
 
 local TracerESP = {
 	Enabled = false,
@@ -621,8 +617,8 @@ local SkeletonESP, SkeletonCachePoints, SkeletonCacheVisible, R15SkeletonLines =
 }
 
 local World = {
-	LightingTechnology = Lighting.Technology,
-	OldLightingTechnology = tostring(Lighting.Technology):gsub("Enum.Technology.", ""),
+	--[[LightingTechnology = Lighting.Technology,
+	OldLightingTechnology = tostring(Lighting.Technology):gsub("Enum.Technology.", ""),]]
 	OldGeographicLatitude = Lighting.GeographicLatitude,
 	OldExposureCompensation = Lighting.ExposureCompensation,
 	OldAmbient = Lighting.Ambient,
@@ -696,7 +692,10 @@ for Variable, StringGameId in next, {
 	IsBloxStrike = "7633926880",
 	IsWarTycoon = "1526814825",
 	IsDefusal = "6993600665",
-	IsAladiaPvP = "8050914790"
+	IsAladiaPvP = "8050914790",
+	IsFantasmaPVP = "7380551893",
+	IsDeadEye = "9571037154",
+	IsOperationOne = "8307114974"
 } do
     Games[Variable] = (GameId == StringGameId)
 end
@@ -706,10 +705,9 @@ local IsCounterBloxBaseGame = Games.IsCounterBlox or Games.IsCounterBloxReImagin
 
 local CanUseVirtualInputManager = false
 if Games.IsDefuseDivision then
-	local Success,_ = pcall(function()
+	if pcall(function()
 		VirtualInputManager = Create("VirtualInputManager")
-	end)
-	if Success then
+	end) then
 		CanUseVirtualInputManager = true
 	end
 end
@@ -721,15 +719,15 @@ local PlayerLeaveLogs = false
 
 workspace.FallenPartsDestroyHeight = -math.huge
 
-local function InsertToConnections(Connection)
+local function InsertToConnections(Connection: RBXScriptConnection)
 	table.insert(Connections, Connection)
 end
 
-local function ConnectToRenderStepped(Function)
+local function RenderStepped(Function: (number) -> ())
 	return RunService.RenderStepped:Connect(Function)
 end
 
-local function ConnectToHeartbeat(Function)
+local function Heartbeat(Function: (number) -> ())
 	return RunService.Heartbeat:Connect(Function)
 end
 
@@ -759,7 +757,7 @@ InsertToConnections(Mouse.Move:Connect(function()
 	MouseLocation = UserInputService:GetMouseLocation()
 end))
 
-local function GetSettingsShield()
+local function GetSettingsShield(): Instance?
     if CachedSettingsShield and CachedSettingsShield.Parent then
         return CachedSettingsShield
     end
@@ -798,9 +796,9 @@ AimbotFOVCircles.S_FOVCircle = DrawingUtils.new("Circle", {
 	Visible = false
 })
 
-local IsEnemy = nil
+local IsEnemy: (Player) -> boolean = nil
 if Games.IsAimblox then
-	IsEnemy = function(Player)
+	IsEnemy = function(Player: Player): boolean
 		if not Player then
 			return false
 		end
@@ -812,7 +810,7 @@ if Games.IsAimblox then
 		return false
 	end
 elseif Games.IsDefuseDivision then
-	IsEnemy = function(Player)
+	IsEnemy = function(Player: Player): boolean
 		if Player then
 			local LocalPlayerStates = LocalPlayer:FindFirstChild("PlayerStates")
 
@@ -862,11 +860,35 @@ elseif Games.IsBloxStrike then
 		return false
 	end
 elseif Games.IsGunGroundsFFA or Games.IsFlick then
-	IsEnemy = function(Player)
+	IsEnemy = function(Player: Player): boolean
 		return true
 	end
+elseif Games.IsDeadEye then
+	IsEnemy = function(Player: Player): boolean
+		if not Player then
+			return false
+		end
+
+		local LocalTeam = LocalPlayer:GetAttribute("TeamNum")
+
+		if not LocalTeam then
+			return true
+		end
+
+		local PlayerTeam = Player:GetAttribute("TeamNum")
+
+		if not PlayerTeam then
+			return true
+		end
+
+		if LocalTeam ~= PlayerTeam then
+			return true
+		end
+
+		return false
+	end
 elseif Games.MurderersVSSheriffsDUELS then
-	IsEnemy = function(Player)
+	IsEnemy = function(Player: Player): boolean
 		if not Player then
 			return false
 		end
@@ -878,7 +900,7 @@ elseif Games.MurderersVSSheriffsDUELS then
 		return false
 	end
 elseif Games.IsKatX then
-	IsEnemy = function(Player)
+	IsEnemy = function(Player: Player): boolean
 		if not Player then
 			return false
 		end
@@ -908,7 +930,7 @@ elseif Games.IsKatX then
 		return false
 	end
 elseif Games.IsDefusal then
-	IsEnemy = function(Player)
+	IsEnemy = function(Player: Player): boolean
 		if not Player then
 			return false
 		end
@@ -936,7 +958,7 @@ elseif Games.IsDefusal then
 		return false
 	end
 elseif Games.IsRivals then
-	IsEnemy = function(Player)
+	IsEnemy = function(Player: Player): boolean
 		if not Player then
 			return false
 		end
@@ -948,7 +970,7 @@ elseif Games.IsRivals then
 		return false
 	end
 else
-	IsEnemy = function(Player)
+	IsEnemy = function(Player: Player): boolean
 		if not Player then
 			return false
 		end
@@ -961,14 +983,14 @@ else
 	end
 end
 
-local function GetArsenalHealthInstance(Cache)
+local function GetArsenalHealthInstance(Cache: table): NumberValue?
 	local NRPBS = Cache.NRPBS
 	return NRPBS and NRPBS:FindFirstChild("Health") or nil
 end
 
-local IsDead = nil
+local IsDead: (Instance, string, number) -> (boolean, number) = nil
 if IsArsenalBaseGame then
-	IsDead = function(Character, Mode, CustomValue)
+	IsDead = function(Character: Instance?, Mode: string, CustomValue: number): (boolean, number)
 		if not Character then
 			return true
 		end
@@ -1001,7 +1023,7 @@ if IsArsenalBaseGame then
 		return false, HealthValue
 	end
 elseif Games.IsSniperArena or Games.IsAimblox or Games.IsDefusal then
-	IsDead = function(Character, Mode, CustomValue)
+	IsDead = function(Character: Instance?, Mode: string, CustomValue: number): (boolean, number)
 		if not Character then
 			return true, 0
 		end
@@ -1029,7 +1051,7 @@ elseif Games.IsSniperArena or Games.IsAimblox or Games.IsDefusal then
 		return false, HealthValue
 	end
 elseif Games.IsDefuseDivision then
-	IsDead = function(Character, ...)
+	IsDead = function(Character: Instance?, ...): boolean
 		if not Character then
 			return true
 		end
@@ -1052,7 +1074,7 @@ elseif Games.IsDefuseDivision then
 		return false
 	end
 elseif Games.IsAladiaPvP then
-	IsDead = function(Character, Mode, CustomValue)
+	IsDead = function(Character: Instance?, Mode: string, CustomValue: number): boolean
 		if not Character then
 			return true
 		end
@@ -1074,7 +1096,7 @@ elseif Games.IsAladiaPvP then
 		return false
 	end
 else
-	IsDead = function(Character, Mode, CustomValue)
+	IsDead = function(Character: Instance?, Mode: string, CustomValue: number): boolean
 		if not Character then
 			return true
 		end
@@ -1097,7 +1119,33 @@ else
 	end
 end
 
-local function IsBehindWall(Origin, TargetPosition, Character)
+local function IsProtected(Character: Instance?): boolean
+	if Character:FindFirstChildOfClass("ForceField") then
+		return true
+	end
+
+	return false
+end
+
+local PerformJump: () -> () = nil
+if Games.IsDefuseDivision then
+	PerformJump = function()
+		if CanUseVirtualInputManager then
+			VirtualInputManager:SendScroll(
+				MouseLocation.X, MouseLocation.Y,
+				0, -1,
+				CoolEmptyTable, game
+			)
+		end
+	end
+else
+	PerformJump = function()
+		LocalHumanoid.Jump = true
+		LocalHumanoid:ChangeState(EnumJumpingState)
+	end
+end
+
+local function IsBehindWall(Origin: Vector3, TargetPosition: Vector3, Character: Instance?): boolean
 	if not Character then
 		return false
 	end
@@ -1111,7 +1159,7 @@ local function IsBehindWall(Origin, TargetPosition, Character)
     return not Result.Instance:IsDescendantOf(Character)
 end
 
-local function CreateESP()
+local function CreateESP(): table
 	local ESP = {}
 
 	ESP.HeadDot = DrawingUtils.new("Circle", {
@@ -1184,7 +1232,7 @@ local function CreateESP()
 	return ESP
 end
 
-local function WorldToViewportPoint(Position)
+local function WorldToViewportPoint(Position: Vector3): (Vector2, boolean)
 	if not Camera then
 		return Vector2.zero, false
 	end
@@ -1193,7 +1241,7 @@ local function WorldToViewportPoint(Position)
 	return Vector2.new(Screen.X, Screen.Y), OnScreen
 end
 
-local function WorldToScreenPoint(Position, IncludeZ)
+local function WorldToScreenPoint(Position: Vector3, IncludeZ: boolean): ((Vector3 | Vector2), boolean)
 	if not Camera then
 		return Vector2.zero, false
 	end
@@ -1206,7 +1254,7 @@ local function WorldToScreenPoint(Position, IncludeZ)
 	end
 end
 
-local function ClearCache(Player)
+local function ClearCache(Player: Player)
 	local Cache = CachedPlayers[Player]
 
 	if not Cache then
@@ -1235,11 +1283,7 @@ local function ClearCache(Player)
 	CachedPlayers[Player] = nil
 end
 
-local function CachePlayer(Player)
-	if Player == LocalPlayer or not Player then
-		return nil
-	end
-
+local function CachePlayer(Player: Player): Instance?
 	local Character = Player.Character
 
 	if not Character then
@@ -1300,6 +1344,7 @@ local function CachePlayer(Player)
 		ESP.Cham = Create("Highlight", {
 			Enabled = false,
 			Name = "Cham_" .. Name,
+			DepthMode = Enum.HighlightDepthMode.AlwaysOnTop,
 			Adornee = Character,
 			Parent = CoreGui
 		})
@@ -1311,7 +1356,7 @@ local function CachePlayer(Player)
 			Enabled = false,
 			Name = "Profile_" .. Name,
 			Size = UDim2.fromScale(1, 1),
-			StudsOffsetWorldSpace = Vector3.new(0, 1.75, 0),
+			StudsOffsetWorldSpace = ProfileStudsOffsetWorldSpace,
 			AlwaysOnTop = true,
 			ResetOnSpawn = false,
 			Adornee = Head,
@@ -1341,32 +1386,27 @@ local function CachePlayer(Player)
 	return Character
 end
 
-local function SetEnabled(Object, State)
+local function SetEnabled(Object: Instance, State: boolean)
 	if Object.Enabled ~= State then
 		Object.Enabled = State
 	end
 end
 
-local function AddCache(Player)
+local function AddCache(Player: Player)
 	local Character = CachePlayer(Player)
 
 	if Character then
-		for _,Object in ipairs(Character:GetChildren()) do
-			if Object:IsA("Highlight") then
-				if Object.Name ~= "Cham_" .. Player.Name then
-					SetEnabled(Object, false)
-				end
+		for _,Child in ipairs(Character:GetChildren()) do
+			if Child:IsA("Highlight") and Child.Name ~= "Cham_" .. Player.Name then
+				SetEnabled(Child, false)
 			end
 		end
 	end
 
 	InsertToConnections(Player.CharacterAdded:Connect(function()
-		CachePlayer(Player)
-		InsertToConnections(Player.Character.ChildAdded:Connect(function(Child)
-			if Child:IsA("Highlight") then
-				if Child.Name ~= "Cham_" .. Player.Name then
-					SetEnabled(Child, false)
-				end
+		InsertToConnections(CachePlayer(Player).ChildAdded:Connect(function(Child)
+			if Child:IsA("Highlight") and Child.Name ~= "Cham_" .. Player.Name then
+				SetEnabled(Child, false)
 			end
 		end))
 	end))
@@ -1376,54 +1416,50 @@ local function AddCache(Player)
 	end))
 end
 
-task.spawn(function()
-	while true do
-		if not Running then
-			break
+ThreadManager:Start("CachedPlayers", function()
+	CachedRaycastParams.FilterDescendantsInstances = {LocalCharacter, Camera}
+
+	for _,Player in ipairs(Players:GetPlayers()) do
+		if Player == LocalPlayer then
+			continue
 		end
 
-		CachedRaycastParams.FilterDescendantsInstances = {LocalCharacter, Camera}
-
-		for _,Player in ipairs(Players:GetPlayers()) do
-			local Cache = CachedPlayers[Player]
-			if not Cache then
+		local Cache = CachedPlayers[Player]
+		if not Cache then
+			AddCache(Player)
+		else
+			local Character = Cache.Character
+			if not Character or not Character.Parent then
+				ClearCache(Player)
 				AddCache(Player)
-			else
-				local Character = Cache.Character
-				if not Character or not Character.Parent then
-					ClearCache(Player)
-					AddCache(Player)
-					continue
-				end
+				continue
+			end
 
-				local Humanoid = Cache.Humanoid
-				if not Humanoid or not Humanoid.Parent then
-					ClearCache(Player)
-					AddCache(Player)
-					continue
-				end
+			local Humanoid = Cache.Humanoid
+			if not Humanoid or not Humanoid.Parent then
+				ClearCache(Player)
+				AddCache(Player)
+				continue
+			end
 
-				local Root = Cache.Root
-				if not Root or not Root.Parent then
-					ClearCache(Player)
-					AddCache(Player)
-					continue
-				end
+			local Root = Cache.Root
+			if not Root or not Root.Parent then
+				ClearCache(Player)
+				AddCache(Player)
+				continue
+			end
 
-				local Head = Cache.Head
-				if not Head or not Head.Parent then
-					ClearCache(Player)
-					AddCache(Player)
-					continue
-				end
+			local Head = Cache.Head
+			if not Head or not Head.Parent then
+				ClearCache(Player)
+				AddCache(Player)
+				continue
 			end
 		end
-
-		task.wait(1.5)
 	end
-end)
+end, 1.5)
 
-InsertToConnections(Players.PlayerAdded:Connect(function(Player)
+InsertToConnections(Players.PlayerAdded:Connect(function(Player: Player)
 	AddCache(Player)
 	if PlayerJoinLogs then
 		Library:Notify({
@@ -1433,7 +1469,7 @@ InsertToConnections(Players.PlayerAdded:Connect(function(Player)
 		})
 	end
 end))
-InsertToConnections(Players.PlayerRemoving:Connect(function(Player)
+InsertToConnections(Players.PlayerRemoving:Connect(function(Player: Player)
 	ClearCache(Player)
 	if PlayerLeaveLogs then
 		Library:Notify({
@@ -1444,7 +1480,7 @@ InsertToConnections(Players.PlayerRemoving:Connect(function(Player)
 	end
 end))
 
-local function PlayHitSound(Option, Volume)
+local function PlayHitSound(Option: string, Volume: number)
 	local AssetId = HitSounds.Sounds[Option]
 	if AssetId then
 		Create("Sound", {
@@ -1478,41 +1514,46 @@ end
 
 local CurrentGameName = "Unknown"
 task.spawn(function()
-	local GameSuccess,_ = pcall(function()
+	if not pcall(function()
 		local Name = MarketplaceService:GetProductInfo(game.PlaceId).Name
 		CurrentGameName = Name
-	end)
-	if not GameSuccess then
+	end) then
 		CurrentGameName = "Unknown"
 		task.wait(10)
-		CurrentGameName = MarketplaceService:GetProductInfo(game.PlaceId).Name
+		if not pcall(function()
+			local Name = MarketplaceService:GetProductInfo(game.PlaceId).Name
+			CurrentGameName = Name
+		end) then
+			task.wait(15)
+			CurrentGameName = MarketplaceService:GetProductInfo(game.PlaceId).Name
+		end
 	end
 end)
 
-local CurrentFPS = nsloadstring(UtilsRepo .. "FPS.luau", {RunService, GetService("Stats")})
+local CurrentFPS = nsloadstring(true, "FPS.luau", {RunService, GetService("Stats")})
 local CurrentPing = 0
 
 task.spawn(function()
-	local DataPing = CurrentFPS.Stats:WaitForChild("Network"):WaitForChild("ServerStatsItem")["Data Ping"]
-	InsertToConnections(ConnectToRenderStepped(function()
+	local DataPing = CurrentFPS.Stats:WaitForChild("Network"):WaitForChild("ServerStatsItem"):WaitForChild("Data Ping")
+	InsertToConnections(RenderStepped(function()
 		CurrentPing = DataPing:GetValue()
 		Watermark:SetText("[nikoletoscripts/combat.cc] | " .. CurrentGameName .. " | FPS: " .. CurrentFPS.Value .. " | Ping: " .. math.floor(CurrentPing))
 	end))
 end)
 
-local function SetSize(DrawingObject, Size)
+local function SetSize(DrawingObject: table?, Size: Vector2)
 	if DrawingObject.Size ~= Size then
 		DrawingObject.Size = Size
 	end
 end
 
-local function SetTransparency(DrawingObject, Transparency)
+local function SetTransparency(DrawingObject: table?, Transparency: number)
 	if DrawingObject.Transparency ~= Transparency then
 		DrawingObject.Transparency = Transparency
 	end
 end
 
-local function UpdateFOVCircle(FOVCircle, FOVCircleTable, AimbotTable)
+local function UpdateFOVCircle(FOVCircle: table?, FOVCircleTable: table, AimbotTable: table)
 	if not FOVCircle then
 		return
 	end
@@ -1530,51 +1571,84 @@ local function UpdateFOVCircle(FOVCircle, FOVCircleTable, AimbotTable)
 	):Visible(AimbotTable.Toggled and FOVCircleTable.Enabled)
 end
 
-local HideESP = DrawingUtils.HideAll
-local GetDistanceSquared = DrawingUtils.GetDistanceSquared
+local function HideESP(ESP: table?)
+    if not ESP then
+        return
+    end
 
-local function CanRenderVisually(Player, Character, Head, Root)
-	if not Player or not Character or not Root or not Head then
-		return false, 0, Vector3.zero
+    for Index, Object in next, ESP do
+        if Index == "Cham" or Index == "Profile" then
+            if Object.Enabled ~= false then
+                Object.Enabled = false
+            end
+            continue
+        end
+
+        if Index == "Box3D" or Index == "Skeleton" then
+            for _, Line in next, Object do
+                Line:Visible(false)
+            end
+            continue
+        end
+
+        Object:Visible(false)
+    end
+end
+
+local function GetDistanceSquared(Point1: Vector3, Point2: Vector3): number
+    local DeltaX = Point1.X - Point2.X
+    local DeltaY = Point1.Y - Point2.Y
+    local DeltaZ = Point1.Z - Point2.Z
+    return DeltaX * DeltaX + DeltaY * DeltaY + DeltaZ * DeltaZ
+end
+
+local function CanRenderVisually(Player: Player, Character: Instance?, Head: Instance?, Root: Instance?): (boolean, number, Vector3, Vector3?)
+	if not Character or not Head or not Root then
+		return false, 0, Vector3.zero, Vector3.zero
 	end
 
 	if ESPTeamCheck and not IsEnemy(Player) then
-		return false, 0, Vector3.zero
+		return false, 0, Vector3.zero, Vector3.zero
 	end
 
 	local DeadState, CustomGameHealth = IsDead(Character, "Universal", 0)
 	if DeadState then
-		return false, CustomGameHealth, Vector3.zero
+		return false, CustomGameHealth, Vector3.zero, Vector3.zero
+	end
+
+	if ESPForceFieldCheck and IsProtected(Character) then
+		return false, CustomGameHealth, Vector3.zero, Vector3.zero
 	end
 
 	local RootPosition = Root.Position
+	local LocalRootPosition
 	if LocalRoot then
-		if GetDistanceSquared(LocalRoot.Position, RootPosition) > (ESPDistanceCheck * ESPDistanceCheck) then
-			return false, CustomGameHealth, RootPosition
+		LocalRootPosition = LocalRoot.Position
+
+		if GetDistanceSquared(LocalRootPosition, RootPosition) > ESPDistanceCheck then
+			return false, CustomGameHealth, RootPosition, LocalRootPosition
 		end
 
-		if ESPWallCheck and IsBehindWall(LocalRoot.Position, RootPosition, Character) then
-			return false, CustomGameHealth, RootPosition
+		if ESPWallCheck and IsBehindWall(LocalRootPosition, RootPosition, Character) then
+			return false, CustomGameHealth, RootPosition, LocalRootPosition
 		end
 	end
 
-	return true, CustomGameHealth, RootPosition
+	return true, CustomGameHealth, RootPosition, LocalRootPosition
 end
 
-InsertToConnections(ConnectToRenderStepped(function(DeltaTime)
+InsertToConnections(RenderStepped(function(DeltaTime: number)
 	UpdateFOVCircle(AimbotFOVCircles.FOVCircle, Aimbot.FOVCircle, Aimbot)
 	UpdateFOVCircle(AimbotFOVCircles.S_FOVCircle, SilentAimbot.FOVCircle, SilentAimbot)
 
-	if ESPPerformanceMode then
-		local Interval = 1 / 60
-
+	if ESPPerformanceMode then -- Interval = 1 / 60
 		ESPAccumulator += DeltaTime
 
-		if ESPAccumulator < Interval then
+		if ESPAccumulator < 0.01666666666 then
 			return
 		end
 
-		ESPAccumulator -= Interval
+		ESPAccumulator -= 0.01666666666
 	elseif not ESPDynamicRefreshRate then
 		local Interval = 1 / ESPRefreshRate
 
@@ -1587,7 +1661,7 @@ InsertToConnections(ConnectToRenderStepped(function(DeltaTime)
 		ESPAccumulator -= Interval
 	end
 
-	if not ESPToggled or not Camera then
+	if not ESPToggled or not Camera or ESPDistanceCheck <= 0 then
 		for _,Cache in next, CachedPlayers do
 			HideESP(Cache.ESP)
 		end
@@ -1595,58 +1669,116 @@ InsertToConnections(ConnectToRenderStepped(function(DeltaTime)
 	end
 
     local ChamEnabled = ChamESP.Enabled
-    local ChamFillColor = ChamESP.FillColor
-    local ChamOutlineColor = ChamESP.OutlineColor
-    local ChamFillTransparency = ChamESP.FillTransparency
-    local ChamOutlineTransparency = ChamESP.OutlineTransparency
+	local ChamFillColor, ChamOutlineColor, ChamFillTransparency, ChamOutlineTransparency
 
-    local ProfileEnabled = ProfileESP.Enabled
-    local ProfileColor = ProfileESP.Color
-    local ProfileTransparency = ProfileESP.Transparency
-    local ProfileShowBackground = ProfileESP.ShowBackground
-    local ProfileBackgroundColor = ProfileESP.BackgroundColor
-    local ProfileBackgroundTransparency = ProfileESP.BackgroundTransparency
+	if ChamEnabled then
+		ChamFillColor = ChamESP.FillColor
+		ChamOutlineColor = ChamESP.OutlineColor
+		ChamFillTransparency = ChamESP.FillTransparency
+		ChamOutlineTransparency = ChamESP.OutlineTransparency
+	end
+
+	local ProfileEnabled = ProfileESP.Enabled
+	local ProfileColor, ProfileTransparency
+	local ProfileShowBackground, ProfileBackgroundColor, ProfileBackgroundTransparency
+
+	if ProfileEnabled then
+		ProfileColor = ProfileESP.Color
+		ProfileTransparency = ProfileESP.Transparency
+		ProfileShowBackground = ProfileESP.ShowBackground
+
+		if ProfileShowBackground then
+			ProfileBackgroundColor = ProfileESP.BackgroundColor
+			ProfileBackgroundTransparency = ProfileESP.BackgroundTransparency
+		end
+	end
 
 	local HeadDotEnabled = HeadDotESP.Enabled
-	local HeadDotColor = HeadDotESP.Color
-	local HeadDotTransparency = HeadDotESP.Transparency
+	local HeadDotColor, HeadDotTransparency
+
+	if HeadDotEnabled then
+		HeadDotColor = HeadDotESP.Color
+		HeadDotTransparency = HeadDotESP.Transparency
+	end
 
 	local HeadTagEnabled = HeadTagESP.Enabled
-	local HeadTagColor = HeadTagESP.Color
-	local HeadTagTransparency = HeadTagESP.Transparency
-	local HeadTagDropdown = HeadTagESP.Dropdown
+	local HeadTagColor, HeadTagTransparency, HeadTagDropdown
+
+	if HeadTagEnabled then
+		HeadTagColor = HeadTagESP.Color
+		HeadTagTransparency = HeadTagESP.Transparency
+		HeadTagDropdown = HeadTagESP.Dropdown
+	end
 
 	local TracerEnabled = TracerESP.Enabled
-	local TracerColor = TracerESP.Color
-	local TracerTransparency = TracerESP.Transparency
-	local TracerTypeIsLocked = TracerESP.Type == "Locked"
-	local TracerPartIsHead = TracerESP.Part == "Head"
+	local TracerColor, TracerTransparency
+	local TracerTypeIsLocked, TracerPartIsHead
+
+	if TracerEnabled then
+		TracerColor = TracerESP.Color
+		TracerTransparency = TracerESP.Transparency
+		TracerTypeIsLocked = TracerESP.Type == "Locked"
+		TracerPartIsHead = TracerESP.Part == "Head"
+	end
 
 	local ArrowEnabled = ArrowESP.Enabled
-	local ArrowColor = ArrowESP.Color
-	local ArrowFilled = ArrowESP.Filled
-	local ArrowRadius = ArrowESP.Radius
-	local ArrowTransparency = ArrowESP.Transparency
+	local ArrowColor, ArrowFilled, ArrowRadius, ArrowTransparency
+
+	if ArrowEnabled then
+		ArrowColor = ArrowESP.Color
+		ArrowFilled = ArrowESP.Filled
+		ArrowRadius = ArrowESP.Radius
+		ArrowTransparency = ArrowESP.Transparency
+	end
 
 	local Box2D = BoxESP.Box2D
 	local Box2DEnabled = Box2D.Enabled
-	local Box2DColor = Box2D.Color
-	local Box2DTransparency = Box2D.Transparency
+	local Box2DColor, Box2DTransparency
+
+	if Box2DEnabled then
+		Box2DColor = Box2D.Color
+		Box2DTransparency = Box2D.Transparency
+	end
 
 	local Box3D = BoxESP.Box3D
 	local Box3DEnabled = Box3D.Enabled
-	local Box3DColor = Box3D.Color
-	local Box3DTransparency = Box3D.Transparency
+	local Box3DColor, Box3DTransparency
+
+	if Box3DEnabled then
+		Box3DColor = Box3D.Color
+		Box3DTransparency = Box3D.Transparency
+	end
 
 	local HealthBarEnabled = HealthBarESP.Enabled
-	local HealthBarColor = HealthBarESP.Color
-	local HealthBarThickness = HealthBarESP.Thickness
-	local HealthBarTransparency = HealthBarESP.Transparency
+	local HealthBarColor, HealthBarThickness, HealthBarTransparency
+
+	if HealthBarEnabled then
+		HealthBarColor = HealthBarESP.Color
+		HealthBarThickness = HealthBarESP.Thickness
+		HealthBarTransparency = HealthBarESP.Transparency
+	end
 
 	local SkeletonEnabled = SkeletonESP.Enabled
-	local SkeletonColor = SkeletonESP.Color
-	local SkeletonThickness = SkeletonESP.Thickness
-	local SkeletonTransparency = SkeletonESP.Transparency
+	local SkeletonColor, SkeletonThickness, SkeletonTransparency
+
+	if SkeletonEnabled then
+		SkeletonColor = SkeletonESP.Color
+		SkeletonThickness = SkeletonESP.Thickness
+		SkeletonTransparency = SkeletonESP.Transparency
+	end
+
+	local ShouldContinue = ChamESP or ProfileEnabled
+	or HeadDotEnabled or HeadTagEnabled
+	or TracerEnabled or ArrowEnabled
+	or Box2DEnabled or Box3DEnabled
+	or HealthBarEnabled or SkeletonEnabled
+
+	if not ShouldContinue then
+		for _,Cache in next, CachedPlayers do
+			HideESP(Cache.ESP)
+		end
+		return
+	end
 
 	local IsDefuseDivision = Games.IsDefuseDivision
 	local IsSniperArena = Games.IsSniperArena
@@ -1660,11 +1792,10 @@ InsertToConnections(ConnectToRenderStepped(function(DeltaTime)
 		end
 
 		local Character = Cache.Character
-		local Humanoid = Cache.Humanoid
 		local Head = Cache.Head
 		local Root = Cache.Torso or Cache.Root
 
-		local CanRenderState, CustomGameHealth, RootPosition = CanRenderVisually(Player, Character, Humanoid, Head, Root)
+		local CanRenderState, CustomGameHealth, RootPosition, LocalRootPosition = CanRenderVisually(Player, Character, Head, Root)
 
 		if not CanRenderState then
 			HideESP(ESP)
@@ -1695,17 +1826,6 @@ InsertToConnections(ConnectToRenderStepped(function(DeltaTime)
 		end
 
 		local ChamObject = ESP.Cham
-		local ProfileObject = ESP.Profile
-		local HeadDotObject = ESP.HeadDot
-		local HeadTagObject = ESP.HeadTag
-		local TracerObject = ESP.Tracer
-		local ArrowObject = ESP.Arrow
-		local Box2DObject = ESP.Box2D
-		local Box3DLines = ESP.Box3D
-		local HBOutline = ESP.HealthBarOutline
-		local HBFill = ESP.HealthBarFill
-		local SkeletonLines = ESP.Skeleton
-
 		if ChamEnabled and ChamObject then
 			ChamObject.FillColor = ChamFillColor
 			ChamObject.OutlineColor = ChamOutlineColor
@@ -1716,6 +1836,7 @@ InsertToConnections(ConnectToRenderStepped(function(DeltaTime)
 			SetEnabled(ChamObject, false)
 		end
 
+		local ProfileObject = ESP.Profile
         if ProfileEnabled and ProfileObject then
 			local Thumbnail = ProfileObject["Thumbnail"]
 			Thumbnail.ImageColor3 = ProfileColor
@@ -1731,17 +1852,20 @@ InsertToConnections(ConnectToRenderStepped(function(DeltaTime)
 			SetEnabled(ProfileObject, false)
 		end
 
-		if HeadDotEnabled and HeadDotObject and HeadOnScreen then
+		local HeadDotObject = ESP.HeadDot
+		if HeadDotEnabled and HeadDotObject then
 			HeadDotObject:Color(HeadDotColor):Transparency(HeadDotTransparency):Position(HeadScreen):Visible(true)
 		elseif HeadDotObject then
 			HeadDotObject:Visible(false)
 		end
 
-		local RigTypeIsR15
-		if HeadTagEnabled or SkeletonEnabled then
-			RigTypeIsR15 = Humanoid.RigType == RigTypeR15
+		local Humanoid = Cache.Humanoid
+		local RigTypeIsR15: boolean = false
+		if (HeadTagEnabled or SkeletonEnabled) and Humanoid.RigType == RigTypeR15 then
+			RigTypeIsR15 = true
 		end
 
+		local HeadTagObject = ESP.HeadTag
 		if HeadTagEnabled and HeadTagObject and TopOnScreen then
 			local HeadTagString = ""
 
@@ -1790,7 +1914,7 @@ InsertToConnections(ConnectToRenderStepped(function(DeltaTime)
 									OptionText = math.floor(Humanoid.Health) .. " Health"
 								end
 							elseif Option == "Distance" then
-								OptionText =  math.floor(LocalRoot and (LocalRoot.Position - RootPosition).Magnitude or 0) .. " Studs Away"
+								OptionText =  math.floor(LocalRootPosition and (LocalRootPosition - RootPosition).Magnitude or 0) .. " Studs Away"
 							elseif Option == "RigType" then
 								OptionText = RigTypeIsR15 and "R15" or "R6"
 							end
@@ -1811,11 +1935,13 @@ InsertToConnections(ConnectToRenderStepped(function(DeltaTime)
 		local FootScreen, FootOnScreen = nil, false
 		local FootScreenY = 0
 
+		local Box2DObject = ESP.Box2D
 		if Box2DEnabled or HealthBarEnabled then
 			FootScreen, FootOnScreen = WorldToViewportPoint(RootPosition - Vector3.new(0, Humanoid.HipHeight + 2, 0))
 			FootScreenY = FootScreen.Y
 		end
 
+		local TracerObject = ESP.Tracer
 		if TracerEnabled and TracerObject and RootOnScreen then
 			TracerObject:Color(TracerColor):Transparency(TracerTransparency):From(
 				TracerTypeIsLocked and FixedBottomCenter or MouseLocation
@@ -1824,6 +1950,7 @@ InsertToConnections(ConnectToRenderStepped(function(DeltaTime)
 			TracerObject:Visible(false)
 		end
 
+		local ArrowObject = ESP.Arrow
 		if ArrowEnabled and ArrowObject and RootOnScreen then
 			local Direction = (RootScreen - ScreenCenter).Unit
 
@@ -1842,6 +1969,9 @@ InsertToConnections(ConnectToRenderStepped(function(DeltaTime)
 		elseif ArrowObject then
 			ArrowObject:Visible(false)
 		end
+
+		local HBOutline = ESP.HealthBarOutline
+		local HBFill = ESP.HealthBarFill
 
 		local TopAndFootOnScreen = (TopOnScreen and FootOnScreen)
 		local ShouldBox2D = (Box2DEnabled and Box2DObject)
@@ -1864,6 +1994,7 @@ InsertToConnections(ConnectToRenderStepped(function(DeltaTime)
 			Box2DObject:Visible(false)
 		end
 
+		local Box3DLines = ESP.Box3D
         if Box3DEnabled and RootOnScreen then
             local RootCFrame = Root.CFrame
 
@@ -1917,6 +2048,7 @@ InsertToConnections(ConnectToRenderStepped(function(DeltaTime)
 			HBFill:Visible(false)
 		end
 
+		local SkeletonLines = ESP.Skeleton
 		if SkeletonEnabled and RootOnScreen then
 			if RigTypeIsR15 then
 				table.clear(SkeletonCachePoints)
@@ -2111,7 +2243,7 @@ InsertToConnections(ConnectToRenderStepped(function(DeltaTime)
 	end
 end))
 
-local function RotatePoint(Point, Angle)
+local function RotatePoint(Point: Vector2, Angle: number): Vector2
     local Rad = math.rad(Angle)
     local Cos = math.cos(Rad)
     local Sin = math.sin(Rad)
@@ -2125,7 +2257,7 @@ local function RotatePoint(Point, Angle)
     return Vector2.new(MouseLocationX + (DX * Cos - DY * Sin), MouseLocationY + (DX * Sin + DY * Cos))
 end
 
-InsertToConnections(ConnectToRenderStepped(function(DeltaTime)
+InsertToConnections(RenderStepped(function(DeltaTime: number)
     local CurrentRotation = CrosshairOverlay.CurrentRotation
     if CrosshairOverlay.RotationStatic then
         CrosshairOverlay.CurrentRotation = CrosshairOverlay.Rotation
@@ -2215,7 +2347,7 @@ InsertToConnections(ConnectToRenderStepped(function(DeltaTime)
     end
 end))
 
-local function GetPredictedPosition(AimbotType, Position, AssemblyLinearVelocity)
+local function GetPredictedPosition(AimbotType: string, Position: Vector3, AssemblyLinearVelocity: Vector3): Vector3
 	local PredictionConfiguration = PredictionSettings[AimbotType]
 	local AimbotConfiguration = PredictionConfiguration.AimbotConfiguration
 
@@ -2231,7 +2363,7 @@ local function GetPredictedPosition(AimbotType, Position, AssemblyLinearVelocity
 	return Position
 end
 
-local function Color3ToHex(Color)
+local function Color3ToHex(Color: Color3)
 	return string.format(
 		"#%02X%02X%02X",
 		Color.R * 255,
@@ -2240,7 +2372,7 @@ local function Color3ToHex(Color)
 	)
 end
 
-local function TriggerHitFunctions(PreviousHealth, Health, WorldPosition)
+local function TriggerHitFunctions(PreviousHealth: number, Health: number, WorldPosition: Vector3?)
 	if not HitConfiguration.Toggled then
 		return
 	end
@@ -2264,180 +2396,178 @@ local function TriggerHitFunctions(PreviousHealth, Health, WorldPosition)
 	end
 
 	local Marker = HitConfiguration.Marker
-	if Marker.Enabled then
-		if WorldPosition then
-			local Style = Marker.Style
-			local Scale = Marker.Scale
-			local Color = Marker.Color
-			local Lifetime = Marker.Lifetime
-			local FadeIn = Marker.FadeIn
-			local FadeOut = Marker.FadeOut
+	if Marker.Enabled and WorldPosition then
+		local Style = Marker.Style
+		local Scale = Marker.Scale
+		local Color = Marker.Color
+		local Lifetime = Marker.Lifetime
+		local FadeIn = Marker.FadeIn
+		local FadeOut = Marker.FadeOut
 
-			local IsClassicX = Style == "Classic X"
-			local IsBrokenX = Style == "Broken X"
-			local IsPlus = Style == "Plus"
-			local IsCircle = Style == "Circle"
+		local IsClassicX = Style == "Classic X"
+		local IsBrokenX = Style == "Broken X"
+		local IsPlus = Style == "Plus"
+		local IsCircle = Style == "Circle"
 
-			local Size = 15 * Scale
-			local FadeTime = math.clamp(Lifetime * 0.2, 0.05, 0.25)
+		local Size = 15 * Scale
+		local FadeTime = math.clamp(Lifetime * 0.2, 0.05, 0.25)
 
-			local Lines = {}
-			local Circle = nil
-			local Dot = nil
+		local Lines = {}
+		local Circle = nil
+		local Dot = nil
 
-			if Marker.CenterDot then
-				Dot = DrawingUtils.new("Circle", {
-					NumSides = 24,
-					Filled = true,
+		if Marker.CenterDot then
+			Dot = DrawingUtils.new("Circle", {
+				NumSides = 24,
+				Filled = true,
+				Thickness = 2,
+				Color = Color,
+				Transparency = 1,
+				Visible = false
+			}):Radius(2 * Scale)
+		end
+
+		if IsClassicX or IsBrokenX or IsPlus then
+			for _ = 1, 4 do
+				Lines[#Lines + 1] = DrawingUtils.new("Line", {
 					Thickness = 2,
 					Color = Color,
 					Transparency = 1,
 					Visible = false
-				}):Radius(2 * Scale)
+				})
 			end
+		elseif IsCircle then
+			Circle = DrawingUtils.new("Circle", {
+				NumSides = 24,
+				Filled = false,
+				Thickness = 2,
+				Color = Color,
+				Transparency = 1,
+				Visible = false
+			}):Radius(Size)
+		end
 
-			if IsClassicX or IsBrokenX or IsPlus then
-				for _ = 1, 4 do
-					Lines[#Lines + 1] = DrawingUtils.new("Line", {
-						Thickness = 2,
-						Color = Color,
-						Transparency = 1,
-						Visible = false
-					})
-				end
-			elseif IsCircle then
-				Circle = DrawingUtils.new("Circle", {
-					NumSides = 24,
-					Filled = false,
-					Thickness = 2,
-					Color = Color,
-					Transparency = 1,
-					Visible = false
-				}):Radius(Size)
-			end
+		local Offsets
+		if IsPlus then
+			Offsets = {
+				Vector2.new(-Size, 0), Vector2.new(Size, 0),
+				Vector2.new(0, -Size), Vector2.new(0, Size)
+			}
+		end
 
-			local Offsets
-			if IsPlus then
-				Offsets = {
-					Vector2.new(-Size, 0), Vector2.new(Size, 0),
-					Vector2.new(0, -Size), Vector2.new(0, Size)
-				}
-			end
+		local StartTime = tick()
+		local LastCameraCFrame = Camera and Camera.CFrame or CFrameZero
+		local Screen, OnScreen = WorldToViewportPoint(WorldPosition)
 
-			local StartTime = tick()
-			local LastCameraCFrame = Camera and Camera.CFrame or CFrameZero
-			local Screen, OnScreen = WorldToViewportPoint(WorldPosition)
-
-			local Connection
-			Connection = ConnectToRenderStepped(function()
-				if not Running then
-					for _,Line in next, Lines do
-						Line:Nil()
-					end
-
-					if Circle then
-						Circle:Nil()
-					end
-
-					if Dot then
-						Dot:Nil()
-					end
-
-					Connection:Disconnect()
-					Connection = nil
-					return
-				end
-
-				local ElapsedTime = tick() - StartTime
-				if ElapsedTime >= Lifetime then
-					for _,Line in ipairs(Lines) do
-						Line:Nil()
-					end
-
-					if Circle then
-						Circle:Nil()
-					end
-
-					if Dot then
-						Dot:Nil()
-					end
-
-					Connection:Disconnect()
-					Connection = nil
-					return
-				end
-
-				local Alpha = 1
-				if FadeIn and FadeOut then
-					if ElapsedTime < FadeTime then
-						Alpha = ElapsedTime / FadeTime
-					elseif ElapsedTime > (Lifetime - FadeTime) then
-						Alpha = (Lifetime - ElapsedTime) / FadeTime
-					end
-				elseif FadeIn then
-					Alpha = math.clamp(ElapsedTime / FadeTime, 0, 1)
-				elseif FadeOut then
-					Alpha = math.clamp(1 - (ElapsedTime / Lifetime), 0, 1)
-				end
-
-				local CameraCFrame = Camera and Camera.CFrame or CFrameZero
-				if CameraCFrame ~= LastCameraCFrame then
-					Screen, OnScreen = WorldToViewportPoint(WorldPosition)
-					LastCameraCFrame = CameraCFrame
-				end
-
+		local Connection
+		Connection = RenderStepped(function()
+			if not Running then
 				for _,Line in next, Lines do
-					Line:Transparency(Alpha):Visible(false)
+					Line:Nil()
 				end
 
 				if Circle then
-					Circle:Transparency(Alpha):Visible(false)
+					Circle:Nil()
 				end
 
 				if Dot then
-					Dot:Transparency(Alpha):Visible(false)
+					Dot:Nil()
 				end
 
-				if not OnScreen then
-					for _,Line in next, Lines do
-						Line:Visible(false)
-					end
+				Connection:Disconnect()
+				Connection = nil
+				return
+			end
 
-					if Circle then
-						Circle:Visible(false)
-					end
-
-					if Dot then
-						Dot:Visible(false)
-					end
-
-					return
+			local ElapsedTime = tick() - StartTime
+			if ElapsedTime >= Lifetime then
+				for _,Line in ipairs(Lines) do
+					Line:Nil()
 				end
 
-				if IsClassicX then
-					for Index = 1, 4 do
-						local Direction = HitMarkerDirections[Index]
-						Lines[Index]:From(Screen + Direction):To(Screen + Direction * Size):Visible(true)
-					end
-				elseif IsBrokenX then
-					local Gap = Size * 0.35
-					for Index = 1, 4 do
-						local Direction = HitMarkerDirections[Index]
-						Lines[Index]:From(Screen + Direction * Gap):To(Screen + Direction * Size):Visible(true)
-					end
-				elseif IsPlus then
-					for Index = 1, 4 do
-						Lines[Index]:From(Screen):To(Screen + Offsets[Index]):Visible(true)
-					end
-				elseif IsCircle and Circle then
-					Circle:Position(Screen):Visible(true)
+				if Circle then
+					Circle:Nil()
 				end
 
 				if Dot then
-					Dot:Position(Screen):Visible(true)
+					Dot:Nil()
 				end
-			end)
-		end
+
+				Connection:Disconnect()
+				Connection = nil
+				return
+			end
+
+			local Alpha = 1
+			if FadeIn and FadeOut then
+				if ElapsedTime < FadeTime then
+					Alpha = ElapsedTime / FadeTime
+				elseif ElapsedTime > (Lifetime - FadeTime) then
+					Alpha = (Lifetime - ElapsedTime) / FadeTime
+				end
+			elseif FadeIn then
+				Alpha = math.clamp(ElapsedTime / FadeTime, 0, 1)
+			elseif FadeOut then
+				Alpha = math.clamp(1 - (ElapsedTime / Lifetime), 0, 1)
+			end
+
+			local CameraCFrame = Camera and Camera.CFrame or CFrameZero
+			if CameraCFrame ~= LastCameraCFrame then
+				Screen, OnScreen = WorldToViewportPoint(WorldPosition)
+				LastCameraCFrame = CameraCFrame
+			end
+
+			for _,Line in next, Lines do
+				Line:Transparency(Alpha):Visible(false)
+			end
+
+			if Circle then
+				Circle:Transparency(Alpha):Visible(false)
+			end
+
+			if Dot then
+				Dot:Transparency(Alpha):Visible(false)
+			end
+
+			if not OnScreen then
+				for _,Line in next, Lines do
+					Line:Visible(false)
+				end
+
+				if Circle then
+					Circle:Visible(false)
+				end
+
+				if Dot then
+					Dot:Visible(false)
+				end
+
+				return
+			end
+
+			if IsClassicX then
+				for Index = 1, 4 do
+					local Direction = HitMarkerDirections[Index]
+					Lines[Index]:From(Screen + Direction):To(Screen + Direction * Size):Visible(true)
+				end
+			elseif IsBrokenX then
+				local Gap = Size * 0.35
+				for Index = 1, 4 do
+					local Direction = HitMarkerDirections[Index]
+					Lines[Index]:From(Screen + Direction * Gap):To(Screen + Direction * Size):Visible(true)
+				end
+			elseif IsPlus then
+				for Index = 1, 4 do
+					Lines[Index]:From(Screen):To(Screen + Offsets[Index]):Visible(true)
+				end
+			elseif IsCircle and Circle then
+				Circle:Position(Screen):Visible(true)
+			end
+
+			if Dot then
+				Dot:Position(Screen):Visible(true)
+			end
+		end)
 	end
 
 	local Sound = HitConfiguration.Sound
@@ -2504,7 +2634,7 @@ local AimbotFunctions = {
 				end
 
 				if ForceFieldCheck then
-					if Character:FindFirstChildOfClass("ForceField") then
+					if IsProtected(Character) then
 						continue
 					end
 				end
@@ -2542,7 +2672,7 @@ local AimbotFunctions = {
 			end
 		end,
 
-		TargetAimbot = function(Target, ...)
+		TargetAimbot = function(Target: Player, ...): (number, number)
 			if not Target then
 				StopAimbot()
 				return
@@ -2780,7 +2910,7 @@ local AimbotFunctions = {
 				end
 
 				if ForceFieldCheck then
-					if Character:FindFirstChildOfClass("ForceField") then
+					if IsProtected(Character) then
 						continue
 					end
 				end
@@ -2822,7 +2952,7 @@ local AimbotFunctions = {
 			end
 		end,
 
-		TargetAimbot = function(Target, DeltaTime)
+		TargetAimbot = function(Target: Player, DeltaTime: number): (number, number)
 			if not isrbxactive() then
 				return
 			end
@@ -2851,7 +2981,7 @@ local AimbotFunctions = {
 
 			local AimPart = nil
 			local LocalAimPartPosition = Vector3.zero
-			if Aimbot.AimPartAeimPart == "Head" then
+			if Aimbot.AimPart == "Head" then
 				AimPart = Cache.Head
 				if LocalHead then
 					LocalAimPartPosition = LocalHead.Position
@@ -2995,7 +3125,7 @@ local AimbotFunctions = {
 	}
 }
 
-if not Games.Aimblox and not Games.IsStrucid then
+if not Games.Aimblox and not Games.IsStrucid and not Games.IsFantasmaPVP then
 	local Functions = AimbotFunctions.Camera
 	GetClosestPlayer = Functions.GetClosestPlayer
 	TargetAimbot = Functions.TargetAimbot
@@ -3005,7 +3135,7 @@ else
 	TargetAimbot = Functions.TargetAimbot
 end
 
-local Trigger = nil
+local Trigger: () -> () = nil
 if Games.IsQuickShot then
 	Trigger = function()
 		if not Camera or not LocalCharacter or not LocalHumanoid then
@@ -3032,6 +3162,10 @@ if Games.IsQuickShot then
 			end
 
 			if TriggerBot.DeadCheck and IsDead(ModelInstance, TriggerBot.DeadCheckMode, TriggerBot.CustomDeadCheckValue) then
+				return
+			end
+
+			if TriggerBot.ForceFieldCheck and IsProtected(ModelInstance) then
 				return
 			end
 
@@ -3078,12 +3212,20 @@ elseif Games.IsOneTap then
 				return
 			end
 
+			if TriggerBot.ForceFieldCheck and IsProtected(ModelInstance) then
+				return
+			end
+
 			if TriggerBot.TeamCheck and not IsEnemy(Player) then
 				return
 			end
 		else
 			local Humanoid = ModelInstance:FindFirstChildOfClass("Humanoid")
 			if not Humanoid or Humanoid:FindFirstChildOfClass("Status") then
+				return
+			end
+
+			if TriggerBot.ForceFieldCheck and IsProtected(ModelInstance) then
 				return
 			end
 		end
@@ -3126,11 +3268,19 @@ elseif Games.IsCombatArena then
 				return
 			end
 
+			if TriggerBot.ForceFieldCheck and IsProtected(ModelInstance) then
+				return
+			end
+
 			if TriggerBot.TeamCheck and not IsEnemy(Player) then
 				return
 			end
 		else
 			if not ModelInstance:FindFirstChild("NPCAnimate") then
+				return
+			end
+
+			if TriggerBot.ForceFieldCheck and IsProtected(ModelInstance) then
 				return
 			end
 		end
@@ -3169,6 +3319,10 @@ else
 		end
 
 		if TriggerBot.DeadCheck and IsDead(ModelInstance, TriggerBot.DeadCheckMode, TriggerBot.CustomDeadCheckValue) then
+			return
+		end
+
+		if TriggerBot.ForceFieldCheck and IsProtected(ModelInstance) then
 			return
 		end
 
@@ -3256,7 +3410,7 @@ task.spawn(function()
 			end))
 		end]]
 	elseif Games.IsRivals then
-		GetPartData = function()
+		GetPartData = function(): Instance?
 			local ClosestDistance = (FOVCircle.Enabled and FOVCircle.Radius) or math.huge
 			local ClosestPart
 
@@ -3318,7 +3472,7 @@ task.spawn(function()
 		end))
 	elseif Games.IsDefuseDivision then
 		if hookmetamethod and getnamecallmethod then
-			GetPartData = function()
+			GetPartData = function(): Instance?
 				local ClosestDistance = (FOVCircle.Enabled and FOVCircle.Radius) or math.huge
 				local ClosestPart
 				for Player, Cache in next, CachedPlayers do
@@ -3380,7 +3534,7 @@ task.spawn(function()
 		end
 	elseif Games.IsDaHood then
 		if hookmetamethod then
-			GetPartData = function()
+			GetPartData = function(): Instance?
 				local ClosestDistance = (FOVCircle.Enabled and FOVCircle.Radius) or math.huge
 				local ClosestPart
 				for Player, Cache in next, CachedPlayers do
@@ -3409,6 +3563,7 @@ task.spawn(function()
 				end
 				return ClosestPart
 			end
+
 			local __index
 			__index = hookmetamethod(game, "__index", newcclosure(function(self, Index)
 				if not SilentAimbot.Enabled or not self:IsA("Mouse") or ((Index ~= "Hit") and Index ~= "Target") then
@@ -3426,7 +3581,7 @@ task.spawn(function()
 	end
 end)
 
-local function CacheLocalPlayer()
+ThreadManager:Start("CacheLocalPlayer", function()
     local CurrentCharacter = LocalPlayer.Character
 
     if not CurrentCharacter or not CurrentCharacter.Parent then
@@ -3453,33 +3608,18 @@ local function CacheLocalPlayer()
             end
         end
     end
-end
+end, 0.1)
 
-task.spawn(function()
-	while true do
-		if not Running then
-			break
-		end
-
-		CacheLocalPlayer()
-		task.wait(0.1)
-	end
-end)
-
-local ControlTurn = nil
 if IsCounterBloxBaseGame then
 	task.spawn(function()
-		ControlTurn = ReplicatedStorage:WaitForChild("Events"):WaitForChild("ControlTurn")
-	end)
-
-	task.spawn(function()
-		while true do
+		local ControlTurn = ReplicatedStorage:WaitForChild("Events"):WaitForChild("ControlTurn")
+		ThreadManager:Start("CounterBloxBaseGameAntiAim", function()
 			if LocalRoot and AntiAim.Enabled and AntiAim.Look then
 				ControlTurn:FireServer(AntiAim.LookValue)
 			end
 
 			task.wait(AntiAim.LookWaitTime)
-		end
+		end)
 	end)
 end
 
@@ -3544,21 +3684,12 @@ local function VelocityAA()
 		return
 	end
 
-	local ModeBehaviour = AntiAim.VelocityModeBehaviours[AntiAimMode]
-	local RealVelocity = LocalRoot.AssemblyLinearVelocity
-	local FakeVelocity = Vector3.zero
-
-	local Success, Output = pcall(ModeBehaviour, LocalRoot)
-	if Success and typeof(Output) == "Vector3" then
-		FakeVelocity = Output
-	end
-
-	LocalRoot.AssemblyLinearVelocity = FakeVelocity
+	LocalRoot.AssemblyLinearVelocity = AntiAim.VelocityModeBehaviours[AntiAimMode](LocalRoot)
 	RunService.RenderStepped:Wait()
-	LocalRoot.AssemblyLinearVelocity = RealVelocity
+	LocalRoot.AssemblyLinearVelocity = LocalRoot.AssemblyLinearVelocity
 end
 
-InsertToConnections(ConnectToHeartbeat(function()
+InsertToConnections(Heartbeat(function()
 	if LocalRoot and AntiAim.Enabled then
 		CFrameAA()
 		VelocityAA()
@@ -3566,8 +3697,8 @@ InsertToConnections(ConnectToHeartbeat(function()
 end))
 
 if IsMouseAndKeyboardPreferredInput then
-	InsertToConnections(UserInputService.InputBegan:Connect(function(Input, GameProccessed)
-		if GameProccessed then
+	InsertToConnections(UserInputService.InputBegan:Connect(function(Input, GameProccessedEvent)
+		if GameProccessedEvent then
 			return
 		end
 
@@ -3612,6 +3743,7 @@ local WindowTabs = {
  	WindowPlayersTab = nil,
 	WindowFFlagsTab = nil,
  	WindowVisualsTab = nil,
+	WindowWorldTab = nil,
 	WindowSettingsTab = nil
 }
 local UISuccess, UIOutput = pcall(function()
@@ -3626,6 +3758,7 @@ local UISuccess, UIOutput = pcall(function()
 		WindowTabs.WindowTriggerBotTab = Window:AddTab("TriggerBot", "")
 		WindowTabs.WindowPlayersTab = Window:AddTab("LocalPlayer", "")
 		WindowTabs.WindowVisualsTab = Window:AddTab("Visuals", "")
+		WindowTabs.WindowWorldTab = Window:AddTab("World", "globe")
 		WindowTabs.WindowFFlagsTab = Window:AddTab("FFlags", "")
 		WindowTabs.WindowSettingsTab = Window:AddTab("Settings", "")
 	else
@@ -3639,6 +3772,7 @@ local UISuccess, UIOutput = pcall(function()
 		WindowTabs.WindowTriggerBotTab = Window:AddTab("TriggerBot", "bot")
 		WindowTabs.WindowPlayersTab = Window:AddTab("LocalPlayer", "users")
 		WindowTabs.WindowVisualsTab = Window:AddTab("Visuals", "eye")
+		WindowTabs.WindowWorldTab = Window:AddTab("World", "globe")
 		WindowTabs.WindowFFlagsTab = Window:AddTab("FFlags", "globe")
 		WindowTabs.WindowSettingsTab = Window:AddTab("Settings", "settings")
 	end
@@ -3650,25 +3784,26 @@ Library:Toggle(false)
 local TabBoxes = {
 	LocalPlayerTabBox = WindowTabs.WindowPlayersTab:AddLeftTabbox("LocalPlayerTabBox"),
 	PlayersGroupBox = WindowTabs.WindowPlayersTab:AddRightGroupbox("Fun"),
-	VisualsTabbox = WindowTabs.WindowVisualsTab:AddLeftTabbox("VisualsLeftTabbox"),
 }
 local Tabs = {
 	Aimbot = WindowTabs.WindowAimingTab:AddLeftGroupbox("Aimbot | Camera & Mouse"),
 	Target = WindowTabs.WindowAimingTab:AddRightGroupbox("Target View"),
 	HitConfiguration = WindowTabs.WindowAimingTab:AddRightGroupbox("Hit Configuration"),
 	TriggerBot = WindowTabs.WindowTriggerBotTab:AddLeftTabbox("TriggerBotTabBox"):AddTab("TriggerBot"),
-	Movement = TabBoxes.LocalPlayerTabBox:AddTab("Movement")
+	Movement = TabBoxes.LocalPlayerTabBox:AddTab("Movement"),
+	AntiAim = TabBoxes.LocalPlayerTabBox:AddTab("Anti Aim")
 }
-local AntiAimTab = TabBoxes.LocalPlayerTabBox:AddTab("Anti Aim")
-local VisualsESPTab = TabBoxes.VisualsTabbox:AddTab("ESP")
-local VisualsWorldTab = TabBoxes.VisualsTabbox:AddTab("World")
+local VisualsESPTab = WindowTabs.WindowVisualsTab:AddLeftGroupbox("Extra-Sensory Perception")
+local WorldLightingTab = WindowTabs.WindowWorldTab:AddLeftGroupbox("Lighting")
+local WorldLocalCharacterTab = WindowTabs.WindowWorldTab:AddRightGroupbox("Local Character")
 local VisualsTabCrosshair = WindowTabs.WindowVisualsTab:AddRightGroupbox("Crosshair Overlay")
 local FFlagsTab = WindowTabs.WindowFFlagsTab:AddLeftGroupbox("FFlags")
 local SettingsTab = WindowTabs.WindowSettingsTab:AddLeftGroupbox("Settings")
 
 if Games.IsRivals then
-	Tabs.Aimbot:AddLabel("If you are using Camera Aimbot then it is recommended to Spam-Click and not Hold-Click.", true)
+	Tabs.Aimbot:AddLabel("If you are using Camera Aimbot then it is recommended to Spam-Click instead of Hold-Click.", true)
 end
+
 Tabs.Aimbot:AddToggle("Aimbot", {
 	Text = "Toggle Aimbot",
 	Default = Aimbot.Toggled,
@@ -3695,7 +3830,7 @@ Tabs.Aimbot:AddToggle("Aimbot", {
 
 		GetClosestPlayer()
 
-		Connections.Aimbot = ConnectToRenderStepped(function(DeltaTime)
+		Connections.Aimbot = RenderStepped(function(DeltaTime: number)
 			if not Aimbot.StickyAim then
 				GetClosestPlayer()
 			end
@@ -3703,7 +3838,7 @@ Tabs.Aimbot:AddToggle("Aimbot", {
 			local TargetView = Aimbot.TargetView
 			local Target = Aimbot.Target
 			local Health, Distance = TargetAimbot(Target, DeltaTime)
-			if Target then
+			if Target and Target.Parent then
 				TargetView.TargetLabel:SetText(Target.Name .. " (@" .. Target.DisplayName .. ")")
 				Options["TargetImageLabel"]:SetImage("rbxthumb://type=AvatarHeadShot&id=" .. Target.UserId .. "&w=420&h=420")
 
@@ -3727,7 +3862,8 @@ Tabs.Aimbot:AddToggle("Aimbot", {
 		end)
 	end
 })
-if not Games.IsAimblox and not Games.IsStrucid then
+
+if not Games.IsAimblox and not Games.IsStrucid and not Games.IsFantasmaPVP then
 	if IsMouseAndKeyboardPreferredInput then
 		Tabs.Aimbot:AddDropdown("AimbotAimType", {
 			Text = "Aim Type",
@@ -3746,6 +3882,7 @@ else
 	GetClosestPlayer = Functions.GetClosestPlayer
 	TargetAimbot = Functions.TargetAimbot
 end
+
 Tabs.Aimbot:AddDropdown("AimbotAimPart", {
 	Text = "Aim Part",
 	Values = {"Head", "Root"},
@@ -3821,9 +3958,9 @@ Tabs.Aimbot:AddToggle("AimbotAutoPrediction", {
 })
 Tabs.Aimbot:AddToggle("AimbotForceField", {
 	Text = "ForceField Check",
-	Default = Aimbot.ForceField,
+	Default = Aimbot.ForceFieldCheck,
 	Callback = function(State)
-		Aimbot.ForceField = State
+		Aimbot.ForceFieldCheck = State
 	end
 })
 Tabs.Aimbot:AddToggle("AimbotSitCheck", {
@@ -3921,7 +4058,7 @@ Tabs.Aimbot:AddSlider("AimbotPredictionOffset", {
 })
 Tabs.Aimbot:AddSlider("AimbotSmoothnessOffset", {
 	Text = "Smoothness Offset",
-	Default = (not Games.IsAimblox and not Games.IsStrucid) and Aimbot.SmoothnessOffset or 1,
+	Default = (not Games.IsAimblox and not Games.IsStrucid and not Games.IsFantasmaPVP) and Aimbot.SmoothnessOffset or 1,
 	Min = 0,
 	Max = 15,
 	Rounding = 0,
@@ -3981,7 +4118,7 @@ Tabs.Target:AddToggle("AimbotViewAtToggle", {
 			end
 			return
 		end
-		Connections.AimbotViewAtTarget = ConnectToRenderStepped(function()
+		Connections.AimbotViewAtTarget = RenderStepped(function()
 			if Camera then
 				local Cache = CachedPlayers[Aimbot.Target]
 				if Cache then
@@ -4011,7 +4148,7 @@ Tabs.Target:AddToggle("AimbotLookAtToggle", {
 			end
 			return
 		end
-		Connections.AimbotLookAtTarget = ConnectToRenderStepped(function()
+		Connections.AimbotLookAtTarget = RenderStepped(function()
 			if not LocalRoot or LocalPlayer.CameraMode == CameraModeLockFirstPerson then
 				return
 			end
@@ -4162,7 +4299,7 @@ Tabs.HitConfiguration:AddSlider("AimbotHitSoundVolume", {
 		HitConfiguration.Sound.Volume = Volume
 	end
 })
-local HitSoundsDropdown = Tabs.HitConfiguration:AddDropdown("AimbotHitSounds", {
+Tabs.HitConfiguration:AddDropdown("AimbotHitSounds", {
 	Text = "Sound",
 	Values = HitSounds.Options,
 	Default = 1,
@@ -4173,23 +4310,21 @@ local HitSoundsDropdown = Tabs.HitConfiguration:AddDropdown("AimbotHitSounds", {
 })
 
 if FileFunctions.listfiles and FileFunctions.isfolder and FileFunctions.makefolder and FileFunctions.isfile and getcustomassetFunction then
-	task.spawn(function()
-		local DefaultSounds = HitSounds.Options
-		while true do
-			local TableOfHitSounds = table.clone(DefaultSounds)
+	local DefaultSounds = HitSounds.Options
+	local HitSoundsDropdown = Options["AimbotHitSounds"]
 
-			for _,File in ipairs(FileFunctions.listfiles("combat.cc/Sounds")) do
-				if FileFunctions.isfile(File) and File:sub(-4):lower() == ".mp3" then
-					local Path = File:gsub("\\", "/"):gsub("^combat%.cc/Sounds/", "")
-					table.insert(TableOfHitSounds, Path)
-				end
+	ThreadManager:Start("HitSoundmp3Checker", function()
+		local TableOfHitSounds = table.clone(DefaultSounds)
+
+		for _,File in ipairs(FileFunctions.listfiles("combat.cc/Sounds")) do
+			if FileFunctions.isfile(File) and File:sub(-4):lower() == ".mp3" then
+				local Path = File:gsub("\\", "/"):gsub("^combat%.cc/Sounds/", "")
+				table.insert(TableOfHitSounds, Path)
 			end
-
-			HitSoundsDropdown:SetValues(TableOfHitSounds)
-
-			task.wait(0.5)
 		end
-	end)
+
+		HitSoundsDropdown:SetValues(TableOfHitSounds)
+	end, 0.1)
 end
 
 local TriggerBotLabel = Tabs.TriggerBot:AddLabel("TriggerBot: Disabled")
@@ -4199,6 +4334,12 @@ Tabs.TriggerBot:AddToggle("TriggerBotEnabled", {
 	Callback = function(State)
 		TriggerBotLabel:SetText("TriggerBot: Disabled")
 		TriggerBot.Toggled = State
+		if not State and TriggerBot.Enabled then
+			if Connections.TriggerBot then
+				Connections.TriggerBot:Disconnect()
+				Connections.TriggerBot = nil
+			end
+		end
 	end
 }):AddKeyPicker("TriggerBotKey", {
 	Mode = "Toggle",
@@ -4209,7 +4350,7 @@ Tabs.TriggerBot:AddToggle("TriggerBotEnabled", {
 		end
 		TriggerBot.Enabled = not TriggerBot.Enabled
 		if TriggerBot.Enabled then
-			Connections.TriggerBot = ConnectToRenderStepped(Trigger)
+			Connections.TriggerBot = RenderStepped(Trigger)
 			TriggerBotLabel:SetText("TriggerBot: Enabled")
 		else
 			if Connections.TriggerBot then
@@ -4220,21 +4361,28 @@ Tabs.TriggerBot:AddToggle("TriggerBotEnabled", {
 		end
 	end
 })
-Tabs.TriggerBot:AddToggle("TBTeamCheck", {
+Tabs.TriggerBot:AddToggle("TriggerBotForceField", {
+	Text = "ForceField Check",
+	Default = TriggerBot.ForceFieldCheck,
+	Callback = function(State)
+		TriggerBot.ForceFieldCheck = State
+	end
+})
+Tabs.TriggerBot:AddToggle("TriggerBotTeamCheck", {
 	Text = "Team Check",
 	Default = TriggerBot.TeamCheck,
 	Callback = function(value)
 		TriggerBot.TeamCheck = value
 	end
 })
-Tabs.TriggerBot:AddToggle("TBDeadCheck", {
+Tabs.TriggerBot:AddToggle("TriggerBotDeadCheck", {
 	Text = "Dead Check",
 	Default = TriggerBot.DeadCheck,
 	Callback = function(value)
 		TriggerBot.DeadCheck = value
 	end
 })
-Tabs.TriggerBot:AddDropdown("TBDeadCheckMode", {
+Tabs.TriggerBot:AddDropdown("TriggerBotDeadCheckMode", {
 	Text = "Dead Check mode",
 	Values = {"Universal", "Custom"},
 	Default = 1,
@@ -4255,7 +4403,7 @@ Tabs.TriggerBot:AddSlider("TriggerBotCustomDeadCheckValue", {
 		TriggerBot.CustomDeadCheckValue = Value
 	end
 })
-Tabs.TriggerBot:AddSlider("TBTriggerDelay", {
+Tabs.TriggerBot:AddSlider("TriggerBotTriggerDelay", {
 	Text = "Trigger delay",
 	Default = 0.1,
 	Min = 0.1,
@@ -4299,7 +4447,7 @@ Tabs.Movement:AddToggle("Fly", {
 		end
 
 		local Fly = Movement.Fly
-		Connections.Fly = ConnectToHeartbeat(function()
+		Connections.Fly = Heartbeat(function()
 			if not LocalRoot then
 				return
 			end
@@ -4387,7 +4535,7 @@ Tabs.Movement:AddToggle("Speed", {
 			return
 		end
 
-		Connections.Speed = ConnectToHeartbeat(function()
+		Connections.Speed = Heartbeat(function()
 			if LocalHumanoid and LocalRoot then
 				local MoveDirection = LocalHumanoid.MoveDirection
 				if MoveDirection.Magnitude > 0 then
@@ -4451,8 +4599,9 @@ Tabs.Movement:AddToggle("ForceThirdPerson", {
 			LocalPlayer.CameraMaxZoomDistance = OldCameraMaxZoomDistance
 			return
 		end
+
 		OldCameraMaxZoomDistance = LocalPlayer.CameraMaxZoomDistance
-		Connections.ForceThirdPerson = ConnectToRenderStepped(function()
+		Connections.ForceThirdPerson = RenderStepped(function()
 			LocalPlayer.CameraMode = CameraModeClassic
 			LocalPlayer.CameraMaxZoomDistance = 9999
 		end)
@@ -4497,32 +4646,23 @@ Tabs.Movement:AddToggle("Auto Jump", {
 			end
 			return
 		end
-		local IsDefuseDivision = Games.IsDefuseDivision
-		Connections.AutoJump = ConnectToHeartbeat(function()
+
+		Connections.AutoJump = Heartbeat(function()
 			if not LocalHumanoid or UserInputService:GetFocusedTextBox() then
 				return
 			end
 
 			if UserInputService:IsKeyDown(KeyCodeSpace) then
 				if Movement.InfiniteJump or LocalHumanoid:GetState() ~= EnumFreefallState then
-					if IsDefuseDivision and CanUseVirtualInputManager then
-						VirtualInputManager:SendScroll(
-							MouseLocation.X, MouseLocation.Y,
-							0, -1,
-							CoolEmptyTable, game
-						)
-					else
-						LocalHumanoid.Jump = true
-						LocalHumanoid:ChangeState(EnumJumpingState)
-					end
+					PerformJump()
 				end
 			end
 		end)
 	end
 })
 
-local AntiAimStatusLabel = AntiAimTab:AddLabel("Status: Disabled")
-AntiAimTab:AddToggle("AntiAimToggle", {
+local AntiAimStatusLabel = Tabs.AntiAim:AddLabel("Status: Disabled")
+Tabs.AntiAim:AddToggle("AntiAimToggle", {
 	Text = "Toggle AntiAim [UNSAFE]",
 	Default = AntiAim.Toggled,
 	Risky = true,
@@ -4552,8 +4692,8 @@ AntiAimTab:AddToggle("AntiAimToggle", {
 		AntiAimStatusLabel:SetText("Status: Enabled")
 	end
 })
-AntiAimTab:AddLabel("CFrame doesn't always work in First Person View.", true)
-AntiAimTab:AddDropdown("CFrameMode", {
+Tabs.AntiAim:AddLabel("CFrame doesn't always work in First Person View.", true)
+Tabs.AntiAim:AddDropdown("CFrameMode", {
 	Text = "CFrame Mode",
 	Values = {"None", "Randomizer", "Backwards", "Left", "Right", "Jitter", "Reverse Jitter"},
 	Default = 1,
@@ -4561,7 +4701,7 @@ AntiAimTab:AddDropdown("CFrameMode", {
 		AntiAim.CFrameMode = Mode
 	end
 })
-AntiAimTab:AddDropdown("VelocityMode", {
+Tabs.AntiAim:AddDropdown("VelocityMode", {
 	Text = "Velocity Mode",
 	Values = {"None", "Randomizer", "Heavenly", "Underground", "Look Vector", "Prediction Multiplier", "Prediction Changer", "Prediction Disabler"},
 	Default = 1,
@@ -4571,8 +4711,8 @@ AntiAimTab:AddDropdown("VelocityMode", {
 })
 
 if Games.IsCounterBlox then
-	AntiAimTab:AddDivider("Counter-Blox Look Direction")
-	AntiAimTab:AddDropdown("CounterBloxLookDirection", {
+	Tabs.AntiAim:AddDivider("Counter-Blox Look Direction")
+	Tabs.AntiAim:AddDropdown("CounterBloxLookDirection", {
 		Text = "Look Direction",
 		Values = {"None", "Up", "Down"},
 		Default = 1,
@@ -4581,7 +4721,7 @@ if Games.IsCounterBlox then
 			AntiAim.LookValue = (Mode == "Up") and 1 or -1
 		end
 	})
-	AntiAimTab:AddToggle("CounterBloxLookDirectionJitter", {
+	Tabs.AntiAim:AddToggle("CounterBloxLookDirectionJitter", {
 		Text = "Look Jitter",
 		Default = false,
 		Risky = false,
@@ -4590,8 +4730,8 @@ if Games.IsCounterBlox then
 		end
 	})
 elseif Games.IsCounterBloxReImagined then
-	AntiAimTab:AddDivider("Counter-Blox Look Direction")
-	AntiAimTab:AddDropdown("CounterBloxReImaginedLookDirection", {
+	Tabs.AntiAim:AddDivider("Counter-Blox Look Direction")
+	Tabs.AntiAim:AddDropdown("CounterBloxReImaginedLookDirection", {
 		Text = "Look Direction",
 		Values = {"None", "Back", "Up", "Down"},
 		Default = 1,
@@ -4600,7 +4740,7 @@ elseif Games.IsCounterBloxReImagined then
 			AntiAim.LookValue = (Mode == "Back") and -3 or ((Mode == "Up") and -10 or -1)
 		end
 	})
-	AntiAimTab:AddToggle("CounterBloxLookDirectionJitter", {
+	Tabs.AntiAim:AddToggle("CounterBloxLookDirectionJitter", {
 		Text = "Look Jitter",
 		Default = false,
 		Risky = false,
@@ -4654,7 +4794,7 @@ TabBoxes.PlayersGroupBox:AddToggle("ChinaHat", {
             return
         end
 
-        Connections.ChinaHat = ConnectToHeartbeat(function()
+        Connections.ChinaHat = Heartbeat(function()
             local LocalPart = LocalHead or LocalRoot
 
             if not LocalPart then
@@ -4738,13 +4878,16 @@ TabBoxes.PlayersGroupBox:AddToggle("AnimationFreezer", {
 				Connections.AnimationFreezer:Disconnect()
 				Connections.AnimationFreezer = nil
 			end
+	
 			local AnimateInstance = LocalCharacter and LocalCharacter:FindFirstChild("Animate")
 			if AnimateInstance then
 				AnimateInstance.Disabled = false
 			end
+
 			return
 		end
-		Connections.AnimationFreezer = ConnectToHeartbeat(function()
+
+		Connections.AnimationFreezer = Heartbeat(function()
 			local AnimateInstance = LocalCharacter and LocalCharacter:FindFirstChild("Animate")
 			if AnimateInstance then
 				AnimateInstance.Enabled = false
@@ -4766,7 +4909,13 @@ VisualsESPTab:AddToggle("ESPDynamicRefreshRate", {
 	Default = ESPDynamicRefreshRate,
 	Callback = function(State)
 		ESPDynamicRefreshRate = State
-		Options["ESPRefreshRate"]:SetDisabled(State)
+		if not State then
+			if not ESPPerformanceMode then
+				Options["ESPRefreshRate"]:SetDisabled(false)
+			end
+		else
+			Options["ESPRefreshRate"]:SetDisabled(true)
+		end
 	end
 })
 VisualsESPTab:AddSlider("ESPRefreshRate", {
@@ -4786,12 +4935,24 @@ VisualsESPTab:AddToggle("ESPPerformanceMode", {
 	Default = ESPPerformanceMode,
 	Callback = function(State)
 		ESPPerformanceMode = State
+		if not ESPDynamicRefreshRate then
+			Options["ESPRefreshRate"]:SetDisabled(State)
+		end
 	end
 })
 VisualsESPTab:AddButton({
 	Text = "Reset ESP Cache",
 	Tooltip = "Click this if ESP is freezing/glitching.",
 	Func = function()
+		if cleardrawcache then
+			pcall(cleardrawcache)
+		end
+
+		local ClearFunction = Drawing and Drawing.clear
+		if ClearFunction then
+			pcall(ClearFunction)
+		end
+
 		for _,DrawingObject in next, ESPObjects do
 			if typeof(DrawingObject) == "Instance" then
 				DrawingObject:Destroy()
@@ -4800,11 +4961,11 @@ VisualsESPTab:AddButton({
 			end
 		end
 
-		if cleardrawcache then
-			pcall(cleardrawcache)
-		end
-
 		for _,Player in ipairs(Players:GetPlayers()) do
+			if Player == LocalPlayer then
+				continue
+			end
+
 			ClearCache(Player)
 			AddCache(Player)
 		end
@@ -4894,14 +5055,13 @@ VisualsESPTab:AddToggle("HeadDotFilled", {
 })
 
 VisualsESPTab:AddDivider("HeadTag ESP")
-local VisualsHeadTagESP = VisualsESPTab:AddToggle("HeadTagESP", {
+VisualsESPTab:AddToggle("HeadTagESP", {
 	Text = "Enabled",
 	Default = HeadTagESP.Enabled,
 	Callback = function(State)
 		HeadTagESP.Enabled = State
 	end
-})
-VisualsHeadTagESP:AddColorPicker("HeadTagColor", {
+}):AddColorPicker("HeadTagColor", {
 	Default = HeadTagESP.Color,
 	Transparency = 0,
 	Callback = function(Color)
@@ -5070,13 +5230,20 @@ VisualsESPTab:AddToggle("SkeletonESP", {
 VisualsESPTab:AddDivider("Checks")
 VisualsESPTab:AddSlider("ESPConfigurationDistanceCheck", {
 	Text = "Max Distance",
-	Default = ESPDistanceCheck,
+	Default = 4000,
 	Min = 0,
 	Max = 10000,
 	Rounding = 1,
 	Compact = false,
 	Callback = function(Value)
-		ESPDistanceCheck = Value
+		ESPDistanceCheck = Value * Value
+	end
+})
+VisualsESPTab:AddToggle("ESPConfigurati onForceField", {
+	Text = "ForceField Check",
+	Default = ESPForceFieldCheck,
+	Callback = function(State)
+		ESPForceFieldCheck = State
 	end
 })
 VisualsESPTab:AddToggle("ESPConfigurationWallCheck", {
@@ -5098,11 +5265,177 @@ task.delay(0, function()
     VisualsESPTab:Resize()
 end)
 
-VisualsWorldTab:AddDivider("Local Character")
-VisualsWorldTab:AddToggle("CharacterHighlight", {
+WorldLightingTab:AddToggle("WorldShadowDisabler", {
+	Text = "Global Shadows Disabler",
+	Default = false,
+	Callback = function(State)
+		if not State then
+			if Connections.ShadowDisabler then
+				Connections.ShadowDisabler:Disconnect()
+				Connections.ShadowDisabler = nil
+			end
+			return
+		end
+
+		Lighting.GlobalShadows = false
+		Connections.ShadowDisabler = Lighting:GetPropertyChangedSignal("GlobalShadows"):Connect(function()
+			Lighting.GlobalShadows = false
+		end)
+	end
+})
+WorldLightingTab:AddButton({
+	Text = "Enable Global Shadows",
+	Func = function()
+		if Connections.ShadowDisabler then
+			Connections.ShadowDisabler:Disconnect()
+			Connections.ShadowDisabler = nil
+		end
+
+		Toggles["WorldShadowDisabler"]:SetValue(false)
+		Lighting.GlobalShadows = true
+	end
+})
+
+WorldLightingTab:AddToggle("WorldForceNight", {
+	Text = "Force Night",
+	Default = false,
+	Callback = function(State)
+		if not State then
+			if Connections.ForceNight then
+				Connections.ForceNight:Disconnect()
+				Connections.ForceNight = nil
+			end
+			return
+		end
+
+		Lighting.TimeOfDay = 0
+		Connections.ForceNight = Lighting:GetPropertyChangedSignal("TimeOfDay"):Connect(function()
+			Lighting.TimeOfDay = 0
+		end)
+	end
+})
+WorldLightingTab:AddToggle("WorldForceDay", {
+	Text = "Force Day",
+	Default = false,
+	Callback = function(State)
+		if not State then
+			if Connections.ForceDay then
+				Connections.ForceDay:Disconnect()
+				Connections.ForceDay = nil
+			end
+			return
+		end
+
+		Lighting.TimeOfDay = 12
+		Connections.ForceDay = Lighting:GetPropertyChangedSignal("TimeOfDay"):Connect(function()
+			Lighting.TimeOfDay = 12
+		end)
+	end
+})
+
+WorldLightingTab:AddToggle("WorldDarkMode", {
+	Text = "Dark Mode",
+	Default = false,
+	Callback = function(State)
+		if not State then
+			if Connections.DarkMode then
+				Connections.DarkMode:Disconnect()
+				Connections.DarkMode = nil
+			end
+			Lighting.GeographicLatitude = World.OldGeographicLatitude
+			return
+		end
+
+		World.OldGeographicLatitude = Lighting.GeographicLatitude
+		Lighting.GeographicLatitude = "NaN"
+		Connections.DarkMode = Lighting:GetPropertyChangedSignal("GeographicLatitude"):Connect(function()
+			World.OldGeographicLatitude = Lighting.GeographicLatitude
+			Lighting.GeographicLatitude = "NaN"
+		end)
+	end
+})
+
+WorldLightingTab:AddSlider("ExposureCompensationSlider", {
+	Text = "Exposure Compensation",
+	Default = Lighting.ExposureCompensation * 0.1,
+	Min = -1,
+	Max = 1,
+	Rounding = 10,
+	Compact = false,
+	Callback = function(Value)
+		Lighting.ExposureCompensation = Value * 10
+	end
+})
+
+WorldLightingTab:AddButton({
+	Text = "Restore Original Exposure Compensation",
+	Func = function()
+		Lighting.ExposureCompensation = World.OldExposureCompensation
+		Options["ExposureCompensationSlider"]:SetValue(World.OldExposureCompensation)
+	end
+})
+
+WorldLightingTab:AddLabel("Change Ambient"):AddColorPicker("AmbientColor", {
+	Default = World.OldAmbient,
+	Transparency = nil,
+	Callback = function(Color)
+		Lighting.Ambient = Color
+	end
+})
+WorldLightingTab:AddButton({
+	Text = "Save Current Ambient as Original",
+	Func = function()
+		World.OldAmbient = Lighting.Ambient
+	end
+})
+WorldLightingTab:AddButton({
+	Text = "Restore Original Ambient",
+	Func = function()
+		Lighting.Ambient = World.OldAmbient
+		Options["AmbientColor"]:SetValue(World.OldAmbient)
+	end
+})
+
+--[[
+if gethiddenpropertyFunction and sethiddenpropertyFunction then
+	WorldTab:AddDropdown("LightingTechnologyDropdown", {
+		Text = "Lighting Technology",
+		Values = {"Legacy", "Deprecated", "Voxel", "Compatibility", "ShadowMap", "Future", "Unified"},
+		Default = World.OldLightingTechnology,
+		Callback = function(Option)
+			World.LightingTechnology = Option
+		end
+	})
+
+	WorldTab:AddButton({
+		Text = "Apply Lighting Technology",
+		Func = function()
+			nssethiddenproperty(Lighting, "Technology", World.LightingTechnology)
+		end
+	})
+
+	WorldTab:AddButton({
+		Text = "Save Lighting Technology",
+		Func = function()
+			World.OldLightingTechnology = World.LightingTechnology
+		end
+	})
+
+	WorldTab:AddButton({
+		Text = "Restore Lighting Technology",
+		Func = function()
+			nssethiddenproperty(Lighting, "Technology", World.OldLightingTechnology)
+		end
+	})
+end
+]]
+
+WorldLocalCharacterTab:AddToggle("CharacterHighlight", {
 	Text = "Highlight",
 	Default = false,
 	Callback = function(State)
+		World.Highlight.Enabled = State
+
 		if not State then
 			local Highlight = CoreGui:FindFirstChild("ns__LocalHighlight")
 			if Highlight then
@@ -5110,9 +5443,10 @@ VisualsWorldTab:AddToggle("CharacterHighlight", {
 			end
 			return
 		end
+
 		if not Connections.CharacterHighlight then
 			local Configuration = World.Highlight
-			Connections.CharacterHighlight = ConnectToHeartbeat(function()
+			Connections.CharacterHighlight = Heartbeat(function()
 				if not LocalCharacter then
 					return
 				end
@@ -5120,7 +5454,7 @@ VisualsWorldTab:AddToggle("CharacterHighlight", {
 				local Highlight = CoreGui:FindFirstChild("ns__LocalHighlight") or Create("Highlight", {Name = "ns__LocalHighlight", Parent = CoreGui})
 				if Configuration.Enabled then
 					Highlight.FillColor = Configuration.Color
-					Highlight.OutlineColor = Configuration.Colors
+					Highlight.OutlineColor = Configuration.Color
 					Highlight.FillTransparency = Configuration.Transparency
 					Highlight.OutlineTransparency = Configuration.Transparency
 					if Highlight.Adornee ~= LocalCharacter then
@@ -5139,7 +5473,7 @@ VisualsWorldTab:AddToggle("CharacterHighlight", {
 	end
 })
 
-VisualsWorldTab:AddSlider("CharacterTransparency", {
+WorldLocalCharacterTab:AddSlider("CharacterTransparency", {
 	Text = "Character Transparency",
 	Default = World.CharacterTransparency,
 	Min = 0,
@@ -5150,7 +5484,7 @@ VisualsWorldTab:AddSlider("CharacterTransparency", {
 		World.CharacterTransparency = Value
 	end
 })
-VisualsWorldTab:AddButton({
+WorldLocalCharacterTab:AddButton({
 	Text = "Apply Transparency",
 	Func = function()
 		if LocalCharacter then
@@ -5163,7 +5497,7 @@ VisualsWorldTab:AddButton({
 		end
 	end
 })
-VisualsWorldTab:AddButton({
+WorldLocalCharacterTab:AddButton({
 	Text = "Restore Original Transparency",
 	Func = function()
 		if LocalCharacter then
@@ -5177,165 +5511,6 @@ VisualsWorldTab:AddButton({
 	end
 })
 
-VisualsWorldTab:AddDivider("Lighting")
-VisualsWorldTab:AddToggle("WorldShadowDisabler", {
-	Text = "Global Shadows Disabler",
-	Default = false,
-	Callback = function(State)
-		if not State then
-			if Connections.ShadowDisabler then
-				Connections.ShadowDisabler:Disconnect()
-				Connections.ShadowDisabler = nil
-			end
-			return
-		end
-		Lighting.GlobalShadows = false
-		Connections.ShadowDisabler = Lighting:GetPropertyChangedSignal("GlobalShadows"):Connect(function()
-			Lighting.GlobalShadows = false
-		end)
-	end
-})
-VisualsWorldTab:AddButton({
-	Text = "Enable Global Shadows",
-	Func = function()
-		if Connections.ShadowDisabler then
-			Connections.ShadowDisabler:Disconnect()
-			Connections.ShadowDisabler = nil
-		end
-		Toggles["WorldShadowDisabler"]:SetValue(false)
-		Lighting.GlobalShadows = true
-	end
-})
-
-VisualsWorldTab:AddToggle("WorldForceNight", {
-	Text = "Force Night",
-	Default = false,
-	Callback = function(State)
-		if not State then
-			if Connections.ForceNight then
-				Connections.ForceNight:Disconnect()
-				Connections.ForceNight = nil
-			end
-			return
-		end
-		Lighting.TimeOfDay = 0
-		Connections.ForceNight = Lighting:GetPropertyChangedSignal("TimeOfDay"):Connect(function()
-			Lighting.TimeOfDay = 0
-		end)
-	end
-})
-VisualsWorldTab:AddToggle("WorldForceDay", {
-	Text = "Force Day",
-	Default = false,
-	Callback = function(State)
-		if not State then
-			if Connections.ForceDay then
-				Connections.ForceDay:Disconnect()
-				Connections.ForceDay = nil
-			end
-			return
-		end
-		Lighting.TimeOfDay = 12
-		Connections.ForceDay = Lighting:GetPropertyChangedSignal("TimeOfDay"):Connect(function()
-			Lighting.TimeOfDay = 12
-		end)
-	end
-})
-
-VisualsWorldTab:AddToggle("WorldDarkMode", {
-	Text = "Dark Mode",
-	Default = false,
-	Callback = function(State)
-		if not State then
-			if Connections.DarkMode then
-				Connections.DarkMode:Disconnect()
-				Connections.DarkMode = nil
-			end
-			Lighting.GeographicLatitude = World.OldGeographicLatitude
-			return
-		end
-		World.OldGeographicLatitude = Lighting.GeographicLatitude
-		Lighting.GeographicLatitude = "NaN"
-		Connections.DarkMode = Lighting:GetPropertyChangedSignal("GeographicLatitude"):Connect(function()
-			World.OldGeographicLatitude = Lighting.GeographicLatitude
-			Lighting.GeographicLatitude = "NaN"
-		end)
-	end
-})
-
-VisualsWorldTab:AddSlider("ExposureCompensationSlider", {
-	Text = "Exposure Compensation",
-	Default = Lighting.ExposureCompensation * 0.1,
-	Min = -1,
-	Max = 1,
-	Rounding = 10,
-	Compact = false,
-	Callback = function(Value)
-		Lighting.ExposureCompensation = Value * 10
-	end
-})
-
-VisualsWorldTab:AddButton({
-	Text = "Restore Original Exposure Compensation",
-	Func = function()
-		Lighting.ExposureCompensation = World.OldExposureCompensation
-		Options["ExposureCompensationSlider"]:SetValue(World.OldExposureCompensation)
-	end
-})
-
-VisualsWorldTab:AddLabel("Change Ambient"):AddColorPicker("AmbientColor", {
-	Default = World.OldAmbient,
-	Transparency = nil,
-	Callback = function(Color)
-		Lighting.Ambient = Color
-	end
-})
-VisualsWorldTab:AddButton({
-	Text = "Save Current Ambient as Original",
-	Func = function()
-		World.OldAmbient = Lighting.Ambient
-	end
-})
-VisualsWorldTab:AddButton({
-	Text = "Restore Original Ambient",
-	Func = function()
-		Lighting.Ambient = World.OldAmbient
-		Options["AmbientColor"]:SetValue(World.OldAmbient)
-	end
-})
---[[
-if gethiddenpropertyFunction and sethiddenpropertyFunction then
-	VisualsWorldTab:AddDropdown("LightingTechnologyDropdown", {
-		Text = "Lighting Technology",
-		Values = {"Legacy", "Deprecated", "Voxel", "Compatibility", "ShadowMap", "Future", "Unified"},
-		Default = World.OldLightingTechnology,
-		Callback = function(Option)
-			World.LightingTechnology = Option
-		end
-	})
-
-	VisualsWorldTab:AddButton({
-		Text = "Apply Lighting Technology",
-		Func = function()
-			nssethiddenproperty(Lighting, "Technology", World.LightingTechnology)
-		end
-	})
-
-	VisualsWorldTab:AddButton({
-		Text = "Save Lighting Technology",
-		Func = function()
-			World.OldLightingTechnology = World.LightingTechnology
-		end
-	})
-
-	VisualsWorldTab:AddButton({
-		Text = "Restore Lighting Technology",
-		Func = function()
-			nssethiddenproperty(Lighting, "Technology", World.OldLightingTechnology)
-		end
-	})
-end
-]]
 VisualsTabCrosshair:AddToggle("CrosshairOverlayEnabled", {
     Text = "Enable Crosshair",
     Default = CrosshairOverlay.Enabled,
@@ -5611,7 +5786,7 @@ SettingsTab:AddLabel("Toggle menu keybind"):AddKeyPicker("MenuKeybind", {
     NoUI = true,
     Text = "Menu keybind"
 })
-Library.ToggleKeybind = Options.MenuKeybind
+Library.ToggleKeybind = Options["MenuKeybind"]
 SettingsTab:AddToggle("ns__KeybindsMenu", {
 	Text = "Keybinds Menu",
 	Default = true,
@@ -5636,25 +5811,22 @@ SettingsTab:AddToggle("ns__PlayerLeaveLogs", {
 })
 
 local function ClearConnections(Table)
-	for Key, Value in next, Table do
-		if typeof(Value) == "RBXScriptConnection" then
-			Value:Disconnect()
-			Table[Key] = nil
-		end
-		if typeof(Value) == "table" then
-			ClearConnections(Value)
-			Table[Key] = nil
-		end
+	for _,Value in next, Table do
+		Value:Disconnect()
 	end
+
+	table.clear(Table)
 end
 
 local function Unload(Message)
 	Library.Unload()
-	Running = false
-
-	task.wait(0.1)
-
+	task.wait()
+	ClearConnections(Connections)
+	task.wait()
+	ThreadManager:StopAll()
+	task.wait()
 	ResetFFLagModifications()
+
 	local AnimateInstance = LocalCharacter and LocalCharacter:FindFirstChild("Animate")
 	if AnimateInstance then
 		AnimateInstance.Disabled = false
@@ -5662,6 +5834,11 @@ local function Unload(Message)
 
 	Lighting.ExposureCompensation = World.OldExposureCompensation
 	Lighting.Ambient = World.OldAmbient
+
+	local LocalHighlight = CoreGui:FindFirstChild("ns__LocalHighlight")
+	if LocalHighlight then
+		LocalHighlight:Destroy()
+	end
 
 	if LocalCharacter and World.HasAppliedCharacterTransparency then
 		for _,Object in ipairs(LocalCharacter:GetDescendants()) do
@@ -5671,7 +5848,6 @@ local function Unload(Message)
 		end
 	end
 
-	ClearConnections(Connections)
 	if CurrentFPS.Value ~= "Unknown" then
 		CurrentFPS:Disconnect()
 	end
@@ -5683,6 +5859,15 @@ local function Unload(Message)
 	if ChinaHat.ChinaHatTrail then
 		ChinaHat.ChinaHatTrail:Destroy()
 		ChinaHat.ChinaHatTrail = nil
+	end
+
+	if cleardrawcache then
+		pcall(cleardrawcache)
+	end
+
+	local ClearFunction = Drawing and Drawing.clear
+	if ClearFunction then
+		pcall(ClearFunction)
 	end
 
 	for _,FOVCircle in next, AimbotFOVCircles do
@@ -5697,15 +5882,6 @@ local function Unload(Message)
 		end
 	end
 
-	if cleardrawcache then
-		pcall(cleardrawcache)
-	end
-
-	local ClearFunction = Drawing and Drawing.clear
-	if ClearFunction then
-		pcall(ClearFunction)
-	end
-
 	for _,Player in ipairs(Players:GetPlayers()) do
 		ClearCache(Player)
 	end
@@ -5717,7 +5893,7 @@ SettingsTab:AddButton({
 	Text = "Reload Script",
 	Func = function()
 		Unload([[ // Reloading combat.cc || Made by nikoleto scripts - github.com/nikoladhima \\ --]])
-		nsloadstring("https://raw.githubusercontent.com/nikoladhima/combat.cc/main/combat.cc.lua")
+		nsloadstring(false, "https://raw.githubusercontent.com/nikoladhima/combat.cc/main/combat.cc.lua")
 	end
 })
 SettingsTab:AddButton({
@@ -5809,19 +5985,24 @@ task.spawn(function()
 			Default = false,
 			Callback = function(State)
 				if not State then
-					CounterBlox.AutomaticWeapon:Disconnect()
-					CounterBlox.AutomaticWeapon = nil
-					for v, OldValue in next, Saved.AutomaticValues do
-						if v and v.Parent then
-							v.Value = OldValue
+					if CounterBlox.AutomaticWeapon then
+						CounterBlox.AutomaticWeapon:Disconnect()
+						CounterBlox.AutomaticWeapon = nil
+					end
+
+					for Object, OldValue in next, Saved.AutomaticValues do
+						if Object and Object.Parent then
+							Object.Value = OldValue
 						end
 					end
+
 					return
 				end
-				CounterBlox.AutomaticWeapon = ConnectToHeartbeat(function()
-					for _,v in ipairs(AutomaticValues) do
-						if v.Value ~= true then
-							v.Value = true
+
+				CounterBlox.AutomaticWeapon = Heartbeat(function()
+					for _,Object in ipairs(AutomaticValues) do
+						if Object.Value ~= true then
+							Object.Value = true
 						end
 					end
 				end)
@@ -5832,19 +6013,24 @@ task.spawn(function()
 			Default = false,
 			Callback = function(State)
 				if not State then
-					CounterBlox.RapidFire:Disconnect()
-					CounterBlox.RapidFire = nil
-					for v, OldValue in next, Saved.FireRateValues do
-						if v and v.Parent then
-							v.Value = OldValue
+					if CounterBlox.RapidFire then
+						CounterBlox.RapidFire:Disconnect()
+						CounterBlox.RapidFire = nil
+					end
+
+					for Object, OldValue in next, Saved.FireRateValues do
+						if Object and Object.Parent then
+							Object.Value = OldValue
 						end
 					end
+
 					return
 				end
-				CounterBlox.RapidFire = ConnectToHeartbeat(function()
-					for _,v in ipairs(FireRateValues) do
-						if v.Value ~= FireRate then
-							v.Value = FireRate
+
+				CounterBlox.RapidFire = Heartbeat(function()
+					for _,Object in ipairs(FireRateValues) do
+						if Object.Value ~= FireRate then
+							Object.Value = FireRate
 						end
 					end
 				end)
@@ -5869,19 +6055,24 @@ task.spawn(function()
 			Default = false,
 			Callback = function(State)
 				if not State then
-					CounterBlox.InfiniteAmmo:Disconnect()
-					CounterBlox.InfiniteAmmo = nil
-					for v, OldValue in next, Saved.AmmoValues do
-						if v and v.Parent then
-							v.Value = OldValue
+					if CounterBlox.InfiniteAmmo then
+						CounterBlox.InfiniteAmmo:Disconnect()
+						CounterBlox.InfiniteAmmo = nil
+					end
+
+					for Object, OldValue in next, Saved.AmmoValues do
+						if Object and Object.Parent then
+							Object.Value = OldValue
 						end
 					end
+
 					return
 				end
-				CounterBlox.InfiniteAmmo = ConnectToHeartbeat(function()
-					for _,v in ipairs(AmmoValues) do
-						if v.Value ~= 6e9 then
-							v.Value = 6e9
+
+				CounterBlox.InfiniteAmmo = Heartbeat(function()
+					for _,Object in ipairs(AmmoValues) do
+						if Object.Value ~= 6e9 then
+							Object.Value = 6e9
 						end
 					end
 				end)
@@ -5892,19 +6083,24 @@ task.spawn(function()
 			Default = false,
 			Callback = function(State)
 				if not State then
-					CounterBlox.NoRecoil:Disconnect()
-					CounterBlox.NoRecoil = nil
-					for v, OldValue in next, Saved.RecoilValues do
-						if v and v.Parent then
-							v.Value = OldValue
+					if CounterBlox.NoRecoil then
+						CounterBlox.NoRecoil:Disconnect()
+						CounterBlox.NoRecoil = nil
+					end
+
+					for Object, OldValue in next, Saved.RecoilValues do
+						if Object and Object.Parent then
+							Object.Value = OldValue
 						end
 					end
+
 					return
 				end
-				CounterBlox.NoRecoil = ConnectToHeartbeat(function()
-					for _,v in ipairs(RecoilValues) do
-						if v.Value ~= 0 then
-							v.Value = 0
+
+				CounterBlox.NoRecoil = Heartbeat(function()
+					for _,Object in ipairs(RecoilValues) do
+						if Object.Value ~= 0 then
+							Object.Value = 0
 						end
 					end
 				end)
@@ -5914,33 +6110,28 @@ task.spawn(function()
 			Text = "No Spread",
 			Default = false,
 			Callback = function(State)
-				if State then
-					for _,v in ipairs(SpreadValues) do
-						if v.Value ~= 0 then
-							v.Value = 0
+				if not State then
+					if CounterBlox.NoSpread then
+						CounterBlox.NoSpread:Disconnect()
+						CounterBlox.NoSpread = nil
+					end
+
+					for Object, OldValue in next, Saved.SpreadValues do
+						if Object and Object.Parent then
+							Object.Value = OldValue
 						end
 					end
-					while true do
-						if not State then
-							CounterBlox.NoSpread:Disconnect()
-							CounterBlox.NoSpread = nil
-							for v, OldValue in next, Saved.SpreadValues do
-								if v and v.Parent then
-									v.Value = OldValue
-								end
-							end
-							break
-						end
 
-						for _,v in ipairs(SpreadValues) do
-							if v.Value ~= 0 then
-								v.Value = 0
-							end
-						end
-
-						task.wait(2)
-					end
+					return
 				end
+
+				CounterBlox.NoSpread = Heartbeat(function()
+					for _,Object in ipairs(SpreadValues) do
+						if Object.Value ~= 0 then
+							Object.Value = 0
+						end
+					end
+				end)
 			end
 		})
 		WeaponModificationTab:AddToggle("InstantReload", {
@@ -5948,31 +6139,38 @@ task.spawn(function()
 			Default = false,
 			Callback = function(State)
 				if not State then
-					CounterBlox.InstantReload:Disconnect()
-					CounterBlox.InstantReload = nil
-					for v, OldValue in next, Saved.ReloadTimeValues do
-						if v and v.Parent then
-							v.Value = OldValue
+					if CounterBlox.InstantReload then
+						CounterBlox.InstantReload:Disconnect()
+						CounterBlox.InstantReload = nil
+					end
+
+					for Object, OldValue in next, Saved.ReloadTimeValues do
+						if Object and Object.Parent then
+							Object.Value = OldValue
 						end
 					end
+
 					return
 				end
-				CounterBlox.InstantReload = ConnectToHeartbeat(function()
-					for _,v in ipairs(ReloadTimeValues) do
-						if v.Value ~= 0.01 then
-							v.Value = 0.01
+
+				CounterBlox.InstantReload = Heartbeat(function()
+					for _,Object in ipairs(ReloadTimeValues) do
+						if Object.Value ~= 0.01 then
+							Object.Value = 0.01
 						end
 					end
 				end)
 			end
 		})
+
 		task.spawn(function()
 			repeat task.wait() until Running == false
 			ClearConnections(CounterBlox)
+
 			for _,SavedValues in ipairs(Saved) do
-				for v, OldValue in next, (SavedValues) do
-					if v and v.Parent then
-						v.Value = OldValue
+				for Object, OldValue in next, (SavedValues) do
+					if Object and Object.Parent then
+						Object.Value = OldValue
 					end
 				end
 			end
@@ -6061,42 +6259,36 @@ task.spawn(function()
 				end
 			end
 		end
-		local HitboxSize = Vector3.new(26, 26, 26)
-		task.spawn(function()
-			while true do
-				if not Running then
-					break
-				end
 
-				if SilentAimbot.Enabled then
-					for Player, Cache in next, CachedPlayers do
-						if IsEnemy(Player) then
-							for _,BasePart in ipairs(ArsenalTableOfParts) do
-								local Character = Cache.Character
-								local Part = Character and Character:FindFirstChild(BasePart)
-								if Part then
-									if Part.Size ~= HitboxSize then
-										Part.Size = HitboxSize
-									end
-									if Part.Transparency ~= 1 then
-										Part.Transparency = 1
-									end
-									if Part.CanCollide ~= false then
-										Part.CanCollide = false
-									end
+		local HitboxSize = Vector3.new(26, 26, 26)
+		ThreadManager:Start("ArsenalSilentAimbot", function()
+			if SilentAimbot.Enabled then
+				for Player, Cache in next, CachedPlayers do
+					if IsEnemy(Player) then
+						for _,BasePart in ipairs(ArsenalTableOfParts) do
+							local Character = Cache.Character
+							local Part = Character and Character:FindFirstChild(BasePart)
+							if Part then
+								if Part.Size ~= HitboxSize then
+									Part.Size = HitboxSize
+								end
+								if Part.Transparency ~= 1 then
+									Part.Transparency = 1
+								end
+								if Part.CanCollide ~= false then
+									Part.CanCollide = false
 								end
 							end
-						else
-							ResetArsenalSilentAimbot(Player)
 						end
+					else
+						ResetArsenalSilentAimbot(Player)
 					end
 				end
-
-				task.wait(0.1)
 			end
-		end)
+		end, 0.1)
+
 		local SilentAimbotLabel = SilentAimbotTab:AddLabel("Silent Aimbot: Disabled")
-		local SilentAimbotToggle = SilentAimbotTab:AddToggle("SilentAimbot", {
+		SilentAimbotTab:AddToggle("SilentAimbot", {
 			Text = "Toggle Aimbot",
 			Default = SilentAimbot.Toggled,
 			Callback = function(Value)
@@ -6108,8 +6300,7 @@ task.spawn(function()
 					end
 				end
 			end
-		})
-		SilentAimbotToggle:AddKeyPicker("SilentAimbotKey", {
+		}):AddKeyPicker("SilentAimbotKey", {
 			Mode = "Toggle",
 			Text = "Silent Aimbot",
 			Callback = function(State)
@@ -6184,21 +6375,27 @@ task.spawn(function()
 			Default = false,
 			Callback = function(State)
 				if not State then
-					Arsenal.AutomaticWeapon:Disconnect()
-					Arsenal.AutomaticWeapon = nil
-					for v, OldValue in next, Saved.AutomaticValues do
-						if v and v.Parent then
-							v.Value = OldValue
+					if Arsenal.AutomaticWeapon then
+						Arsenal.AutomaticWeapon:Disconnect()
+						Arsenal.AutomaticWeapon = nil
+					end
+
+					for Object, OldValue in next, Saved.AutomaticValues do
+						if Object and Object.Parent then
+							Object.Value = OldValue
 						end
 					end
+
 					return
 				end
 
-				for _,v in ipairs(AutomaticValues) do
-					if v.Value ~= true then
-						v.Value = true
+				Arsenal.AutomaticWeapon = Heartbeat(function()
+					for _,Object in ipairs(AutomaticValues) do
+						if Object.Value ~= true then
+							Object.Value = true
+						end
 					end
-				end
+				end)
 			end
 		})
 		WeaponModificationTab:AddToggle("RapidFire", {
@@ -6206,21 +6403,27 @@ task.spawn(function()
 			Default = false,
 			Callback = function(State)
 				if not State then
-					Arsenal.RapidFire:Disconnect()
-					Arsenal.RapidFire = nil
-					for v, OldValue in next, Saved.FireRateValues do
-						if v and v.Parent then
-							v.Value = OldValue
+					if Arsenal.RapidFire then
+						Arsenal.RapidFire:Disconnect()
+						Arsenal.RapidFire = nil
+					end
+
+					for Object, OldValue in next, Saved.FireRateValues do
+						if Object and Object.Parent then
+							Object.Value = OldValue
 						end
 					end
+
 					return
 				end
 
-				for _,v in ipairs(FireRateValues) do
-					if v.Value ~= FireRate then
-						v.Value = FireRate
+				Arsenal.RapidFire = Heartbeat(function()
+					for _,Object in ipairs(FireRateValues) do
+						if Object.Value ~= FireRate then
+							Object.Value = FireRate
+						end
 					end
-				end
+				end)
 			end
 		})
 		WeaponModificationTab:AddDropdown("FireRateSpeed", {
@@ -6242,21 +6445,27 @@ task.spawn(function()
 			Default = false,
 			Callback = function(State)
 				if not State then
-					Arsenal.IncreaseAmmo:Disconnect()
-					Arsenal.IncreaseAmmo = nil
-					for v, OldValue in next, Saved.AmmoValues do
-						if v and v.Parent then
-							v.Value = OldValue
+					if Arsenal.IncreaseAmmo then
+						Arsenal.IncreaseAmmo:Disconnect()
+						Arsenal.IncreaseAmmo = nil
+					end
+
+					for Object, OldValue in next, Saved.AmmoValues do
+						if Object and Object.Parent then
+							Object.Value = OldValue
 						end
 					end
+
 					return
 				end
 
-				for _,v in ipairs(AmmoValues) do
-					if v.Value < 100 then
-						v.Value = 100
+				Arsenal.IncreaseAmmo = Heartbeat(function()
+					for _,Object in ipairs(AmmoValues) do
+						if Object.Value < 100 then
+							Object.Value = 100
+						end
 					end
-				end
+				end)
 			end
 		})
 		WeaponModificationTab:AddToggle("NoRecoil", {
@@ -6264,21 +6473,27 @@ task.spawn(function()
 			Default = false,
 			Callback = function(State)
 				if not State then
-					Arsenal.NoRecoil:Disconnect()
-					Arsenal.NoRecoil = nil
-					for v, OldValue in next, Saved.RecoilValues do
-						if v and v.Parent then
-							v.Value = OldValue
+					if Arsenal.NoRecoil then
+						Arsenal.NoRecoil:Disconnect()
+						Arsenal.NoRecoil = nil
+					end
+
+					for Object, OldValue in next, Saved.RecoilValues do
+						if Object and Object.Parent then
+							Object.Value = OldValue
 						end
 					end
+
 					return
 				end
 
-				for _,v in ipairs(RecoilValues) do
-					if v.Value ~= 0 then
-						v.Value = 0
+				Arsenal.NoRecoil = Heartbeat(function()
+					for _,Object in ipairs(RecoilValues) do
+						if Object.Value ~= 0 then
+							Object.Value = 0
+						end
 					end
-				end
+				end)
 			end
 		})
 		WeaponModificationTab:AddToggle("NoSpread", {
@@ -6286,21 +6501,27 @@ task.spawn(function()
 			Default = false,
 			Callback = function(State)
 				if not State then
-					Arsenal.NoSpread:Disconnect()
-					Arsenal.NoSpread = nil
-					for v, OldValue in next, Saved.SpreadValues do
-						if v and v.Parent then
-							v.Value = OldValue
+					if Arsenal.NoSpread then
+						Arsenal.NoSpread:Disconnect()
+						Arsenal.NoSpread = nil
+					end
+
+					for Object, OldValue in next, Saved.SpreadValues do
+						if Object and Object.Parent then
+							Object.Value = OldValue
 						end
 					end
+
 					return
 				end
 
-				for _,v in ipairs(SpreadValues) do
-					if v.Value ~= 0 then
-						v.Value = 0
+				Arsenal.NoSpread = Heartbeat(function()
+					for _,Object in ipairs(SpreadValues) do
+						if Object.Value ~= 0 then
+							Object.Value = 0
+						end
 					end
-				end
+				end)
 			end
 		})
 		WeaponModificationTab:AddToggle("InstantReload", {
@@ -6308,21 +6529,27 @@ task.spawn(function()
 			Default = false,
 			Callback = function(State)
 				if not State then
-					Arsenal.InstantReload:Disconnect()
-					Arsenal.InstantReload = nil
-					for v, OldValue in next, Saved.ReloadTimeValues do
-						if v and v.Parent then
-							v.Value = OldValue
+					if Arsenal.InstantReload then
+						Arsenal.InstantReload:Disconnect()
+						Arsenal.InstantReload = nil
+					end
+
+					for Object, OldValue in next, Saved.ReloadTimeValues do
+						if Object and Object.Parent then
+							Object.Value = OldValue
 						end
 					end
+
 					return
 				end
 
-				for _,v in ipairs(ReloadTimeValues) do
-					if v.Value ~= 0 then
-						v.Value = 0
+				Arsenal.InstantReload = Heartbeat(function()
+					for _,Object in ipairs(ReloadTimeValues) do
+						if Object.Value ~= 0 then
+							Object.Value = 0
+						end
 					end
-				end
+				end)
 			end
 		})
 
@@ -6453,30 +6680,32 @@ task.spawn(function()
 		task.spawn(function()
 			repeat task.wait() until Running == false
 			ClearConnections(Arsenal)
+
 			for _,Player in ipairs(Players:GetPlayers()) do
 				ResetArsenalSilentAimbot(Player)
 			end
+
 			for _,SavedValues in ipairs(Saved) do
-				for v, OldValue in next, SavedValues do
-					if v and v.Parent then
-						v.Value = OldValue
+				for Object, OldValue in next, SavedValues do
+					if Object and Object.Parent then
+						Object.Value = OldValue
 					end
 				end
 			end
 		end)
 	elseif Games.IsDefuseDivision then
-		local Import = ReplicatedStorage:WaitForChild("Import")
+		--[[local Import = ReplicatedStorage:WaitForChild("Import")
 		local Guns = Import:WaitForChild("Guns")
 		local Viewmodels = Guns:WaitForChild("Viewmodels")
 
 		local Assets = Import:WaitForChild("Assets")
-		local Skins = Assets:WaitForChild("Skins")
+		local Skins = Assets:WaitForChild("Skins")]]
 
 		local DefuseDivision = {
 			InfiniteAmmo = nil
 		}
 
-		local KnifeConfiguration = {
+		--[[local KnifeConfiguration = {
 			Bayonet = {
 				Viewmodel = "v_Bayonet",
 				Skinfolder = "bayonet",
@@ -6546,36 +6775,43 @@ task.spawn(function()
 			if ViewModel then
 				ViewModel:Destroy()
 			end
-		end
+		end]]
 
 		local Game = Window:AddTab("Defuse Division", "gamepad-2")
 		local SilentTabBox = Game:AddLeftTabbox("SilentAimbotTabBox")
 		local WeaponModificationTabbox = Game:AddLeftTabbox("WeaponModificationTabBox")
-		local SkinChangerTabbox = Game:AddRightTabbox("SkinChangerTabBox")
+		--local SkinChangerTabbox = Game:AddRightTabbox("SkinChangerTabBox")
 		local SilentAimbotTab = SilentTabBox:AddTab("Silent Aimbot")
 		local WeaponModificationTab = WeaponModificationTabbox:AddTab("Weapon Modification")
-		local KnifeSkinChangerTab = SkinChangerTabbox:AddTab("Knife")
+		--local KnifeSkinChangerTab = SkinChangerTabbox:AddTab("Knife")
 
 		SilentAimbotTab:AddLabel("Silent Aimbot is temporarily disabled.", true)
 
 		WeaponModificationTab:AddToggle("InfiniteAmmo", {
-			Text = "Infinite Ammo [Stays at 2]",
+			Text = "Infinite Ammo [Stays at 2 | BUGGY]",
 			Default = false,
 			Callback = function(State)
 				if not State then
-					DefuseDivision.InfiniteAmmo:Disconnect()
-					DefuseDivision.InfiniteAmmo = nil
+					if DefuseDivision.InfiniteAmmo then
+						DefuseDivision.InfiniteAmmo:Disconnect()
+						DefuseDivision.InfiniteAmmo = nil
+					end
 					return
 				end
-				DefuseDivision.InfiniteAmmo = ConnectToHeartbeat(function()
+
+				DefuseDivision.InfiniteAmmo = Heartbeat(function()
 					local Values = PlayerGui:FindFirstChild("Values")
+
 					if not Values then
 						return
 					end
+
 					local CurrentGunValue = Values:FindFirstChild("CurrentGun")
+
 					if not CurrentGunValue then
 						return
 					end
+
 					local CurrentWeapon = Values:FindFirstChild(CurrentGunValue.Value)
 					if CurrentWeapon then
 						local Ammo = CurrentWeapon:FindFirstChild("Ammo")
@@ -6587,7 +6823,7 @@ task.spawn(function()
 			end
 		})
 
-		KnifeSkinChangerTab:AddLabel("Re-equip your Knife after applying Skin.", false)
+		--[[KnifeSkinChangerTab:AddLabel("Re-equip your Knife after applying Skin.", false)
 		local KnifeSkinDropdown = nil
 		KnifeSkinChangerTab:AddDropdown("DefuseDivisionSelectKnifeModel", {
 			Text = "Select Knife Model",
@@ -6734,7 +6970,7 @@ task.spawn(function()
 					Clone.Parent = Viewmodels
 				end
 			end,
-		})
+		})]]
 
 		task.spawn(function()
 			repeat task.wait() until Running == false
@@ -6742,7 +6978,7 @@ task.spawn(function()
 		end)
 	elseif Games.IsGunGroundsFFA or Games.IsFlick then
 		local Flick = {
-			HitboxExtender = nil,
+			HitboxExtender = nil
 		}
 		local Vector3CritSize = Vector3.new(3.113720655441284, 1.2231099605560303, 3.113720655441284)
 		local ShowHitbox = false
@@ -6756,8 +6992,11 @@ task.spawn(function()
 			Default = false,
 			Callback = function(State)
 				if not State then
-					Flick.HitboxExtender:Disconnect()
-					Flick.HitboxExtender = nil
+					if Flick.HitboxExtender then
+						Flick.HitboxExtender:Disconnect()
+						Flick.HitboxExtender = nil
+					end
+
 					for _,Cache in next, CachedPlayers do
 						local Character = Cache.Character
 						local Part = Character and Character:FindFirstChild("Crit")
@@ -6765,9 +7004,11 @@ task.spawn(function()
 							Part.Size = Vector3CritSize
 						end
 					end
+
 					return
 				end
-				Flick.HitboxExtender = ConnectToHeartbeat(function()
+
+				Flick.HitboxExtender = Heartbeat(function()
 					for _,Cache in next, CachedPlayers do
 						local Character = Cache.Character
 
@@ -6810,6 +7051,7 @@ task.spawn(function()
 			for _,Cache in next, CachedPlayers do
 				local Character = Cache.Character
 				local Part = Character and Character:FindFirstChild("Crit")
+
 				if Part then
 					Part.Size = Vector3CritSize
 					Part.Transparency = 1
@@ -6830,39 +7072,32 @@ task.spawn(function()
 		local HitboxExtenderTab = Game:AddLeftGroupbox("Hitbox Extender")
 		local OthersTab = Game:AddRightGroupbox("Others")
 
+		local DefaultRootSize = Vector3.new(2, 2, 1)
 		local function ResetHitbox(Root)
 			if Root then
-				Root.Size = Vector3.new(2, 2, 1)
+				Root.Size = DefaultRootSize
 				Root.Transparency = 1
 			end
 		end
 
-		task.spawn(function()
-			while true do
-				if not Running then
-					break
-				end
-
-				if HitboxExtender then
-					for Player, Cache in next, CachedPlayers do
-						if IsEnemy(Player) then
-							local Root = Cache.Root
-							if Root then
-								SetSize(Root, Vector3.one * HitboxSize)
-								SetTransparency(Root, ShowHitbox and 0.5 or 1)
-								if Root.CanCollide ~= false then
-									Root.CanCollide = false
-								end
+		ThreadManager:Start("QuickShotHitboxExtender", function()
+			if HitboxExtender then
+				for Player, Cache in next, CachedPlayers do
+					if IsEnemy(Player) then
+						local Root = Cache.Root
+						if Root then
+							SetSize(Root, Vector3.one * HitboxSize)
+							SetTransparency(Root, ShowHitbox and 0.5 or 1)
+							if Root.CanCollide ~= false then
+								Root.CanCollide = false
 							end
-						else
-							ResetHitbox(Cache.Root)
 						end
+					else
+						ResetHitbox(Cache.Root)
 					end
 				end
-
-				task.wait(0.1)
 			end
-		end)
+		end, 0.1)
 
 		HitboxExtenderTab:AddToggle("HitboxExtender", {
 			Text = "Hitbox Extender",
@@ -6908,7 +7143,7 @@ task.spawn(function()
 					return
 				end
 
-				QuickShot.LobbyWeapons = ConnectToRenderStepped(function()
+				QuickShot.LobbyWeapons = RenderStepped(function()
 					LocalPlayer:SetAttribute("InRound", true)
 				end)
 			end
@@ -6971,6 +7206,7 @@ task.spawn(function()
 		task.spawn(function()
 			repeat task.wait() until Running == false
 			ClearConnections(QuickShot)
+
 			for _,Cache in next, CachedPlayers do
 				ResetHitbox(Cache.Root)
 			end
@@ -6989,45 +7225,38 @@ task.spawn(function()
 		local GasBlur = false
 		local Landmines = false
 
+		local DefaultRootSize = Vector3.new(2, 2, 1)
 		local function ResetHitbox(Root)
 			if Root then
-				Root.Size = Vector3.new(2, 2, 1)
+				Root.Size = DefaultRootSize
 			end
 		end
 
-		task.spawn(function()
-			while true do
-				if not Running then
-					break
-				end
-
-				if SilentAimbot.Enabled then
-					for Player, Cache in next, CachedPlayers do
-						if IsEnemy(Player) then
-							local Root = Cache.Root
-							if Root then
-								if Root.Size ~= HitboxSize then
-									Root.Size = HitboxSize
-								end
-								if Root.Transparency ~= 1 then
-									Root.Transparency = 1
-								end
-								if Root.CanCollide ~= false then
-									Root.CanCollide = false
-								end
+		ThreadManager:Start("WarTycoonSilentAimbot", function()
+			if SilentAimbot.Enabled then
+				for Player, Cache in next, CachedPlayers do
+					if IsEnemy(Player) then
+						local Root = Cache.Root
+						if Root then
+							if Root.Size ~= HitboxSize then
+								Root.Size = HitboxSize
 							end
-						else
-							ResetHitbox(Cache.Root)
+							if Root.Transparency ~= 1 then
+								Root.Transparency = 1
+							end
+							if Root.CanCollide ~= false then
+								Root.CanCollide = false
+							end
 						end
+					else
+						ResetHitbox(Cache.Root)
 					end
 				end
-
-				task.wait(0.1)
 			end
-		end)
+		end, 0.1)
 
 		local SilentAimbotLabel = SilentAimbotTab:AddLabel("Silent Aimbot: Disabled")
-		local SilentAimbotToggle = SilentAimbotTab:AddToggle("SilentAimbot", {
+		SilentAimbotTab:AddToggle("SilentAimbot", {
 			Text = "Toggle Aimbot",
 			Default = SilentAimbot.Toggled,
 			Callback = function(Value)
@@ -7039,8 +7268,7 @@ task.spawn(function()
 					end
 				end
 			end
-		})
-		SilentAimbotToggle:AddKeyPicker("SilentAimbotKey", {
+		}):AddKeyPicker("SilentAimbotKey", {
 			Mode = "Toggle",
 			Text = "Silent Aimbot",
 			Callback = function(State)
@@ -7165,6 +7393,7 @@ task.spawn(function()
 		task.spawn(function()
 			repeat task.wait() until Running == false
 			ClearConnections(WarTycoon)
+
 			for _,Cache in next, CachedPlayers do
 				ResetHitbox(Cache.Root)
 			end
@@ -7288,135 +7517,139 @@ task.spawn(function()
 			end
 		})
 
-		local OriginalGCAttributes = {}
+		local getgc = getgc or get_gc or getgarbagecollector or get_garbagecollector or get_garbage_collector
+		if getgc then
+			local OriginalGCAttributes = {}
 
-		local function UpdateItemAttribute(Name, NewValue)
-			for _,Table in next, getgc(true) do
-				if type(Table) == "table" and rawget(Table, Name) then
-					local OldValue = Table[Name]
-					local ValueToSet = NewValue
-					if type(NewValue) == "function" then
-						ValueToSet = NewValue(OldValue)
-						if ValueToSet == nil then
-							continue
+			local function UpdateItemAttribute(Name, NewValue)
+				for _,Table in next, getgc(true) do
+					if type(Table) == "table" and rawget(Table, Name) then
+						local OldValue = Table[Name]
+						local ValueToSet = NewValue
+						if type(NewValue) == "function" then
+							ValueToSet = NewValue(OldValue)
+							if ValueToSet == nil then
+								continue
+							end
 						end
-					end
 
-					if OriginalGCAttributes[Table] == nil then
-						OriginalGCAttributes[Table] = {}
-					end
-
-					if OriginalGCAttributes[Table][Name] == nil then
-						OriginalGCAttributes[Table][Name] = OldValue
-					end
-
-					Table[Name] = ValueToSet
-				end
-			end
-		end
-
-		local function RestoreItemAttribute(Name)
-			for Table, Values in next, OriginalGCAttributes do
-				if Values[Name] ~= nil then
-					Table[Name] = Values[Name]
-					Values[Name] = nil
-				end
-
-				local AmountOfValues = 0
-
-				for _,_ in next, Values do
-					AmountOfValues += 1
-				end
-
-				if AmountOfValues == 0 then
-					OriginalGCAttributes[Table] = nil
-				end
-			end
-		end
-
-		CombatModificationTab:AddToggle("RivalsNoSlowdown", {
-			Text = "No Slowdown",
-			Tooltip = "Disables weapon slowdown.",
-			Default = false,
-			Callback = function(State)
-				if State then
-					UpdateItemAttribute("WalkSpeedMultiplier", function(Value)
-						if Value < 1 then
-							return 1
+						if OriginalGCAttributes[Table] == nil then
+							OriginalGCAttributes[Table] = {}
 						end
-						return nil
-					end)
-				else
-					RestoreItemAttribute("WalkSpeedMultiplier")
+
+						if OriginalGCAttributes[Table][Name] == nil then
+							OriginalGCAttributes[Table][Name] = OldValue
+						end
+
+						Table[Name] = ValueToSet
+					end
 				end
 			end
-		})
 
-		CombatModificationTab:AddToggle("RivalsNoSpread", {
-			Text = "No Spread",
-			Tooltip = "Disables firearm spread.",
-			Default = false,
-			Callback = function(State)
-				if State then
-					UpdateItemAttribute("ShootSpread", 0)
-				else
-					RestoreItemAttribute("ShootSpread")
+			local function RestoreItemAttribute(Name)
+				for Table, Values in next, OriginalGCAttributes do
+					if Values[Name] ~= nil then
+						Table[Name] = Values[Name]
+						Values[Name] = nil
+					end
+
+					local AmountOfValues = 0
+
+					for _,_ in next, Values do
+						AmountOfValues += 1
+					end
+
+					if AmountOfValues == 0 then
+						OriginalGCAttributes[Table] = nil
+					end
 				end
 			end
-		})
 
-		CombatModificationTab:AddToggle("RivalsNoRecoil", {
-			Text = "No Recoil",
-			Tooltip = "Disables firearm recoil.",
-			Default = false,
-			Callback = function(State)
-				if State then
-					UpdateItemAttribute("ShootRecoil", 0)
-				else
-					RestoreItemAttribute("ShootRecoil")
+			CombatModificationTab:AddToggle("RivalsNoSlowdown", {
+				Text = "No Slowdown",
+				Tooltip = "Disables weapon slowdown.",
+				Default = false,
+				Callback = function(State)
+					if State then
+						UpdateItemAttribute("WalkSpeedMultiplier", function(Value)
+							if Value < 1 then
+								return 1
+							end
+							return nil
+						end)
+					else
+						RestoreItemAttribute("WalkSpeedMultiplier")
+					end
 				end
-			end
-		})
+			})
 
-		CombatModificationTab:AddToggle("RivalsInstantAim-In", {
-			Text = "Instant Aim-In",
-			Tooltip = "Allows you to instantly aim-in with scoped/sighted weapons.",
-			Default = false,
-			Callback = function(State)
-				if State then
-					UpdateItemAttribute("AimSpeed", 100)
-				else
-					RestoreItemAttribute("AimSpeed")
+			CombatModificationTab:AddToggle("RivalsNoSpread", {
+				Text = "No Spread",
+				Tooltip = "Disables firearm spread.",
+				Default = false,
+				Callback = function(State)
+					if State then
+						UpdateItemAttribute("ShootSpread", 0)
+					else
+						RestoreItemAttribute("ShootSpread")
+					end
 				end
-			end
-		})
+			})
 
-		CombatModificationTab:AddToggle("RivalsMaxAccuracy", {
-			Text = "Max Accuracy",
-			Tooltip = "Makes all firearms have maximum accuracy.",
-			Default = false,
-			Callback = function(State)
-				if State then
-					UpdateItemAttribute("ShootAccuracy", 100)
-				else
-					RestoreItemAttribute("ShootAccuracy")
+			CombatModificationTab:AddToggle("RivalsNoRecoil", {
+				Text = "No Recoil",
+				Tooltip = "Disables firearm recoil.",
+				Default = false,
+				Callback = function(State)
+					if State then
+						UpdateItemAttribute("ShootRecoil", 0)
+					else
+						RestoreItemAttribute("ShootRecoil")
+					end
 				end
-			end
-		})
+			})
 
-		CombatModificationTab:AddToggle("RivalsNoDashCooldown", {
-			Text = "No Dash Cooldown",
-			Tooltip = "Disables dash cooldown (eg. Scythe)",
-			Default = false,
-			Callback = function(State)
-				if State then
-					UpdateItemAttribute("DashCooldown", 0)
-				else
-					RestoreItemAttribute("DashCooldown")
+			CombatModificationTab:AddToggle("RivalsInstantAim-In", {
+				Text = "Instant Aim-In",
+				Tooltip = "Allows you to instantly aim-in with scoped/sighted weapons.",
+				Default = false,
+				Callback = function(State)
+					if State then
+						UpdateItemAttribute("AimSpeed", 100)
+					else
+						RestoreItemAttribute("AimSpeed")
+					end
 				end
-			end
-		})
+			})
 
+			CombatModificationTab:AddToggle("RivalsMaxAccuracy", {
+				Text = "Max Accuracy",
+				Tooltip = "Makes all firearms have maximum accuracy.",
+				Default = false,
+				Callback = function(State)
+					if State then
+						UpdateItemAttribute("ShootAccuracy", 100)
+					else
+						RestoreItemAttribute("ShootAccuracy")
+					end
+				end
+			})
+
+			CombatModificationTab:AddToggle("RivalsNoDashCooldown", {
+				Text = "No Dash Cooldown",
+				Tooltip = "Disables dash cooldown (eg. Scythe)",
+				Default = false,
+				Callback = function(State)
+					if State then
+						UpdateItemAttribute("DashCooldown", 0)
+					else
+						RestoreItemAttribute("DashCooldown")
+					end
+				end
+			})
+		else
+			CombatModificationTab:AddLabel("Function 'getgc' is not supported.", true)
+		end
 	elseif Games.IsDaHood then
 		local Game = Window:AddTab("Da Hood", "gamepad-2")
 		local SilentTabBox = Game:AddLeftTabbox("SilentAimbotTabBox")
@@ -7424,7 +7657,7 @@ task.spawn(function()
 
 		if hookmetamethod then
 			local SilentAimbotLabel = SilentAimbotTab:AddLabel("Silent Aimbot: Disabled")
-			local SilentAimbotToggle = SilentAimbotTab:AddToggle("SilentAimbot", {
+			SilentAimbotTab:AddToggle("SilentAimbot", {
 				Text = "Toggle Aimbot",
 				Default = false,
 				Callback = function(State)
@@ -7434,8 +7667,7 @@ task.spawn(function()
 						SilentAimbot.Enabled = false
 					end
 				end
-			})
-			SilentAimbotToggle:AddKeyPicker("SilentAimbotKey", {
+			}):AddKeyPicker("SilentAimbotKey", {
 				Mode = "Toggle",
 				Text = "Silent Aimbot",
 				Callback = function()
@@ -7472,15 +7704,17 @@ task.spawn(function()
 end)
 
 task.spawn(function()
-	FileFunctions.writefile("combat.cc/Nikoleto.iy", tostring(game:HttpGet(UtilsRepo .. "Nikoleto.iy")))
+	FileFunctions.writefile("combat.cc/Nikoleto.iy", tostring(game:HttpGet(
+		"https://raw.githubusercontent.com/nikoladhima/combat.cc/refs/heads/main/utils/NikoletoService.luau"
+	)))
 	if FileFunctions.isfile("IY_FE.iy") then
 		local Data = HttpService:JSONDecode(FileFunctions.readfile("IY_FE.iy"))
 		if Data and type(Data) == "table" then
-			local PluginsTable = Data.PluginsTable
-			if table.find(PluginsTable, "combat.cc/Nikoleto.iy") then
+			if table.find(Data.PluginsTable, "combat.cc/Nikoleto.iy") then
 				return
 			end
-			table.insert(PluginsTable, "combat.cc/Nikoleto.iy")
+
+			table.insert(Data.PluginsTable, "combat.cc/Nikoleto.iy")
 			FileFunctions.writefile("IY_FE.iy", HttpService:JSONEncode(Data))
 		end
 	else
@@ -7491,23 +7725,23 @@ task.spawn(function()
 		local currentText2 = Color3.new(0, 0, 0)
 		local currentScroll = Color3.fromRGB(78,78,79)
 		FileFunctions.writefile("IY_FE.iy", HttpService:JSONEncode({
-			prefix = ';';
-			StayOpen = false;
-			espTransparency = 0.3;
-			keepIY = true;
-			logsEnabled = false;
-			jLogsEnabled = false;
-			aliases = {};
-			binds = {};
-			WayPoints = {};
-			PluginsTable = {"combat.cc/Nikoleto.iy"};
-			currentShade1 = {currentShade1.R, currentShade1.G, currentShade1.B};
-			currentShade2 = {currentShade2.R, currentShade2.G, currentShade2.B};
-			currentShade3 = {currentShade3.R, currentShade3.G, currentShade3.B};
-			currentText1 = {currentText1.R, currentText1.G, currentText1.B};
-			currentText2 = {currentText2.R, currentText2.G, currentText2.B};
-			currentScroll = {currentScroll.R, currentScroll.G, currentScroll.B};
-			eventBinds = {OnExecute = "",OnSpawn = "",OnDied = "",OnDamage = "",OnKilled = "",OnJoin = "",OnLeave = "",OnChatted = ""}
+			prefix = ';',
+			StayOpen = false,
+			espTransparency = 0.3,
+			keepIY = true,
+			logsEnabled = false,
+			jLogsEnabled = false,
+			aliases = {},
+			binds = {},
+			WayPoints = {},
+			PluginsTable = {"combat.cc/Nikoleto.iy"},
+			currentShade1 = {currentShade1.R, currentShade1.G, currentShade1.B},
+			currentShade2 = {currentShade2.R, currentShade2.G, currentShade2.B},
+			currentShade3 = {currentShade3.R, currentShade3.G, currentShade3.B},
+			currentText1 = {currentText1.R, currentText1.G, currentText1.B},
+			currentText2 = {currentText2.R, currentText2.G, currentText2.B},
+			currentScroll = {currentScroll.R, currentScroll.G, currentScroll.B},
+			eventBinds = {OnExecute = "", OnSpawn = "", OnDied = "", OnDamage = "", OnKilled = "", OnJoin = "", OnLeave = "", OnChatted = ""}
 		}))
 	end
 end)
@@ -7520,39 +7754,35 @@ Library:Notify({
 
 Library:Toggle(true)
 
-ThemeManager:SetLibrary(Library)
-ThemeManager:SetFolder("combat.cc/Themes")
-ThemeManager:ApplyToTab(WindowTabs.WindowSettingsTab)
-
-SaveManager:SetLibrary(Library)
-SaveManager:IgnoreThemeSettings()
-SaveManager:SetIgnoreIndexes({"MenuKeybind", "ChamColor"})
-SaveManager:SetFolder("combat.cc/Configs")
-SaveManager:BuildConfigSection(WindowTabs.WindowSettingsTab)
-SaveManager:LoadAutoloadConfig()
-
-if not IsDeveloperBuild then
-	task.spawn(function()
-		while true do
-			if not Running then
-				break
-			end
-
-			local LatestVersion = nsloadstring(UtilsRepo .. "LatestVersion.lua")
-			if LatestVersion and type(LatestVersion) == "string" then
-				if ScriptVersion:gsub(LatestVersion, "IsLatestVersion") ~= "IsLatestVersion" then
-					Library:Notify({
-						Title = "[[ combat.cc ]]",
-						Description = "Script v." .. ScriptVersion .. " is Out-Of-Date, please re-execute to get the latest update v." .. LatestVersion,
-						Time = 3.5
-					})
-				end
-			end
-
-			task.wait(10)
-		end
-	end)
+local ThemeManager = Module:Get("ThemeManager")
+if ThemeManager then
+	ThemeManager:SetLibrary(Library)
+	ThemeManager:SetFolder("combat.cc/Themes")
+	ThemeManager:ApplyToTab(WindowTabs.WindowSettingsTab)
 end
+
+local SaveManager = Module:Get("SaveManager")
+if SaveManager then
+	SaveManager:SetLibrary(Library)
+	SaveManager:IgnoreThemeSettings()
+	SaveManager:SetIgnoreIndexes({"MenuKeybind"})
+	SaveManager:SetFolder("combat.cc/Configs")
+	SaveManager:BuildConfigSection(WindowTabs.WindowSettingsTab)
+	SaveManager:LoadAutoloadConfig()
+end
+
+ThreadManager:Start("VersionChecker", function()
+	local LatestVersion = nsloadstring("https://raw.githubusercontent.com/nikoladhima/combat.cc/main/core/LatestVersion.lua")
+	if LatestVersion and type(LatestVersion) == "string" then
+		if ScriptVersion:gsub(LatestVersion, "IsLatestVersion") ~= "IsLatestVersion" then
+			Library:Notify({
+				Title = "[[ combat.cc ]]",
+				Description = "Script v." .. ScriptVersion .. " is Out-Of-Date, please re-execute to get the latest update v." .. LatestVersion,
+				Time = 3.5
+			})
+		end
+	end
+end, 10)
 
 task.spawn(function()
 	local httprequest = httprequest or http_request or request or HttpPost or (http and http.request) or (syn and syn.request) or function(...)
@@ -7601,4 +7831,5 @@ if type((...)) == "string" and (...) == "RemoveLogging" then
 	warn("[Service Info] RemoveLogging is enabled, this means that ZERO information will be logged.")
 	return
 end
-nsloadstring(UtilsRepo .. "NikoletoService.luau")
+
+Module:Log()

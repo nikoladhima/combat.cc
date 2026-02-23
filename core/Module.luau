@@ -6,7 +6,7 @@ local Module = {...}
 
 local function FailedCheck(PossibleTable: table?, PossibleTableName: string): boolean
 	if type(PossibleTable) == "table" and PossibleTable.nsFailed then
-		warn("Failed to load " .. PossibleTableName .. ". " .. PossibleTable[3])
+		warn("Failed to load " .. PossibleTableName .. ". " .. PossibleTable[3] or "Unknown")
 		return true
 	end
 	return false

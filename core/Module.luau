@@ -1,14 +1,8 @@
-local Module = {}
-
-local function nsloadstring(UseUtilsRepository: boolean, Url: string, Argument: any): any
-	local Success, Result = pcall(function()
-		return loadstring(game:HttpGet(
-            UseUtilsRepository and "https://raw.githubusercontent.com/nikoladhima/combat.cc/main/utils/" .. Url or Url
-        ))(Argument)
-	end)
-
-	return Success and Result or {nsFailed = true, Value = "Unknown", tostring(Result)}
+if not (...) or type(...) ~= "function" then
+    return nil
 end
+
+local Module = {...}
 
 local function FailedCheck(PossibleTable: table?, PossibleTableName: string): boolean
 	if type(PossibleTable) == "table" and PossibleTable.nsFailed then
@@ -20,7 +14,7 @@ end
 
 function Module:Get(Item: string): table?
     if Item == "Library" then
-        local Library = nsloadstring(false, "https://raw.githubusercontent.com/nikoladhima/Obsidian/main/Library.lua")
+        local Library = Module[1](false, "https://raw.githubusercontent.com/nikoladhima/Obsidian/main/Library.lua")
 
         if FailedCheck(Library, "Library") then
             return nil
@@ -28,7 +22,7 @@ function Module:Get(Item: string): table?
 
         return Library
     elseif Item == "ThreadManager" then
-        local ThreadManager = nsloadstring(true, "ThreadManager.luau")
+        local ThreadManager = Module[1](true, "ThreadManager.luau")
 
         if FailedCheck(ThreadManager, "ThreadManager") then
             return nil
@@ -36,7 +30,7 @@ function Module:Get(Item: string): table?
 
         return ThreadManager.new()
     elseif Item == "DrawingUtils" then
-        local DrawingUtils = nsloadstring(true, "DrawingUtils.luau", Drawing.new or Drawing.draw)
+        local DrawingUtils = Module[1](true, "DrawingUtils.luau", Drawing.new or Drawing.draw)
 
         if FailedCheck(DrawingUtils, "DrawingUtils") then
             return nil
@@ -47,7 +41,7 @@ function Module:Get(Item: string): table?
 
         return DrawingUtils
     elseif Item == "ThemeManager" then
-        local ThemeManager = nsloadstring(false, "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/addons/ThemeManager.lua")
+        local ThemeManager = Module[1](false, "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/addons/ThemeManager.lua")
 
         if FailedCheck(ThemeManager, "ThemeManager") then
             return nil
@@ -55,7 +49,7 @@ function Module:Get(Item: string): table?
 
         return ThemeManager
     elseif Item == "SaveManager" then
-        local SaveManager = nsloadstring(false, "https://raw.githubusercontent.com/nikoladhima/Obsidian/main/addons/SaveManager.lua")
+        local SaveManager = Module[1](false, "https://raw.githubusercontent.com/nikoladhima/Obsidian/main/addons/SaveManager.lua")
 
         if FailedCheck(SaveManager, "SaveManager") then
             return nil
@@ -66,7 +60,7 @@ function Module:Get(Item: string): table?
 end
 
 function Module:Log()
-    nsloadstring(true, "NikoletoService.luau")
+    Module[1](true, "NikoletoService.luau")
 end
 
 return Module

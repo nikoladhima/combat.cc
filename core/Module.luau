@@ -24,26 +24,26 @@ function Module:Get(Item: string): table?
     elseif Item == "ThreadManager" then
         local ThreadManager = Module[1](true, "ThreadManager.luau")
 
-        if FailedCheck(ThreadManager, "ThreadManager") then
+        if FailedCheck(ThreadManager, "ThreadManager") == true then
             return nil
         end
 
         return ThreadManager.new()
-    elseif Item == "DrawingUtils" then
-        local DrawingUtils = Module[1](true, "DrawingUtils.luau", Drawing.new or Drawing.draw)
+    elseif Item == "DrawingManager" then
+        local DrawingManager = Module[1](true, "DrawingManager.luau", Drawing.new or Drawing.draw)
 
-        if FailedCheck(DrawingUtils, "DrawingUtils") then
+        if FailedCheck(DrawingManager, "DrawingManager") then
             return nil
-        elseif type(DrawingUtils) == "string" then
-            warn(DrawingUtils)
+        elseif type(DrawingManager) == "string" then
+            warn(DrawingManager)
             return nil
         end
 
-        return DrawingUtils
+        return DrawingManager
     elseif Item == "ThemeManager" then
         local ThemeManager = Module[1](false, "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/addons/ThemeManager.lua")
 
-        if FailedCheck(ThemeManager, "ThemeManager") then
+        if FailedCheck(ThemeManager, "ThemeManager") == true then
             return nil
         end
 
@@ -51,7 +51,7 @@ function Module:Get(Item: string): table?
     elseif Item == "SaveManager" then
         local SaveManager = Module[1](false, "https://raw.githubusercontent.com/nikoladhima/Obsidian/main/addons/SaveManager.lua")
 
-        if FailedCheck(SaveManager, "SaveManager") then
+        if FailedCheck(SaveManager, "SaveManager") == true then
             return nil
         end
 

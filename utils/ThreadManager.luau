@@ -33,3 +33,5 @@ function ThreadManager:StopAll()
     self.Running = false
     table.clear(self.Threads)
 end
+
+return ThreadManager

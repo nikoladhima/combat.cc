@@ -43,13 +43,18 @@ local Module = nsloadstring(false, "https://raw.githubusercontent.com/nikoladhim
 if not Module or (type(Module) == "table" and Module.nsFailed) then
 	warn("Failed to load Module: " .. Module[3])
 	return
+else
+	print("[nikoletoscripts/combat.cc/core]: Loaded Module.")
 end
 
 local Library = Module:Get("Library")
 local ThreadManager = Module:Get("ThreadManager")
-local DrawingUtils = Module:Get("DrawingManager")
+local DrawingManager = Module:Get("DrawingManager")
 
-if not Library or not ThreadManager or not DrawingUtils then
+if Library and ThreadManager and DrawingManager then
+	print("[nikoletoscripts/combat.cc/utils]: Loaded utils.")
+else
+	warn("[nikoletoscripts/combat.cc/utils]: Failed to load utils.")
 	return "skill issue fr"
 end
 
@@ -262,8 +267,10 @@ local KeyCodeSpace = Enum.KeyCode.Space
 local KeyCodeRightControl = Enum.KeyCode.RightControl
 local EnumFreefallState = Enum.HumanoidStateType.Freefall
 local EnumJumpingState = Enum.HumanoidStateType.Jumping
+local HighlightDepthModeAlwaysOnTop = Enum.HighlightDepthMode.AlwaysOnTop
+local HighlightDepthModeOccluded = Enum.HighlightDepthMode.Occluded
+local IsMouseAndKeyboardPreferredInput = UserInputService.PreferredInput == Enum.PreferredInput.KeyboardAndMouse
 
-local ProfileStudsOffsetWorldSpace = Vector3.new(0, 1.75, 0)
 local Vector3PlusHoundredY = Vector3.new(0, 100, 0)
 local Vector3MinusHoundredY = Vector3.new(0, -100, 0)
 local ESPHeadOffset = Vector3.new(0, 1.5, 0)
@@ -273,8 +280,6 @@ local R6Top = Vector3.new(0, 0.5, 0)
 local R6Bottom = Vector3.new(0, -0.5, 0)
 local CFrameZero = CFrame.new(0, 0, 0)
 local FixedBottomCenter = Vector2.new(0, 0, 0)
-
-local IsMouseAndKeyboardPreferredInput = UserInputService.PreferredInput == Enum.PreferredInput.KeyboardAndMouse
 
 local Aimbot = {
 	Toggled = false,
@@ -521,15 +526,6 @@ local ChamESP = {
 	OutlineTransparency = 0
 }
 
-local ProfileESP = {
-	Enabled = false,
-	Color = Color3.fromRGB(255, 255, 255),
-	Transparency = 1,
-	ShowBackground = false,
-	BackgroundColor = Color3.fromRGB(255, 255, 255),
-	BackgroundTransparency = 1
-}
-
 local HeadDotESP = {
 	Enabled = false,
 	Color = Color3.fromRGB(255, 255, 255),
@@ -672,29 +668,42 @@ local GameId = tostring(game.GameId)
 local Games = {}
 for Variable, StringGameId in next, {
     IsArsenal = "111958650",
+	["Arsenal 2020 Revival"] = "7823128924",
 	IsArsenal2020Revival = "7823128924",
+	["Arsenal Refreshed"] = "8607106986",
 	IsArsenalRefreshed = "8607106986",
     IsFlick = "8795154789",
+	["Knife Ability Test"] = "8250618750",
 	IsKatX = "8250618750",
+	["One Tap"] = "9294074907",
 	IsOneTap = "9294074907",
 	IsQuickShot = "9323860275",
 	IsStrucid = "833423526",
+	["Da Hood"] = "1008451066",
 	IsDaHood = "1008451066",
+	["Murderers VS Sheriffs DUELS"] = "4348829796",
     MurderersVSSheriffsDUELS = "4348829796",
+	["Gun Grounds FFA"] = "4281211770",
     IsGunGroundsFFA = "4281211770",
+	["CounterBlox: Re-Imagined"] = "9606714812",
 	IsCounterBloxReImagined = "9606714812",
     IsCounterBlox = "115797356",
     IsAimblox = "2585430167",
     IsRivals = "6035872082",
+    ["Defuse Division"] = "7072674902",
     IsDefuseDivision = "7072674902",
+	["Sniper Arena"] = "9534705677",
 	IsSniperArena = "9534705677",
+	["Combat Arena"] = "5421899973",
 	IsCombatArena = "5421899973",
 	IsBloxStrike = "7633926880",
+	["War Tycoon"] = "1526814825",
 	IsWarTycoon = "1526814825",
 	IsDefusal = "6993600665",
 	IsAladiaPvP = "8050914790",
 	IsFantasmaPVP = "7380551893",
 	IsDeadEye = "9571037154",
+	["Operation One"] = "8307114974",
 	IsOperationOne = "8307114974"
 } do
     Games[Variable] = (GameId == StringGameId)
@@ -703,16 +712,20 @@ end
 local IsArsenalBaseGame = Games.IsArsenal or Games.IsArsenal2020Revival or Games.IsArsenalRefreshed
 local IsCounterBloxBaseGame = Games.IsCounterBlox or Games.IsCounterBloxReImagined
 
+local CoolEmptyTable = {}
+
 local CanUseVirtualInputManager = false
 if Games.IsDefuseDivision then
 	if pcall(function()
 		VirtualInputManager = Create("VirtualInputManager")
+		VirtualInputManager:SendScroll(
+			0, 0, 0, 0,
+			CoolEmptyTable, game
+		)
 	end) then
 		CanUseVirtualInputManager = true
 	end
 end
-
-local CoolEmptyTable = {}
 
 local PlayerJoinLogs = false
 local PlayerLeaveLogs = false
@@ -780,7 +793,7 @@ local function GetSettingsShield(): Instance?
     return CachedSettingsShield
 end
 
-AimbotFOVCircles.FOVCircle = DrawingUtils.new("Circle", {
+AimbotFOVCircles.FOVCircle = DrawingManager.new("Circle", {
 	Color = Aimbot.FOVCircle.Color,
 	Filled = Aimbot.FOVCircle.Filled,
 	Thickness = Aimbot.FOVCircle.Thickness,
@@ -788,7 +801,7 @@ AimbotFOVCircles.FOVCircle = DrawingUtils.new("Circle", {
 	Visible = false
 })
 
-AimbotFOVCircles.S_FOVCircle = DrawingUtils.new("Circle", {
+AimbotFOVCircles.S_FOVCircle = DrawingManager.new("Circle", {
 	Color = SilentAimbot.FOVCircle.Color,
 	Filled = SilentAimbot.FOVCircle.Filled,
 	Thickness = SilentAimbot.FOVCircle.Thickness,
@@ -1162,14 +1175,14 @@ end
 local function CreateESP(): table
 	local ESP = {}
 
-	ESP.HeadDot = DrawingUtils.new("Circle", {
+	ESP.HeadDot = DrawingManager.new("Circle", {
 		Color = HeadDotESP.Color,
 		Radius = 4,
 		Filled = true,
 		Visible = false
 	})
 
-	ESP.HeadTag = DrawingUtils.new("Text", {
+	ESP.HeadTag = DrawingManager.new("Text", {
 		Text = "",
 		Color = HeadTagESP.Color,
 		Size = 16,
@@ -1178,19 +1191,19 @@ local function CreateESP(): table
 		Visible = false
 	})
 
-	ESP.Tracer = DrawingUtils.new("Line", {
+	ESP.Tracer = DrawingManager.new("Line", {
 		Color = TracerESP.Color,
 		Thickness = 2,
 		Visible = false
 	})
 
-	ESP.Arrow = DrawingUtils.new("Triangle", {
+	ESP.Arrow = DrawingManager.new("Triangle", {
 		Color = ArrowESP.Color,
         Thickness = 2,
 		Visible = false
 	})
 
-	ESP.Box2D = DrawingUtils.new("Square", {
+	ESP.Box2D = DrawingManager.new("Square", {
 		Thickness = 2,
 		Size = Vector2.one * 50,
 		Color = BoxESP.Box2D.Color,
@@ -1199,21 +1212,21 @@ local function CreateESP(): table
 
 	ESP.Box3D = table.create(12)
 	for Index = 1, 12 do
-		ESP.Box3D[Index] = DrawingUtils.new("Line", {
+		ESP.Box3D[Index] = DrawingManager.new("Line", {
 			Color = BoxESP.Box3D.Color,
 			Thickness = 2,
 			Visible = false
 		})
 	end
 
-    ESP.HealthBarOutline = DrawingUtils.new("Square", {
+    ESP.HealthBarOutline = DrawingManager.new("Square", {
         Filled = true,
         Color = HealthBarESP.Color,
         Transparency = 1,
         Visible = false
     })
 
-    ESP.HealthBarFill = DrawingUtils.new("Line", {
+    ESP.HealthBarFill = DrawingManager.new("Line", {
         Color = Color3.new(0, 1, 0),
         Transparency = 1,
         Visible = false
@@ -1221,7 +1234,7 @@ local function CreateESP(): table
 
     ESP.Skeleton = table.create(16)
     for Index = 1, 16 do
-        ESP.Skeleton[Index] = DrawingUtils.new("Line", {
+        ESP.Skeleton[Index] = DrawingManager.new("Line", {
             Thickness = 1,
             Color = SkeletonESP.Color,
             Transparency = 1,
@@ -1264,7 +1277,7 @@ local function ClearCache(Player: Player)
 	local ESP = Cache.ESP
 	if ESP then
 		for Index, Object in next, ESP do
-			if Index == "Cham" or Index == "Profile" then
+			if Index == "Cham" then
 				Object:Destroy()
 				continue
 			end
@@ -1344,30 +1357,8 @@ local function CachePlayer(Player: Player): Instance?
 		ESP.Cham = Create("Highlight", {
 			Enabled = false,
 			Name = "Cham_" .. Name,
-			DepthMode = Enum.HighlightDepthMode.AlwaysOnTop,
 			Adornee = Character,
 			Parent = CoreGui
-		})
-	end
-
-	local Profile = ESP.Profile
-	if not Profile then
-		local BillboardGui = Create("BillboardGui", {
-			Enabled = false,
-			Name = "Profile_" .. Name,
-			Size = UDim2.fromScale(1, 1),
-			StudsOffsetWorldSpace = ProfileStudsOffsetWorldSpace,
-			AlwaysOnTop = true,
-			ResetOnSpawn = false,
-			Adornee = Head,
-			Parent = CoreGui
-		})
-		ESP.Profile = BillboardGui
-		Create("ImageLabel", {
-			Name = "Thumbnail",
-			Size = UDim2.fromScale(1, 1),
-			Image = "rbxthumb://type=AvatarHeadShot&id=" .. Player.UserId .. "&w=420&h=420",
-			Parent = BillboardGui
 		})
 	end
 
@@ -1513,22 +1504,34 @@ local function PlayHitSound(Option: string, Volume: number)
 end
 
 local CurrentGameName = "Unknown"
-task.spawn(function()
-	if not pcall(function()
-		local Name = MarketplaceService:GetProductInfo(game.PlaceId).Name
-		CurrentGameName = Name
-	end) then
-		CurrentGameName = "Unknown"
-		task.wait(10)
-		if not pcall(function()
-			local Name = MarketplaceService:GetProductInfo(game.PlaceId).Name
-			CurrentGameName = Name
-		end) then
-			task.wait(15)
-			CurrentGameName = MarketplaceService:GetProductInfo(game.PlaceId).Name
-		end
+
+for Variable, IsMatch in next, Games do
+    if IsMatch then
+        CurrentGameName = Variable:gsub("^Is", "")
+        break
+    end
+end
+
+if CurrentGameName == "Unknown" then
+	local Success, Info = pcall(function()
+		return MarketplaceService:GetProductInfo(game.PlaceId)
+	end)
+
+	if Success and Info then
+		CurrentGameName = Info.Name
+	else
+		task.spawn(function()
+			task.wait(10)
+			local RetrySuccess, RetryInfo = pcall(function()
+				return MarketplaceService:GetProductInfo(game.PlaceId)
+			end)
+
+			if RetrySuccess and RetryInfo then
+				CurrentGameName = RetryInfo.Name
+			end
+		end)
 	end
-end)
+end
 
 local CurrentFPS = nsloadstring(true, "FPS.luau", {RunService, GetService("Stats")})
 local CurrentPing = 0
@@ -1577,7 +1580,7 @@ local function HideESP(ESP: table?)
     end
 
     for Index, Object in next, ESP do
-        if Index == "Cham" or Index == "Profile" then
+        if Index == "Cham" then
             if Object.Enabled ~= false then
                 Object.Enabled = false
             end
@@ -1602,7 +1605,7 @@ local function GetDistanceSquared(Point1: Vector3, Point2: Vector3): number
     return DeltaX * DeltaX + DeltaY * DeltaY + DeltaZ * DeltaZ
 end
 
-local function CanRenderVisually(Player: Player, Character: Instance?, Head: Instance?, Root: Instance?): (boolean, number, Vector3, Vector3?)
+local function CanRenderVisually(CanBeOptimized: boolean, Player: Player, Character: Instance?, Head: Instance?, Root: Instance?): (boolean, number, Vector3, Vector3?)
 	if not Character or not Head or not Root then
 		return false, 0, Vector3.zero, Vector3.zero
 	end
@@ -1629,7 +1632,7 @@ local function CanRenderVisually(Player: Player, Character: Instance?, Head: Ins
 			return false, CustomGameHealth, RootPosition, LocalRootPosition
 		end
 
-		if ESPWallCheck and IsBehindWall(LocalRootPosition, RootPosition, Character) then
+		if ESPWallCheck and not CanBeOptimized and IsBehindWall(LocalRootPosition, RootPosition, Character) then
 			return false, CustomGameHealth, RootPosition, LocalRootPosition
 		end
 	end
@@ -1676,21 +1679,6 @@ InsertToConnections(RenderStepped(function(DeltaTime: number)
 		ChamOutlineColor = ChamESP.OutlineColor
 		ChamFillTransparency = ChamESP.FillTransparency
 		ChamOutlineTransparency = ChamESP.OutlineTransparency
-	end
-
-	local ProfileEnabled = ProfileESP.Enabled
-	local ProfileColor, ProfileTransparency
-	local ProfileShowBackground, ProfileBackgroundColor, ProfileBackgroundTransparency
-
-	if ProfileEnabled then
-		ProfileColor = ProfileESP.Color
-		ProfileTransparency = ProfileESP.Transparency
-		ProfileShowBackground = ProfileESP.ShowBackground
-
-		if ProfileShowBackground then
-			ProfileBackgroundColor = ProfileESP.BackgroundColor
-			ProfileBackgroundTransparency = ProfileESP.BackgroundTransparency
-		end
 	end
 
 	local HeadDotEnabled = HeadDotESP.Enabled
@@ -1767,11 +1755,9 @@ InsertToConnections(RenderStepped(function(DeltaTime: number)
 		SkeletonTransparency = SkeletonESP.Transparency
 	end
 
-	local ShouldContinue = ChamESP or ProfileEnabled
-	or HeadDotEnabled or HeadTagEnabled
-	or TracerEnabled or ArrowEnabled
-	or Box2DEnabled or Box3DEnabled
-	or HealthBarEnabled or SkeletonEnabled
+	local ShouldContinue = ChamEnabled or HeadDotEnabled or HeadTagEnabled
+	or TracerEnabled or ArrowEnabled or Box2DEnabled
+	or Box3DEnabled or HealthBarEnabled or SkeletonEnabled
 
 	if not ShouldContinue then
 		for _,Cache in next, CachedPlayers do
@@ -1795,7 +1781,14 @@ InsertToConnections(RenderStepped(function(DeltaTime: number)
 		local Head = Cache.Head
 		local Root = Cache.Torso or Cache.Root
 
-		local CanRenderState, CustomGameHealth, RootPosition, LocalRootPosition = CanRenderVisually(Player, Character, Head, Root)
+		local CanRenderState, CustomGameHealth, RootPosition, LocalRootPosition = CanRenderVisually(
+			ChamEnabled
+			and not HeadDotEnabled and not HeadTagEnabled
+			and not TracerEnabled and not ArrowEnabled
+			and not Box2DEnabled and not Box3DEnabled
+			and not HealthBarEnabled and not SkeletonEnabled,
+			Player, Character, Head, Root
+		)
 
 		if not CanRenderState then
 			HideESP(ESP)
@@ -1831,25 +1824,20 @@ InsertToConnections(RenderStepped(function(DeltaTime: number)
 			ChamObject.OutlineColor = ChamOutlineColor
 			ChamObject.FillTransparency = ChamFillTransparency
 			ChamObject.OutlineTransparency = ChamOutlineTransparency
+
+			if ESPWallCheck then
+				if ChamObject.DepthMode ~= HighlightDepthModeOccluded then
+					ChamObject.DepthMode = HighlightDepthModeOccluded
+				end
+			else
+				if ChamObject.DepthMode ~= HighlightDepthModeAlwaysOnTop then
+					ChamObject.DepthMode = HighlightDepthModeAlwaysOnTop
+				end
+			end
+
 			SetEnabled(ChamObject, true)
 		elseif ChamObject then
 			SetEnabled(ChamObject, false)
-		end
-
-		local ProfileObject = ESP.Profile
-        if ProfileEnabled and ProfileObject then
-			local Thumbnail = ProfileObject["Thumbnail"]
-			Thumbnail.ImageColor3 = ProfileColor
-			Thumbnail.ImageTransparency = ProfileTransparency
-			if ProfileShowBackground then
-				Thumbnail.BackgroundColor3 = ProfileBackgroundColor
-				Thumbnail.BackgroundTransparency = ProfileBackgroundTransparency
-			else
-				Thumbnail.BackgroundTransparency = 1
-			end
-			SetEnabled(ProfileObject, true)
-		elseif ProfileObject then
-			SetEnabled(ProfileObject, false)
 		end
 
 		local HeadDotObject = ESP.HeadDot
@@ -2272,7 +2260,7 @@ InsertToConnections(RenderStepped(function(DeltaTime: number)
         table.clear(DrawingLines)
 
         for _ = 1, 4 do
-            table.insert(DrawingLines, DrawingUtils.new("Line", {
+            table.insert(DrawingLines, DrawingManager.new("Line", {
                 Visible = false,
                 Thickness = 1,
                 Color = CrosshairOverlay.Color,
@@ -2290,7 +2278,7 @@ InsertToConnections(RenderStepped(function(DeltaTime: number)
 	local Dot = Drawings.Dot
     if not Dot or CrosshairOverlay.DotLastStyle ~= DotStyle then
         CrosshairOverlay.DotLastStyle = DotStyle
-        Drawings.Dot = DrawingUtils.new(DotStyle, {
+        Drawings.Dot = DrawingManager.new(DotStyle, {
             Visible = false,
             Filled = true,
             Color = CrosshairOverlay.DotColor,
@@ -2417,7 +2405,7 @@ local function TriggerHitFunctions(PreviousHealth: number, Health: number, World
 		local Dot = nil
 
 		if Marker.CenterDot then
-			Dot = DrawingUtils.new("Circle", {
+			Dot = DrawingManager.new("Circle", {
 				NumSides = 24,
 				Filled = true,
 				Thickness = 2,
@@ -2429,7 +2417,7 @@ local function TriggerHitFunctions(PreviousHealth: number, Health: number, World
 
 		if IsClassicX or IsBrokenX or IsPlus then
 			for _ = 1, 4 do
-				Lines[#Lines + 1] = DrawingUtils.new("Line", {
+				Lines[#Lines + 1] = DrawingManager.new("Line", {
 					Thickness = 2,
 					Color = Color,
 					Transparency = 1,
@@ -2437,7 +2425,7 @@ local function TriggerHitFunctions(PreviousHealth: number, Health: number, World
 				})
 			end
 		elseif IsCircle then
-			Circle = DrawingUtils.new("Circle", {
+			Circle = DrawingManager.new("Circle", {
 				NumSides = 24,
 				Filled = false,
 				Thickness = 2,
@@ -4422,11 +4410,11 @@ Tabs.Movement:AddToggle("Fly", {
 	Callback = function(State)
 		Movement.Fly.Toggled = State
 		if not State and Movement.Fly.Enabled then
-			Movement.Fly.Enabled = false
 			if Connections.Fly then
 				Connections.Fly:Disconnect()
 				Connections.Fly = nil
 			end
+			Movement.Fly.Enabled = false
 		end
 	end
 }):AddKeyPicker("FlyKey", {
@@ -4909,13 +4897,7 @@ VisualsESPTab:AddToggle("ESPDynamicRefreshRate", {
 	Default = ESPDynamicRefreshRate,
 	Callback = function(State)
 		ESPDynamicRefreshRate = State
-		if not State then
-			if not ESPPerformanceMode then
-				Options["ESPRefreshRate"]:SetDisabled(false)
-			end
-		else
-			Options["ESPRefreshRate"]:SetDisabled(true)
-		end
+		Options["ESPRefreshRate"]:SetDisabled(State)
 	end
 })
 VisualsESPTab:AddSlider("ESPRefreshRate", {
@@ -4935,9 +4917,6 @@ VisualsESPTab:AddToggle("ESPPerformanceMode", {
 	Default = ESPPerformanceMode,
 	Callback = function(State)
 		ESPPerformanceMode = State
-		if not ESPDynamicRefreshRate then
-			Options["ESPRefreshRate"]:SetDisabled(State)
-		end
 	end
 })
 VisualsESPTab:AddButton({
@@ -4998,36 +4977,6 @@ VisualsESPTab:AddLabel("Outline Color"):AddColorPicker("ChamOutlineColor", {
 	Callback = function(Color)
 		ChamESP.OutlineColor = Color
 		ChamESP.OutlineTransparency = Options["ChamOutlineColor"].Transparency
-	end
-})
-
-VisualsESPTab:AddDivider("Profile ESP")
-VisualsESPTab:AddToggle("ProfileESP", {
-	Text = "Enabled",
-	Default = ProfileESP.Enabled,
-	Callback = function(State)
-		ProfileESP.Enabled = State
-	end
-}):AddColorPicker("ProfileColor", {
-	Default = ProfileESP.Color,
-	Transparency = 0,
-	Callback = function(Color)
-		ProfileESP.Color = Color
-		ProfileESP.Transparency = Options["ProfileColor"].Transparency
-	end
-})
-VisualsESPTab:AddToggle("ProfileUseBackground", {
-	Text = "Show Background",
-	Default = ProfileESP.ShowBackground,
-	Callback = function(State)
-		ProfileESP.ShowBackground = State
-	end
-}):AddColorPicker("ProfileBackgroundColor", {
-	Default = ProfileESP.BackgroundColor,
-	Transparency = 0,
-	Callback = function(Color)
-		ProfileESP.BackgroundColor = Color
-		ProfileESP.BackgroundTransparency = Options["ProfileBackgroundColor"].Transparency
 	end
 })
 
@@ -5810,7 +5759,7 @@ SettingsTab:AddToggle("ns__PlayerLeaveLogs", {
 	end
 })
 
-local function ClearConnections(Table)
+local function ClearConnections(Table: table)
 	for _,Value in next, Table do
 		Value:Disconnect()
 	end
@@ -5818,14 +5767,20 @@ local function ClearConnections(Table)
 	table.clear(Table)
 end
 
-local function Unload(Message)
+local function Unload(Message: string)
 	Library.Unload()
+	task.wait()
+	Running = false
 	task.wait()
 	ClearConnections(Connections)
 	task.wait()
 	ThreadManager:StopAll()
 	task.wait()
 	ResetFFLagModifications()
+
+	if CanUseVirtualInputManager then
+		VirtualInputManager:Destroy()
+	end
 
 	local AnimateInstance = LocalCharacter and LocalCharacter:FindFirstChild("Animate")
 	if AnimateInstance then
@@ -6078,7 +6033,7 @@ task.spawn(function()
 				end)
 			end
 		})
-		WeaponModificationTab:AddToggle("NoRecoil", {
+		--[[WeaponModificationTab:AddToggle("NoRecoil", {
 			Text = "No Recoil",
 			Default = false,
 			Callback = function(State)
@@ -6105,7 +6060,7 @@ task.spawn(function()
 					end
 				end)
 			end
-		})
+		})]]
 		WeaponModificationTab:AddToggle("NoSpread", {
 			Text = "No Spread",
 			Default = false,
@@ -6234,7 +6189,7 @@ task.spawn(function()
 		local ArsenalTableOfParts = {"HeadHB", "HumanoidRootPart"}
 		local HeadSize = Vector3.new(2, 1, 1)
 		local HumanoidRootPartSize = Vector3.new(2, 2, 1)
-		local function ResetArsenalSilentAimbot(Player)
+		local function ResetArsenalSilentAimbot(Player: Player)
 			local Character = Player.Character
 			if Character then
 				for _,BasePart in ipairs(ArsenalTableOfParts) do
@@ -6696,7 +6651,7 @@ task.spawn(function()
 	elseif Games.IsDefuseDivision then
 		--[[local Import = ReplicatedStorage:WaitForChild("Import")
 		local Guns = Import:WaitForChild("Guns")
-		local Viewmodels = Guns:WaitForChild("Viewmodels")
+		local ThirdPersonModels = Guns:WaitForChild("ThirdPersonModels")
 
 		local Assets = Import:WaitForChild("Assets")
 		local Skins = Assets:WaitForChild("Skins")]]
@@ -6707,61 +6662,61 @@ task.spawn(function()
 
 		--[[local KnifeConfiguration = {
 			Bayonet = {
-				Viewmodel = "v_Bayonet",
+				Viewmodel = "Bayonet",
 				Skinfolder = "bayonet",
 				Targets = {"m9"}
 			},
 			Bowie = {
-				Viewmodel = "v_bowie",
+				Viewmodel = "bowie",
 				Skinfolder = nil,
 			},
 			ButterflyKnife = {
-				Viewmodel = "v_ButterflyKnife",
+				Viewmodel = "ButterflyKnife",
 				Skinfolder = "butterflyknife",
 				Targets = {"blade", "latch", "body_legacy"}
 			},
 			Canis = {
-				Viewmodel = "v_canis",
+				Viewmodel = "canis",
 				Skinfolder = "canis",
 				Targets = {"survival"}
 			},
 			Gut = {
-				Viewmodel = "v_gut",
+				Viewmodel = "gut",
 				Skinfolder = "gut",
 				Targets = {"gut"}
 			},
 			Karambit = {
-				Viewmodel = "v_Karambit",
+				Viewmodel = "Karambit",
 				Skinfolder = "karambit",
 				Targets = {"knife_karambit"}
 			},
 			Push = {
-				Viewmodel = "v_push",
+				Viewmodel = "push",
 				Skinfolder = "push",
 				Targets = {"push"}
 			},
 			Skeleton = {
-				Viewmodel = "v_skeleton",
+				Viewmodel = "skeleton",
 				Skinfolder = "skeleton",
 				Targets = {"skeleton"}
 			},
 			Stiletto = {
-				Viewmodel = "v_stiletto",
+				Viewmodel = "stiletto",
 				Skinfolder = "stiletto",
 				Targets = {"blade", "handle"}
 			},
 			Tactical = {
-				Viewmodel = "v_tactical",
+				Viewmodel = "tactical",
 				Skinfolder = "tactical",
 				Targets = {"man"}
 			},
 			Talon = {
-				Viewmodel = "v_talon",
+				Viewmodel = "talon",
 				Skinfolder = "talon",
 				Targets = {"knife_talon"}
 			},
 			Ursus = {
-				Viewmodel = "v_ursus",
+				Viewmodel = "ursus",
 				Skinfolder = "ursus",
 				Targets = {"knife_ursus"}
 			}
@@ -6771,7 +6726,7 @@ task.spawn(function()
 		local SelectedKnifeSkin = "Default"
 
 		local function RemoveViewModel(Name)
-			local ViewModel = Viewmodels:FindFirstChild(Name)
+			local ViewModel = ThirdPersonModels:FindFirstChild(Name)
 			if ViewModel then
 				ViewModel:Destroy()
 			end
@@ -6923,8 +6878,8 @@ task.spawn(function()
 		KnifeSkinChangerTab:AddButton("DefuseDivisionApplyKnifeSkin", {
 			Text = "Apply Knife Skin",
 			Func = function()
-				RemoveViewModel("v_TKnife")
-				RemoveViewModel("v_CTKnife")
+				RemoveViewModel("TKnife")
+				RemoveViewModel("TKnife")
 
 				local function ApplyTexture(KnifeViewModel, Skin, TableOfTargets)
 					if Skin == "Default" or not TableOfTargets then
@@ -6952,8 +6907,9 @@ task.spawn(function()
 					return
 				end
 
-				local ViewModel = Viewmodels:FindFirstChild(Configuration.Viewmodel)
+				local ViewModel = ThirdPersonModels:FindFirstChild(Configuration.Viewmodel)
 				if not ViewModel then
+					print("couldn't find viewmodel in thirdpersonmodels")
 					return
 				end
 
@@ -6963,11 +6919,11 @@ task.spawn(function()
 					Skin = Skins:WaitForChild(SkinFolder):WaitForChild(SelectedKnifeSkin)
 				end
 
-				for _,Name in ipairs({"v_TKnife", "v_CTKnife"}) do
+				for _,Name in ipairs({"TKnife", "CTKnife"}) do
 					local Clone = ViewModel:Clone()
 					Clone.Name = Name
 					ApplyTexture(Clone, Skin, Configuration.Targets)
-					Clone.Parent = Viewmodels
+					Clone.Parent = ThirdPersonModels
 				end
 			end,
 		})]]
@@ -7073,7 +7029,7 @@ task.spawn(function()
 		local OthersTab = Game:AddRightGroupbox("Others")
 
 		local DefaultRootSize = Vector3.new(2, 2, 1)
-		local function ResetHitbox(Root)
+		local function ResetHitbox(Root: Instance?)
 			if Root then
 				Root.Size = DefaultRootSize
 				Root.Transparency = 1
@@ -7220,13 +7176,13 @@ task.spawn(function()
 
 		local Game = Window:AddTab("War Tycoon", "gamepad-2")
 		local SilentAimbotTab = Game:AddLeftGroupbox("Silent Aimbot [Hitbox Expander]")
-		local VisualRemovalsTab = Game:AddRightGroupbox("Removals")
+		local ModificationsTab = Game:AddRightGroupbox("Modifications")
 
 		local GasBlur = false
 		local Landmines = false
 
 		local DefaultRootSize = Vector3.new(2, 2, 1)
-		local function ResetHitbox(Root)
+		local function ResetHitbox(Root: Instance?)
 			if Root then
 				Root.Size = DefaultRootSize
 			end
@@ -7338,22 +7294,601 @@ task.spawn(function()
 			end
 		})
 
-		table.insert(WarTycoon, Camera.ChildAdded:Connect(function(Child)
-			if GasBlur then
-				if Child.Name == "TearGasBlur" then
-					Child:Destroy()
+		local Events = ReplicatedStorage:WaitForChild("ACS_Engine", 10):WaitForChild("Events", 10)
+		local ACS_Guns = ReplicatedStorage:WaitForChild("Configurations"):WaitForChild("ACS_Guns")
+
+		local BulletFireSystem = ReplicatedStorage:WaitForChild("BulletFireSystem")
+		local FireGun = BulletFireSystem:WaitForChild("FireGun")
+		local BulletHit = BulletFireSystem:WaitForChild("BulletHit")
+
+		local RocketSystemEvents = ReplicatedStorage:WaitForChild("RocketSystem"):WaitForChild("Events")
+		local RocketHit = RocketSystemEvents:WaitForChild("RocketHit")
+		local RocketReloadedFX = RocketSystemEvents:WaitForChild("RocketReloadedFX")
+
+		local AntiFallDamage = true
+
+		ModificationsTab:AddToggle("WarTycoonAntiFallDamage", {
+			Text = "Anti Fall Damage",
+			Default = AntiFallDamage,
+			Callback = function(State)
+				AntiFallDamage = State
+				if State then
+					local FallDamage = Events:FindFirstChild("FDMG")
+					if FallDamage then
+						FallDamage.Name = "nikoletoscripts"
+					end
+				else
+					local FallDamage = Events:FindFirstChild("nikoletoscripts")
+					if FallDamage then
+						FallDamage.Name = "FDMG"
+					end
 				end
+			end
+		}):SetValue(true)
+
+		local SelectedTarget = nil
+
+		ModificationsTab:AddDropdown("WarTycoonPlayerList", {
+			SpecialType = "Player",
+			Text = "Select Target",
+			Tooltip = "Select a player to target.",
+			Callback = function(Player)
+				SelectedTarget = Player
+			end
+		})
+
+		local LoopKillTarget = false
+		local LoopKillOldCFrame = nil
+		local KillDistanceOffset = Vector3.new(0, 25, 0)
+
+		ModificationsTab:AddToggle("LoopKillTarget", {
+			Text = "Loop Kill Target [Equip Gun]",
+			Default = false,
+			Callback = function(Value)
+				LoopKillTarget = Value
+
+				if Value then
+					if LocalRoot then
+						LoopKillOldCFrame = LocalRoot.CFrame
+					end
+
+					if not AntiFallDamage then
+						Library:Notify({
+							Title = "[[ combat.cc ]]",
+							Description = "Anti Fall Damage is disabled, you may take fall damage in the process of killing your target.",
+							Time = 3.5
+						})
+					end
+
+					WarTycoon.LoopKillTargetConnection = RunService.Heartbeat:Connect(function()
+						if not SelectedTarget or SelectedTarget == LocalPlayer or not LocalCharacter or not LocalRoot then
+							return
+						end
+
+						local Gun = LocalCharacter:FindFirstChildOfClass("Tool")
+
+						if not Gun then
+							return
+						end
+
+						local Cache = CachedPlayers[SelectedTarget]
+						if not Cache then
+							return
+						end
+
+						local Character = Cache.Character
+						if not Character then
+							return
+						end
+
+						local Humanoid = Cache.Humanoid
+						if not Humanoid or Humanoid.Health <= 0 then
+							return
+						end
+
+						local Root = Cache.Root
+						if not Root then
+							return
+						end
+
+						local Head = Cache.Head
+						if not Head then
+							return
+						end
+
+						LocalRoot.CFrame = Root.CFrame + KillDistanceOffset
+
+						local HitPosition = Head.Position
+						local Settings = require(ACS_Guns:FindFirstChild(Gun.Name):FindFirstChild("Settings"))
+
+						FireGun:FireServer({HitPosition}, Gun, LocalCharacter:FindFirstChild("S" .. Gun.Name), HitPosition, false)
+						BulletHit:FireServer(
+							Gun, Head, HitPosition,
+							{
+								{HitPosition, HitPosition, math.huge},
+								{HitPosition, HitPosition, math.huge}
+							},
+							HitPosition,
+							{
+								FireRate = Settings.FireRate,
+								MaxSpread = Settings.MaxSpread,
+								Mode = Settings.Mode,
+								MaxRecoilPower = Settings.MaxRecoilPower,
+								Distance = Settings.Distance,
+								BSpeed = Settings.BSpeed
+							}
+						)
+					end)
+				else
+					if WarTycoon.LoopKillTargetConnection then
+						WarTycoon.LoopKillTargetConnection:Disconnect()
+						WarTycoon.LoopKillTargetConnection = nil
+					end
+
+					if LocalRoot and LoopKillOldCFrame then
+						LocalRoot.CFrame = LoopKillOldCFrame
+					end
+				end
+			end
+		})
+
+		ModificationsTab:AddButton({
+			Text = "Kill Target [Equip Gun]",
+			ToolTip = "You will be temporarily teleported in the process of killing your target.",
+			Func = function()
+				if LoopKillTarget then
+					if WarTycoon.KillTargetConnection then
+						WarTycoon.KillTargetConnection:Disconnect()
+						WarTycoon.KillTargetConnection = nil
+					end
+					return
+				end
+
+				if not SelectedTarget or not LocalCharacter or not LocalRoot then
+					return
+				end
+
+				if SelectedTarget == LocalPlayer then
+					Library:Notify({
+						Title = "[[ combat.cc ]]",
+						Description = "Blud tried to kill himself.",
+						Time = 3.5
+					})
+					return
+				end
+
+				local Gun = LocalCharacter:FindFirstChildOfClass("Tool")
+
+				if not Gun then
+					Library:Notify({
+						Title = "[[ combat.cc ]]",
+						Description = "Make sure you have a gun equipped first.",
+						Time = 3.5
+					})
+					return
+				end
+
+				local Cache = CachedPlayers[SelectedTarget]
+				if not Cache then
+					Library:Notify({
+						Title = "[[ combat.cc ]]",
+						Description = "Target has not loaded in yet.",
+						Time = 3.5
+					})
+					return
+				end
+
+				local Character = Cache.Character
+				if not Character then
+					Library:Notify({
+						Title = "[[ combat.cc ]]",
+						Description = "Target has not loaded in yet.",
+						Time = 3.5
+					})
+					return
+				elseif Character:FindFirstChild("BaseShieldForceField") or Character:FindFirstChild("StarterShield_ForceField") then
+					Library:Notify({
+						Title = "[[ combat.cc ]]",
+						Description = "Target is shielded by a ForceField.",
+						Time = 3.5
+					})
+					return
+				end
+
+				local Humanoid = Cache.Humanoid
+				if not Humanoid then
+					Library:Notify({
+						Title = "[[ combat.cc ]]",
+						Description = "Target is not alive.",
+						Time = 3.5
+					})
+					return
+				end
+
+				local Root = Cache.Root
+				if not Root then
+					Library:Notify({
+						Title = "[[ combat.cc ]]",
+						Description = "Target is not alive.",
+						Time = 3.5
+					})
+					return
+				end
+
+				local Head = Cache.Head
+				if not Head then
+					Library:Notify({
+						Title = "[[ combat.cc ]]",
+						Description = "Target is not alive.",
+						Time = 3.5
+					})
+					return
+				end
+
+				if not AntiFallDamage then
+					Library:Notify({
+						Title = "[[ combat.cc ]]",
+						Description = "Anti Fall Damage is disabled, you may take fall damage in the process of killing your target.",
+						Time = 3.5
+					})
+				end
+
+				local OldCFrame = LocalRoot.CFrame
+				local Settings = require(ACS_Guns:FindFirstChild(Gun.Name):FindFirstChild("Settings"))
+				local Connection = nil
+				Connection = RunService.Heartbeat:Connect(function()
+					if LoopKillTarget then
+						if WarTycoon.KillTargetConnection then
+							WarTycoon.KillTargetConnection:Disconnect()
+							WarTycoon.KillTargetConnection = nil
+						end
+						return
+					end
+
+					if not Humanoid or not Character or not LocalCharacter or not LocalRoot or not Gun or not Humanoid.Parent or not Gun.Parent or Gun.Parent ~= LocalCharacter then
+						if Connection then
+							Connection:Disconnect()
+							Connection = nil
+						end
+
+						if LocalRoot then
+							LocalRoot.CFrame = OldCFrame
+						end
+
+						Library:Notify({
+							Title = "[[ combat.cc ]]",
+							Description = "Target died or you unequipped your gun, teleported back.",
+							Time = 3.5
+						})
+
+						return
+					end
+
+					if Humanoid.Health <= 0 then
+						if Connection then
+							Connection:Disconnect()
+							Connection = nil
+						end
+
+						if LocalRoot then
+							LocalRoot.CFrame = OldCFrame
+						end
+
+						Library:Notify({
+							Title = "[[ combat.cc ]]",
+							Description = "Target died, teleported back.",
+							Time = 3.5
+						})
+
+						return
+					end
+
+					if Character:FindFirstChild("BaseShieldForceField") or Character:FindFirstChild("StarterShield_ForceField") then
+						if Connection then
+							Connection:Disconnect()
+							Connection = nil
+						end
+
+						if LocalRoot then
+							LocalRoot.CFrame = OldCFrame
+						end
+
+						Library:Notify({
+							Title = "[[ combat.cc ]]",
+							Description = "Target is shielded by a ForceField, teleported back.",
+							Time = 3.5
+						})
+
+						return
+					end
+
+					LocalRoot.CFrame = Root.CFrame + KillDistanceOffset
+
+					local HitPosition = Head.Position
+					FireGun:FireServer({HitPosition}, Gun, LocalCharacter:FindFirstChild("S" .. Gun.Name), HitPosition, false)
+					BulletHit:FireServer(
+						Gun, Head, HitPosition,
+						{
+							{HitPosition, HitPosition, math.huge},
+							{HitPosition, HitPosition, math.huge}
+						},
+						HitPosition,
+						{
+							FireRate = Settings.FireRate,
+							MaxSpread = Settings.MaxSpread,
+							Mode = Settings.Mode,
+							MaxRecoilPower = Settings.MaxRecoilPower,
+							Distance = Settings.Distance,
+							BSpeed = Settings.BSpeed
+						}
+					)
+				end)
+				WarTycoon.KillTargetConnection = Connection
+			end
+		})
+
+		local LoopRPGSpamTarget = false
+
+		ModificationsTab:AddToggle("LoopRPGSpamTarget", {
+			Text = "Loop RPG Spam Target [Equip RPG]",
+			Default = false,
+			Callback = function(Value)
+				LoopRPGSpamTarget = Value
+
+				if Value then
+					WarTycoon.LoopRPGSpamTargetConnection = RunService.Heartbeat:Connect(function()
+						if not SelectedTarget or SelectedTarget == LocalPlayer or not LocalCharacter or not LocalRoot then
+							return
+						end
+
+						local Gun = LocalCharacter:FindFirstChild("RPG")
+
+						if not Gun then
+							return
+						end
+
+						local Cache = CachedPlayers[SelectedTarget]
+						if not Cache then
+							return
+						end
+
+						local Character = Cache.Character
+						if not Character then
+							return
+						end
+
+						local Humanoid = Cache.Humanoid
+						if not Humanoid or Humanoid.Health <= 0 then
+							return
+						end
+
+						local Root = Cache.Root
+						if not Root then
+							return
+						end
+
+						RocketReloadedFX:FireServer(Gun, true)
+
+						if Humanoid.Sit then
+							RocketHit:FireServer({
+								Normal = vector.create(0.9848124980926514, 0, 0.17362114787101746),
+								Player = LocalPlayer,
+								Label = LocalPlayer.Name .. "Rocket3",
+								HitPart = nil,
+								Vehicle = Gun,
+								Position = Root.Position,
+								Weapon = Gun
+							})
+						else
+							local RootPosition = Root.Position
+							local RocketHitArguments = {
+								Normal = vector.create(0.9848124980926514, 0, 0.17362114787101746),
+								Player = LocalPlayer,
+								Label = LocalPlayer.Name .. "Rocket3",
+								HitPart = nil,
+								Vehicle = Gun,
+								Position = RootPosition,
+								Weapon = Gun
+							}
+
+							RocketHit:FireServer(RocketHitArguments)
+							RocketHitArguments.Position = RootPosition + Vector3.new(math.random(10, 40), 0, 0)
+							RocketHit:FireServer(RocketHitArguments)
+						end
+					end)
+				else
+					if WarTycoon.LoopRPGSpamTargetConnection then
+						WarTycoon.LoopRPGSpamTargetConnection:Disconnect()
+						WarTycoon.LoopRPGSpamTargetConnection = nil
+					end
+				end
+			end
+		})
+
+		ModificationsTab:AddButton({
+			Text = "RPG Spam Target [Equip RPG]",
+			Func = function()
+				if LoopRPGSpamTarget then
+					if WarTycoon.RPGSpamTargetConnection then
+						WarTycoon.RPGSpamTargetConnection:Disconnect()
+						WarTycoon.RPGSpamTargetConnection = nil
+					end
+					return
+				end
+
+				if not SelectedTarget or not LocalCharacter or not LocalRoot then
+					return
+				end
+
+				if SelectedTarget == LocalPlayer then
+					Library:Notify({
+						Title = "[[ combat.cc ]]",
+						Description = "Blud tried to kill himself.",
+						Time = 3.5
+					})
+					return
+				end
+
+				local Gun = LocalCharacter:FindFirstChild("RPG")
+
+				if not Gun then
+					Library:Notify({
+						Title = "[[ combat.cc ]]",
+						Description = "Make sure you have an RPG equipped first.",
+						Time = 3.5
+					})
+					return
+				end
+
+				local Cache = CachedPlayers[SelectedTarget]
+				if not Cache then
+					Library:Notify({
+						Title = "[[ combat.cc ]]",
+						Description = "Target has not loaded in yet.",
+						Time = 3.5
+					})
+					return
+				end
+
+				local Character = Cache.Character
+				if not Character then
+					Library:Notify({
+						Title = "[[ combat.cc ]]",
+						Description = "Target has not loaded in yet.",
+						Time = 3.5
+					})
+					return
+				elseif Character:FindFirstChild("BaseShieldForceField") or Character:FindFirstChild("StarterShield_ForceField") then
+					Library:Notify({
+						Title = "[[ combat.cc ]]",
+						Description = "Target is shielded by a ForceField.",
+						Time = 3.5
+					})
+					return
+				end
+
+				local Humanoid = Cache.Humanoid
+				if not Humanoid then
+					Library:Notify({
+						Title = "[[ combat.cc ]]",
+						Description = "Target is not alive.",
+						Time = 3.5
+					})
+					return
+				end
+
+				local Root = Cache.Root
+				if not Root then
+					Library:Notify({
+						Title = "[[ combat.cc ]]",
+						Description = "Target is not alive.",
+						Time = 3.5
+					})
+					return
+				end
+
+				local Connection = nil
+				Connection = RunService.Heartbeat:Connect(function()
+					if LoopRPGSpamTarget then
+						if WarTycoon.RPGSpamTargetConnection then
+							WarTycoon.RPGSpamTargetConnection:Disconnect()
+							WarTycoon.RPGSpamTargetConnection = nil
+						end
+						return
+					end
+
+					if not Humanoid or not Character or not LocalCharacter or not LocalRoot or not Gun or not Humanoid.Parent or not Gun.Parent or Gun.Parent ~= LocalCharacter then
+						if Connection then
+							Connection:Disconnect()
+							Connection = nil
+						end
+
+						Library:Notify({
+							Title = "[[ combat.cc ]]",
+							Description = "Target died or you unequipped your RPG, teleported back.",
+							Time = 3.5
+						})
+
+						return
+					end
+
+					if Humanoid.Health <= 0 then
+						if Connection then
+							Connection:Disconnect()
+							Connection = nil
+						end
+
+						Library:Notify({
+							Title = "[[ combat.cc ]]",
+							Description = "Target died, teleported back.",
+							Time = 3.5
+						})
+
+						return
+					end
+
+					if Character:FindFirstChild("BaseShieldForceField") or Character:FindFirstChild("StarterShield_ForceField") then
+						if Connection then
+							Connection:Disconnect()
+							Connection = nil
+						end
+
+						Library:Notify({
+							Title = "[[ combat.cc ]]",
+							Description = "Target is shielded by a ForceField, teleported back.",
+							Time = 3.5
+						})
+
+						return
+					end
+
+					RocketReloadedFX:FireServer(Gun, true)
+
+					if Humanoid.Sit then
+						RocketHit:FireServer({
+							Normal = vector.create(0.9848124980926514, 0, 0.17362114787101746),
+							Player = LocalPlayer,
+							Label = LocalPlayer.Name .. "Rocket3",
+							HitPart = nil,
+							Vehicle = Gun,
+							Position = Root.Position,
+							Weapon = Gun
+						})
+					else
+						local RootPosition = Root.Position
+						local RocketHitArguments = {
+							Normal = vector.create(0.9848124980926514, 0, 0.17362114787101746),
+							Player = LocalPlayer,
+							Label = LocalPlayer.Name .. "Rocket3",
+							HitPart = nil,
+							Vehicle = Gun,
+							Position = RootPosition,
+							Weapon = Gun
+						}
+
+						RocketHit:FireServer(RocketHitArguments)
+						RocketHitArguments.Position = RootPosition + Vector3.new(math.random(10, 40), 0, 0)
+						RocketHit:FireServer(RocketHitArguments)
+					end
+				end)
+				WarTycoon.RPGSpamTargetConnection = Connection
+			end
+		})
+
+		table.insert(WarTycoon, Camera.ChildAdded:Connect(function(Child)
+			if GasBlur and Child.Name:lower():find("blur") then
+				Child:Destroy()
 			end
 		end))
 
-		VisualRemovalsTab:AddToggle("GasBlurRemoval", {
-			Text = "Gas Blur",
+		ModificationsTab:AddToggle("GasBlurRemoval", {
+			Text = "Gas Blur Removal",
 			Default = GasBlur,
 			Callback = function(Value)
 				GasBlur = Value
 				if Value and Camera then
 					for _,Child in next, Camera:GetChildren() do
-						if Child.Name == "TearGasBlur" then
+						if Child.Name:lower():find("blur") then
 							Child:Destroy()
 						end
 					end
@@ -7361,18 +7896,15 @@ task.spawn(function()
 			end
 		})
 
-		table.insert(WarTycoon, workspace.DescendantAdded:Connect(function(Child)
-			if Landmines then
-				if Child.Name == "Land Mine" then
-					local TouchPart = Child:FindFirstChild("TouchPart")
-					if TouchPart then
-						Child:Destroy()
-					end
+		--[[table.insert(WarTycoon, workspace.DescendantAdded:Connect(function(Child)
+			if Landmines and Child.Name == "Land Mine" then
+				if Child:FindFirstChild("TouchPart") then
+					Child:Destroy()
 				end
 			end
 		end))
 
-		VisualRemovalsTab:AddToggle("Landmines", {
+		ModificationsTab:AddToggle("Landmines", {
 			Text = "Landmines",
 			Default = false,
 			Callback = function(Value)
@@ -7380,19 +7912,27 @@ task.spawn(function()
 				if Value then
 					for _,Child in ipairs(workspace:GetDescendants()) do
 						if Child.Name == "Land Mine" then
-							local TouchPart = Child:FindFirstChild("TouchPart")
-							if TouchPart then
+							if Child:FindFirstChild("TouchPart") then
 								Child:Destroy()
 							end
 						end
 					end
 				end
 			end
-		})
+		})]]
 
 		task.spawn(function()
 			repeat task.wait() until Running == false
 			ClearConnections(WarTycoon)
+
+			local FallDamage = Events:FindFirstChild("nikoletoscripts")
+			if FallDamage then
+				FallDamage.Name = "FDMG"
+			end
+
+			if LoopKillTarget and LoopKillOldCFrame and LocalRoot then
+				LocalRoot.CFrame = LoopKillOldCFrame
+			end
 
 			for _,Cache in next, CachedPlayers do
 				ResetHitbox(Cache.Root)
@@ -7521,7 +8061,7 @@ task.spawn(function()
 		if getgc then
 			local OriginalGCAttributes = {}
 
-			local function UpdateItemAttribute(Name, NewValue)
+			local function UpdateItemAttribute(Name: string, NewValue: any)
 				for _,Table in next, getgc(true) do
 					if type(Table) == "table" and rawget(Table, Name) then
 						local OldValue = Table[Name]
@@ -7546,7 +8086,7 @@ task.spawn(function()
 				end
 			end
 
-			local function RestoreItemAttribute(Name)
+			local function RestoreItemAttribute(Name: string)
 				for Table, Values in next, OriginalGCAttributes do
 					if Values[Name] ~= nil then
 						Table[Name] = Values[Name]
@@ -7789,7 +8329,7 @@ task.spawn(function()
 		return (...)
 	end
 
-	local function Invite(InviteCode)
+	local function Invite(InviteCode: string)
 		httprequest({
 			Url = 'http://127.0.0.1:6463/rpc?v=1',
 			Method = 'POST',

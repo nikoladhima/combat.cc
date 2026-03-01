@@ -58,7 +58,7 @@ else
 	return "skill issue fr"
 end
 
-local ScriptVersion = "2.8.0"
+local ScriptVersion = "2.9.0"
 
 local FileFunctions = {
     listfiles = listfiles or list_files or function(...): {string}

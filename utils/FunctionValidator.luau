@@ -19,7 +19,7 @@ function FunctionValidator.Validate(FunctionName: string | {string}, Fallback: (
         end
 
         for _,Name in next, FunctionName do
-            local Function = rawget(GlobalEnvironment, Name) or GlobalEnvironment[Name]
+            local Function = GlobalEnvironment[Name]
             if Function and type(Function) == "function" then
                 return Function
             end
@@ -27,7 +27,7 @@ function FunctionValidator.Validate(FunctionName: string | {string}, Fallback: (
         return Fallback
     end
 
-    local Function = rawget(GlobalEnvironment, FunctionName) or GlobalEnvironment[FunctionName]
+    local Function = GlobalEnvironment[FunctionName]
     if not Function or type(Function) ~= "function" then
         return Fallback
     end

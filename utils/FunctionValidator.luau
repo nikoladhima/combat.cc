@@ -1,5 +1,9 @@
 local _,GlobalEnvironment = pcall(function()
-    return {}
+    return (
+        getgenv or get_genv or get_g_env
+        or getglobalenv or get_globalenv or get_global_env
+        or getglobalenvironment or get_globalenvironment or get_global_environment
+    )()
 end)
 
 if not GlobalEnvironment then
@@ -15,7 +19,7 @@ function FunctionValidator.Validate(FunctionName: string | {string}, Fallback: (
         end
 
         for _,Name in next, FunctionName do
-            local Function = GlobalEnvironment[Name]
+            local Function = rawget(GlobalEnvironment, Name) or GlobalEnvironment[Name]
             if Function and type(Function) == "function" then
                 return Function
             end
@@ -23,7 +27,7 @@ function FunctionValidator.Validate(FunctionName: string | {string}, Fallback: (
         return Fallback
     end
 
-    local Function = GlobalEnvironment[FunctionName]
+    local Function = rawget(GlobalEnvironment, FunctionName) or GlobalEnvironment[FunctionName]
     if not Function or type(Function) ~= "function" then
         return Fallback
     end

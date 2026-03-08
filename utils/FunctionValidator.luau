@@ -10,7 +10,6 @@ if not GlobalEnvironment then
     return nil
 end
 
-
 local FunctionValidator = {}
 
 function FunctionValidator.Validate(FunctionName: string | {string}, Fallback: (...any) -> any, IsSolara: boolean?)

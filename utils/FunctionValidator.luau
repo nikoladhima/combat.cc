@@ -14,7 +14,7 @@ local FunctionValidator = {}
 
 function FunctionValidator.Validate(FunctionName: string | {string}, Fallback: (...any) -> any, IsSolara: boolean?)
     if type(FunctionName) == "table" then
-        if FunctionName.hookmetamethod and IsSolara then
+        if FunctionName[1] == "hookmetamethod" and IsSolara then
             return Fallback
         end
 

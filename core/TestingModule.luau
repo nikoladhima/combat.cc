@@ -95,14 +95,12 @@ Module.Tables = {
     Mouse = {
         Press = {
             {"mouse1press", "mouse1_press", "mouse_1_press"},
-            {"mouse2press", "mouse2_press", "mouse_2_press"},
             function(): boolean
                 return true
             end
         },
         Release = {
             {"mouse1release", "mouse1_release", "mouse_1_release"},
-            {"mouse2release", "mouse2_release", "mouse_2_release"},
             function(): boolean
                 return true
             end

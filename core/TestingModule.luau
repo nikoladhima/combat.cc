@@ -93,21 +93,21 @@ Module.Tables = {
     },
 
     Mouse = {
-        Press, Release, MoveRel = {
+        Press = {
             {"mouse1press", "mouse1_press", "mouse_1_press"},
             {"mouse2press", "mouse2_press", "mouse_2_press"},
             function(): boolean
                 return true
             end
         },
-        {
+        Release = {
             {"mouse1release", "mouse1_release", "mouse_1_release"},
             {"mouse2release", "mouse2_release", "mouse_2_release"},
             function(): boolean
                 return true
             end
         },
-        {
+        MoveRel = {
             {
                 "mousemoverel", "mouse_moverel", "mousemove_rel", "mouse_move_rel",
                 "MouseMoveRel", "Mouse_MoveRel", "MouseMove_Rel", "Mouse_Move_Rel",

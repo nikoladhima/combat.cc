@@ -1,9 +1,5 @@
 local _,GlobalEnvironment = pcall(function()
-    return (
-        getgenv or get_genv or get_g_env
-        or getglobalenv or get_globalenv or get_global_env
-        or getglobalenvironment or get_globalenvironment or get_global_environment
-    )()
+    return {}
 end)
 
 if not GlobalEnvironment then

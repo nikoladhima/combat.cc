@@ -13,11 +13,11 @@ end
 local FunctionValidator = {}
 
 function FunctionValidator.Validate(FunctionName: string | {string}, Fallback: (...any) -> any, IsSolara: boolean?)
-    if type(FunctionName) == "string" and FunctionName == "hookmetamethod" and IsSolara then
-        return Fallback
-    end
-
     if type(FunctionName) == "table" then
+        if FunctionName.hookmetamethod and IsSolara then
+            return Fallback
+        end
+
         for _,Name in next, FunctionName do
             local Function = rawget(GlobalEnvironment, Name) or GlobalEnvironment[Name]
             if Function and type(Function) == "function" then

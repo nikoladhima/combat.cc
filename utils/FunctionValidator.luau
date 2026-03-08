@@ -10,19 +10,28 @@ if not GlobalEnvironment then
     return nil
 end
 
+
 local FunctionValidator = {}
 
-function FunctionValidator.Validate(FunctionName: string, Fallback: (...any) -> any, IsSolara: boolean?)
-    if FunctionName == "hookmetamethod" and IsSolara then
+function FunctionValidator.Validate(FunctionName: string | {string}, Fallback: (...any) -> any, IsSolara: boolean?)
+    if type(FunctionName) == "string" and FunctionName == "hookmetamethod" and IsSolara then
+        return Fallback
+    end
+
+    if type(FunctionName) == "table" then
+        for _,Name in next, FunctionName do
+            local Function = rawget(GlobalEnvironment, Name) or GlobalEnvironment[Name]
+            if Function and type(Function) == "function" then
+                return Function
+            end
+        end
         return Fallback
     end
 
     local Function = rawget(GlobalEnvironment, FunctionName) or GlobalEnvironment[FunctionName]
-
-    if not Function or typeof(Function) ~= "function" then
+    if not Function or type(Function) ~= "function" then
         return Fallback
     end
-
     return Function
 end
 

@@ -127,7 +127,7 @@ Module.Tables = {
     },
 
     HookMetaMethod = {
-        {"hookmetamethod", "hook_metamethod", "hookmeta_method", "hook_meta_method"}, identifyexecutor():lower():find("solara")
+        "hookmetamethod", "hook_metamethod", "hookmeta_method", "hook_meta_method"
     },
 
     GetNameCallMethod = {

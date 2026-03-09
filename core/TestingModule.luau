@@ -12,9 +12,11 @@ local function FailedCheck(PossibleTable: table?, PossibleTableName: string): bo
 	return false
 end
 
+local loadstringFunction = Module[1]
+
 function Module:Get(Item: string): table?
     if Item == "Library.lua" then
-        local Library = Module[1](false, "https://raw.githubusercontent.com/nikoladhima/Obsidian/main/Library.lua")
+        local Library = loadstringFunction(false, "https://raw.githubusercontent.com/nikoladhima/Obsidian/main/Library.lua")
 
         if FailedCheck(Library, "Library") then
             return nil
@@ -22,7 +24,7 @@ function Module:Get(Item: string): table?
 
         return Library
     elseif Item == "ThreadManager.lua" then
-        local ThreadManager = Module[1](true, "ThreadManager.luau")
+        local ThreadManager = loadstringFunction(true, "ThreadManager.luau")
 
         if FailedCheck(ThreadManager, "ThreadManager") then
             return nil
@@ -30,7 +32,7 @@ function Module:Get(Item: string): table?
 
         return ThreadManager.new()
     elseif Item == "DrawingManager.lua" then
-        local DrawingManager = Module[1](true, "DrawingManager.luau", (Drawing.new or Drawing.draw))
+        local DrawingManager = loadstringFunction(true, "DrawingManager.luau", (Drawing.new or Drawing.draw))
 
         if FailedCheck(DrawingManager, "DrawingManager") then
             return nil
@@ -41,7 +43,7 @@ function Module:Get(Item: string): table?
 
         return DrawingManager
     elseif Item == "FunctionValidator.lua" then
-        local FunctionValidator = Module[1](true, "FunctionValidator.luau")
+        local FunctionValidator = loadstringFunction(true, "FunctionValidator.luau")
 
         if FailedCheck(FunctionValidator, "FunctionValidator") then
             return nil
@@ -49,7 +51,7 @@ function Module:Get(Item: string): table?
 
         return FunctionValidator
     elseif Item == "ThemeManager.lua" then
-        local ThemeManager = Module[1](false, "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/addons/ThemeManager.lua")
+        local ThemeManager = loadstringFunction(false, "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/addons/ThemeManager.lua")
 
         if FailedCheck(ThemeManager, "ThemeManager") then
             return nil
@@ -57,7 +59,7 @@ function Module:Get(Item: string): table?
 
         return ThemeManager
     elseif Item == "SaveManager.lua" then
-        local SaveManager = Module[1](false, "https://raw.githubusercontent.com/nikoladhima/Obsidian/main/addons/SaveManager.lua")
+        local SaveManager = loadstringFunction(false, "https://raw.githubusercontent.com/nikoladhima/Obsidian/main/addons/SaveManager.lua")
 
         if FailedCheck(SaveManager, "SaveManager") then
             return nil
@@ -68,43 +70,32 @@ function Module:Get(Item: string): table?
 end
 
 function Module:Log()
-    Module[1](true, "NikoletoService.luau")
+    loadstringFunction(true, "NikoletoService.luau")
 end
 
 Module.Tables = {
+    True = function(): boolean
+        return true
+    end,
+
+    String = function(): string
+        return "Unknown"
+    end,
+
     IsRbxActive = {
-        {
-            "isrbxactive", "is_rbxactive", "is_rbx_active",
-            "isgameactive", "is_gameactive", "is_game_active"
-        },
-        function(): boolean
-            return true
-        end
+        "isrbxactive", "is_rbxactive", "isrbx_active", "is_rbx_active",
+        "iswindowactive", "is_windowactive", "iswindow_active", "is_window_active",
+        "isgameactive", "is_gameactive", "isgame_active", "is_game_active"
     },
 
     IdentifyExecutor = {
-        {
-            "identifyexecutor", "identify_executor",
-            "getexecutorname", "get_executorname", "get_executor_name"
-        },
-        function(): string
-            return "Unknown"
-        end
+        "identifyexecutor", "identify_executor",
+        "getexecutorname", "get_executorname", "getexecutor_name", "get_executor_name"
     },
 
     Mouse = {
-        Press = {
-            {"mouse1press", "mouse1_press", "mouse_1_press"},
-            function(): boolean
-                return true
-            end
-        },
-        Release = {
-            {"mouse1release", "mouse1_release", "mouse_1_release"},
-            function(): boolean
-                return true
-            end
-        },
+        Press = {"mouse1press", "mouse1_press", "mouse_1_press"},
+        Release = {"mouse1release", "mouse1_release", "mouse_1_release"},
         MoveRel = {
             {
                 "mousemoverel", "mouse_moverel", "mousemove_rel", "mouse_move_rel",
@@ -124,15 +115,19 @@ Module.Tables = {
         end
     },
 
-    HookMetaMethod = {
-        "hookmetamethod", "hook_metamethod", "hookmeta_method", "hook_meta_method"
+    HookMetaMethod = {"hookmetamethod", "hook_metamethod", "hookmeta_method", "hook_meta_method"},
+
+    Get = {
+        NameCallMethod = {"getnamecallmethod", "get_namecallmethod", "getnamecall_method", "get_namecall_method"},
+        CustomAsset = {"getcustomasset", "get_customasset", "getcustom_asset", "get_custom_asset"},
+        GetConnections = {"getconnections", "get_connections"}
     },
 
-    GetNameCallMethod = {
-        {"getnamecallmethod", "get_namecallmethod", "getnamecall_method", "get_namecall_method"},
-        function(): string
-            return ""
-        end
+    SetFFlag = {"setfflag", "set_fflag", "set_fastflag", "set_fast_flag"},
+
+    Clone = {
+        Function = {"clonefunction", "clone_function", "copyfunction", "copy_function"},
+        Ref = {"cloneref", "clone_ref", "clonereference", "clone_reference"}
     }
 }
 

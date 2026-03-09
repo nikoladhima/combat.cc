@@ -1,4 +1,4 @@
-local _,GlobalEnvironment = pcall(function()
+local _,Environment = pcall(function()
     return (
         getgenv or get_genv or get_g_env
         or getglobalenv or get_globalenv or get_global_env
@@ -6,20 +6,23 @@ local _,GlobalEnvironment = pcall(function()
     )()
 end)
 
-if not GlobalEnvironment then
-    return nil
+if not Environment then
+    Environment = getfenv(0)
+    if not Environment then
+        return nil, "broken ass executor :skull:"
+    end
 end
 
 local FunctionValidator = {}
 
-function FunctionValidator.Validate(FunctionName: string | {string}, Fallback: (...any) -> any, IsSolara: boolean?)
-    if type(FunctionName) == "table" then
-        if FunctionName[1] == "hookmetamethod" and IsSolara then
+function FunctionValidator.Validate(Name: string | {string}, Fallback: (...any) -> any, IsSolara: boolean?)
+    if type(Name) == "table" then
+        if Name[1] == "hookmetamethod" and IsSolara then
             return Fallback
         end
 
-        for _,Name in next, FunctionName do
-            local Function = rawget(GlobalEnvironment, Name) or GlobalEnvironment[Name]
+        for _,FunctionName in next, Name do
+            local Function = rawget(Environment, FunctionName) or Environment[FunctionName]
             if Function and type(Function) == "function" then
                 return Function
             end
@@ -27,7 +30,7 @@ function FunctionValidator.Validate(FunctionName: string | {string}, Fallback: (
         return Fallback
     end
 
-    local Function = rawget(GlobalEnvironment, FunctionName) or GlobalEnvironment[FunctionName]
+    local Function = rawget(Environment, Name) or Environment[Name]
     if not Function or type(Function) ~= "function" then
         return Fallback
     end

@@ -74,6 +74,10 @@ function Module:Log()
 end
 
 Module.Tables = {
+    Blank = function(): string
+        return "this executor ass bro :skull:"
+    end,
+
     False = function(): boolean
         return false
     end,
@@ -98,7 +102,7 @@ Module.Tables = {
         IsFile = {"isfile", "is_file"},
         ReadFile = {
             {"readfile", "read_file", "readfileasync", "readfile_async", "read_file_async"},
-            function(...): string
+            function(... : any): string
                 return "{}"
             end
         },

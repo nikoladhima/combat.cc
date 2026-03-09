@@ -74,6 +74,10 @@ function Module:Log()
 end
 
 Module.Tables = {
+    False = function(): boolean
+        return false
+    end,
+
     True = function(): boolean
         return true
     end,
@@ -81,6 +85,27 @@ Module.Tables = {
     String = function(): string
         return "Unknown"
     end,
+
+    Workspace = {
+        ListFiles = {
+            {"listfiles", "list_files"},
+            function(String: string): {string}
+                return {}
+            end
+        },
+        MakeFolder = {"makefolder", "make_folder", "createfolder", "create_folder"},
+        IsFolder = {"isfolder", "is_folder"},
+        IsFile = {"isfile", "is_file"},
+        ReadFile = {
+            {"readfile", "read_file", "readfileasync", "readfile_async", "read_file_async"},
+            function(...): string
+                return "{}"
+            end
+        },
+        WriteFile = {"writefile", "write_file", "writefileasync", "writefile_async", "write_file_async"},
+        DelFile = {"delfile", "del_file", "deletefile", "delete_file"},
+    },
+
 
     IsRbxActive = {
         "isrbxactive", "is_rbxactive", "isrbx_active", "is_rbx_active",

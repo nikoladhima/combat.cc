@@ -94,8 +94,8 @@ Module.Tables = {
     },
 
     Mouse = {
-        Press = {"mouse1press", "mouse1_press", "mouse_1_press"},
-        Release = {"mouse1release", "mouse1_release", "mouse_1_release"},
+        Press = {"mouse1press", "mouse_1press", "mouse1_press", "mouse_1_press"},
+        Release = {"mouse1release", "mouse_1release", "mouse1_release", "mouse_1_release"},
         MoveRel = {
             {
                 "mousemoverel", "mouse_moverel", "mousemove_rel", "mouse_move_rel",
@@ -118,9 +118,9 @@ Module.Tables = {
     HookMetaMethod = {"hookmetamethod", "hook_metamethod", "hookmeta_method", "hook_meta_method"},
 
     Get = {
-        NameCallMethod = {"getnamecallmethod", "get_namecallmethod", "getnamecall_method", "get_namecall_method"},
+        NameCallMethod = {"getnamecallmethod", "get_namecallmethod", "getnamecall_method", "get_namecall_method", "get_name_call_method"},
         CustomAsset = {"getcustomasset", "get_customasset", "getcustom_asset", "get_custom_asset"},
-        GetConnections = {"getconnections", "get_connections"}
+        Connections = {"getconnections", "get_connections"}
     },
 
     SetFFlag = {"setfflag", "set_fflag", "set_fastflag", "set_fast_flag"},

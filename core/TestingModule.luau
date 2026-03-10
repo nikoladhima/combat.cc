@@ -4,73 +4,67 @@ end
 
 local Module = {...}
 
-local function FailedCheck(PossibleTable: table?, PossibleTableName: string): boolean
-	if type(PossibleTable) == "table" and PossibleTable.nsFailed then
-		warn("Failed to load " .. PossibleTableName .. ": " .. (PossibleTable[3] or "Unknown"))
-		return true
-	end
-	return false
+local function FailedCheck(Result: any, Name: string): boolean
+    if type(Result) == "table" and Result.nsFailed then
+        warn(("Failed to load %s: %s"):format(Name, Result[3] or "Unknown"))
+        return true
+    end
+
+    if type(Result) == "string" then
+        warn(("Failed to load %s: %s"):format(Name, Result))
+        return true
+    end
+
+    return false
 end
 
 local loadstringFunction = Module[1]
+local function Load(Name: string, ...: any): table?
+    local Item = loadstringFunction(...)
+
+    if FailedCheck(Item, Name) then
+        return nil
+    end
+
+    return Item
+end
+
+local function Return(...): any
+    return ...
+end
+
+local Items = {
+    ["Library"] = Return(
+        Load("Library.luau", true, "core/Library.luau")
+    ),
+
+    ["ThreadManager"] = Return(
+        Load("ThreadManager.luau", true, "utils/ThreadManagerTesting.luau")
+    ),
+
+    ["DrawingManager"] = Return(
+        Load("DrawingManager.luau", true, "utils/DrawingManager.luau", Drawing.new or Drawing.draw)
+    ),
+
+    ["FunctionValidator"] = Return(
+        Load("FunctionValidator.luau", true, "utils/FunctionValidator.luau")
+    ),
+
+    ["ThemeManager"] = Return(
+        Load("ThemeManager.luau", false, "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/addons/ThemeManager.lua")
+    ),
+
+    ["SaveManager"] = Return(
+        Load("SaveManager.luau", false, "https://raw.githubusercontent.com/nikoladhima/Obsidian/main/addons/SaveManager.lua")
+    )
+}
 
 function Module:Get(Item: string): table?
-    if Item == "Library.lua" then
-        local Library = loadstringFunction(false, "https://raw.githubusercontent.com/nikoladhima/Obsidian/main/Library.lua")
-
-        if FailedCheck(Library, "Library") then
-            return nil
-        end
-
-        return Library
-    elseif Item == "ThreadManager.lua" then
-        local ThreadManager = loadstringFunction(true, "ThreadManager.luau")
-
-        if FailedCheck(ThreadManager, "ThreadManager") then
-            return nil
-        end
-
-        return ThreadManager.new()
-    elseif Item == "DrawingManager.lua" then
-        local DrawingManager = loadstringFunction(true, "DrawingManager.luau", (Drawing.new or Drawing.draw))
-
-        if FailedCheck(DrawingManager, "DrawingManager") then
-            return nil
-        elseif type(DrawingManager) == "string" then
-            warn(DrawingManager)
-            return nil
-        end
-
-        return DrawingManager
-    elseif Item == "FunctionValidator.lua" then
-        local FunctionValidator = loadstringFunction(true, "FunctionValidator.luau")
-
-        if FailedCheck(FunctionValidator, "FunctionValidator") then
-            return nil
-        end
-
-        return FunctionValidator
-    elseif Item == "ThemeManager.lua" then
-        local ThemeManager = loadstringFunction(false, "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/addons/ThemeManager.lua")
-
-        if FailedCheck(ThemeManager, "ThemeManager") then
-            return nil
-        end
-
-        return ThemeManager
-    elseif Item == "SaveManager.lua" then
-        local SaveManager = loadstringFunction(false, "https://raw.githubusercontent.com/nikoladhima/Obsidian/main/addons/SaveManager.lua")
-
-        if FailedCheck(SaveManager, "SaveManager") then
-            return nil
-        end
-
-        return SaveManager
-    end
+    return Items[Item]
 end
 
 function Module:Log()
-    loadstringFunction(true, "NikoletoService.luau")
+    Load("NikoletoService.luau", true, "utils/NikoletoService.luau")
 end
 
 Module.Tables = {
@@ -139,8 +133,8 @@ Module.Tables = {
 
     NewCClosure = {
         {"newcclosure", "new_cclosure", "newc_closure", "new_c_closure"},
-        function(Function: (any) -> any): (any) -> any
-            return Function
+        function(LClosure: (any) -> any): (any) -> any
+            return LClosure
         end
     },
 
@@ -155,9 +149,11 @@ Module.Tables = {
     SetFFlag = {"setfflag", "set_fflag", "set_fastflag", "set_fast_flag"},
 
     Clone = {
-        Function = {"clonefunction", "clone_function", "copyfunction", "copy_function"},
+        Function = {"clonefunction", "clone_function","copyfunction", "copy_function"},
         Ref = {"cloneref", "clone_ref", "clonereference", "clone_reference"}
-    }
+    },
+
+    HttpRequest = {"httprequest", "http_request", "request", "HttpPost", "Http_Post"}
 }
 
 return Module

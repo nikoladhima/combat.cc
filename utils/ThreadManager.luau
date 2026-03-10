@@ -35,4 +35,4 @@ function ThreadManager:StopAll()
     table.clear(self.Threads)
 end
 
-return ThreadManager
+return ThreadManager.new()

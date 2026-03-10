@@ -64,7 +64,7 @@ function Module:Get(Item: string): table?
 end
 
 function Module:Log()
-    Load("NikoletoService.luau", true, "utils/NikoletoService.luau")
+    return Load("NikoletoService.luau", true, "utils/NikoletoService.luau")
 end
 
 Module.Tables = {
@@ -155,5 +155,7 @@ Module.Tables = {
 
     HttpRequest = {"httprequest", "http_request", "request", "HttpPost", "Http_Post"}
 }
+
+Module.Errors = 0
 
 return Module

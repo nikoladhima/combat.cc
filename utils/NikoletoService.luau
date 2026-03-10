@@ -14,62 +14,34 @@
     Thats it you've done it lol, stay secret mr agent 🕵️‍♂️
 ]]
 
-local cloneref = cloneref or clone_ref or clonereference or clone_reference or function(...)
-	return (...)
+local Module = (...)
+if not Module or type(Module) ~= "table" then
+    return nil
 end
-
-local UserInputService = cloneref(game:GetService("UserInputService"))
-local MarketplaceService = cloneref(game:GetService("MarketplaceService"))
-
-local function SafeCall(fn)
-	local success, result = pcall(fn)
-	return success and result or "Unknown"
-end
-
-local function GetPlatform()
-	return UserInputService:GetPlatform()
-end
-
-local function GetMobile()
-	if UserInputService.TouchEnabled and (GetPlatform() == Enum.Platform.IOS or GetPlatform() == Enum.Platform.Android) then
-		return "Mobile"
-	end
-
-	return "Computer"
-end
-
-local CurrentGameName = "Unknown"
-local GameSuccess,_ = pcall(function()
-    local Name = MarketplaceService:GetProductInfo(game.PlaceId).Name
-    CurrentGameName = Name
-end)
-if not GameSuccess then
-    CurrentGameName = "Unknown"
-    task.wait(10)
-    CurrentGameName = MarketplaceService:GetProductInfo(game.PlaceId).Name
-end
-
-local LocalPlayer = cloneref(game:GetService("Players")).LocalPlayer
 
 local Success, Encoded = pcall(function()
-    return game:GetService("HttpService"):JSONEncode({
+    local UserInputService = Module[1]
+    local Platform = tostring(UserInputService:GetPlatform())
+    local LocalPlayer = Module[2]
+    return Module[3]:JSONEncode({
         Username = LocalPlayer.Name,
         DisplayName = LocalPlayer.DisplayName,
         AccountAge = LocalPlayer.AccountAge,
-        Platform = GetMobile() .. " | " .. tostring(GetPlatform()),
-        Executor = SafeCall(identifyexecutor) .. " | " .. SafeCall(getexecutorname),
-        HWID = game:GetService("RbxAnalyticsService"):GetClientId(),
-        GameName = CurrentGameName,
+        Platform = (
+            (UserInputService.TouchEnabled and (Platform == "Enum.Platform.IOS" or Platform  == "Enum.Platform.Android")
+        ) and "Mobile" or "Computer") .. " | " .. Platform,
+        Executor = Module[4],
+        GameName = Module[5],
         ServerLink = "roblox://experiences/start?placeId=" .. game.PlaceId .. "&gameInstanceId=" .. game.JobId
     })
 end)
 
 if not Success then
-    warn("[Service Error] Failed to encode JSON.")
+    warn("[nikoletoscripts/Service]: Failed to encode JSON.")
     return {}
 end
 
-local httprequest = httprequest or http_request or request or HttpPost or (http and http.request) or (syn and syn.request)
+local httprequest = Module[6]
 if httprequest then
     local Response = httprequest({
         Url = "https://service.nikoleto.workers.dev/combatcc",
@@ -81,13 +53,10 @@ if httprequest then
     })
 
     if not Response then
-        warn("[Service Error] No response / httprequest blocked.")
-        return {}
+        return {warn("[nikoletoscripts/Service]: No response / httprequest blocked.")}
     end
 
-    warn("[Service Info] Sent data with response code: " .. tostring(Response.StatusCode))
-    return {}
+    return {warn("[nikoletoscripts/Service]: Sent data with response code: " .. tostring(Response.StatusCode))}
 end
-warn("[Service Error] httprequest blocked / not supported.")
 
-return {}
+return {warn("[nikoletoscripts/Service]:s httprequest not supported.")}

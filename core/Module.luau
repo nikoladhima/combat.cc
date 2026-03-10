@@ -39,7 +39,7 @@ local Items = {
     ),
 
     ["ThreadManager"] = Return(
-        Load("ThreadManager.luau", true, "utils/ThreadManagerTesting.luau")
+        Load("ThreadManager.luau", true, "utils/ThreadManager.luau")
     ),
 
     ["DrawingManager"] = Return(

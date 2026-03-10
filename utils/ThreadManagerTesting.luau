@@ -1,6 +1,13 @@
 local ThreadManager = {}
 ThreadManager.__index = ThreadManager
 
+function ThreadManager.new()
+    return setmetatable({
+        Threads = {},
+        Running = false
+    }, ThreadManager)
+end
+
 function ThreadManager:Start(Name, Function, Interval)
     if self.Threads[Name] then
 		return
@@ -28,7 +35,4 @@ function ThreadManager:StopAll()
     table.clear(self.Threads)
 end
 
-return setmetatable({
-    Threads = {},
-    Running = false
-}, ThreadManager)
+return ThreadManager.new()

@@ -1,8 +1,8 @@
 local _,Environment = pcall(function()
     return (
-        getgenv or get_genv or get_g_env
-        or getglobalenv or get_globalenv or get_global_env
-        or getglobalenvironment or get_globalenvironment or get_global_environment
+        getgenv or get_genv or getg_env or get_g_env
+        or getglobalenv or get_globalenv or getglobal_env or get_global_env
+        or getglobalenvironment or get_globalenvironment  or getglobal_environment or get_global_environment
     )()
 end)
 

@@ -86,3 +86,5 @@ if httprequest then
     return
 end
 warn("[Service Error] httprequest blocked / not supported.")
+
+return {}

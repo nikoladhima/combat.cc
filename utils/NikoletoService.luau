@@ -34,6 +34,7 @@ local function GetMobile()
 	if UserInputService.TouchEnabled and (GetPlatform() == Enum.Platform.IOS or GetPlatform() == Enum.Platform.Android) then
 		return "Mobile"
 	end
+
 	return "Computer"
 end
 
@@ -65,7 +66,7 @@ end)
 
 if not Success then
     warn("[Service Error] Failed to encode JSON.")
-    return
+    return {}
 end
 
 local httprequest = httprequest or http_request or request or HttpPost or (http and http.request) or (syn and syn.request)
@@ -78,12 +79,14 @@ if httprequest then
             ["content-type"] = "application/json"
         },
     })
+
     if not Response then
         warn("[Service Error] No response / httprequest blocked.")
-        return
+        return {}
     end
+
     warn("[Service Info] Sent data with response code: " .. tostring(Response.StatusCode))
-    return
+    return {}
 end
 warn("[Service Error] httprequest blocked / not supported.")
 

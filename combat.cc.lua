@@ -45,7 +45,164 @@ local function nsloadstring(UseDefaultPath: boolean, Path: string, ...: any): an
     return Result
 end
 
-local Module = nsloadstring(true, "core/Module.luau", nsloadstring)
+local Module = loadstring([===[
+	if not (...) or type(...) ~= "function" then
+		return nil
+	end
+
+	local Module = {...}
+
+	local function FailedCheck(Result: any, Name: string): boolean
+		if type(Result) == "table" and Result.nsFailed then
+			warn(("Failed to load %s: %s"):format(Name, Result[3] or "Unknown"))
+			return true
+		end
+
+		if type(Result) == "string" then
+			warn(("Failed to load %s: %s"):format(Name, Result))
+			return true
+		end
+
+		return false
+	end
+
+	local loadstringFunction = Module[1]
+	local function Load(Name: string, ...: any): table?
+		local Item = loadstringFunction(...)
+
+		if FailedCheck(Item, Name) then
+			return nil
+		end
+
+		return Item
+	end
+
+	local Items = {
+		["ThreadManager"] = Load(
+			"ThreadManager.luau", true, "utils/ThreadManager.luau"
+		),
+
+		["DrawingManager"] = Load(
+			"DrawingManager.luau", true, "utils/DrawingManager.luau", Drawing.new or Drawing.draw
+		),
+
+		["FunctionValidator"] = Load(
+			"FunctionValidator.luau", true, "utils/FunctionValidator.luau"
+		),
+
+		["ThemeManager"] = Load(
+			"ThemeManager.luau", false, "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/addons/ThemeManager.lua"
+		),
+
+		["SaveManager"] = Load(
+			"SaveManager.luau", false, "https://raw.githubusercontent.com/nikoladhima/Obsidian/main/addons/SaveManager.lua"
+		)
+	}
+
+	function Module:Get(Item: string): table?
+		return Items[Item]
+	end
+
+	function Module:GetLibrary(Table: {any}): table?
+		return Load("Library.luau", true, "core/Library.luau", Table)
+	end
+
+	function Module:Log(Table: {any}): table?
+		return Load("NikoletoService.luau", true, "utils/NikoletoService.luau", Table)
+	end
+
+	Module.Tables = {
+		Blank = function(): string
+			return "this executor ass bro :skull:"
+		end,
+
+		False = function(): boolean
+			return false
+		end,
+
+		True = function(): boolean
+			return true
+		end,
+
+		String = function(): string
+			return "Unknown"
+		end,
+
+		Workspace = {
+			ListFiles = {
+				{"listfiles", "list_files"},
+				function(Name: string): {string}
+					return {""}
+				end
+			},
+			MakeFolder = {"makefolder", "make_folder", "createfolder", "create_folder"},
+			IsFolder = {"isfolder", "is_folder"},
+			IsFile = {"isfile", "is_file"},
+			ReadFile = {
+				{"readfile", "read_file", "readfileasync", "readfile_async", "read_file_async"},
+				function(Name: string): string
+					return "{" .. Name .. "}"
+				end
+			},
+			WriteFile = {"writefile", "write_file", "writefileasync", "writefile_async", "write_file_async"},
+			DelFile = {"delfile", "del_file", "deletefile", "delete_file"},
+		},
+
+		IsRbxActive = {
+			"isrbxactive", "is_rbxactive", "isrbx_active", "is_rbx_active",
+			"iswindowactive", "is_windowactive", "iswindow_active", "is_window_active",
+			"isgameactive", "is_gameactive", "isgame_active", "is_game_active"
+		},
+
+		IdentifyExecutor = {
+			"identifyexecutor", "identify_executor",
+			"getexecutorname", "get_executorname", "getexecutor_name", "get_executor_name"
+		},
+
+		Mouse = {
+			Press = {"mouse1press", "mouse_1press", "mouse1_press", "mouse_1_press"},
+			Release = {"mouse1release", "mouse_1release", "mouse1_release", "mouse_1_release"},
+			MoveRel = {
+				{
+					"mousemoverel", "mouse_moverel", "mousemove_rel", "mouse_move_rel",
+					"MouseMoveRel", "Mouse_MoveRel", "MouseMove_Rel", "Mouse_Move_Rel",
+					"setmousepos", "set_mousepos", "setmouse_pos", "set_mouse_pos"
+				},
+				function(X: number, Y: number): (number, number)
+					return X, Y
+				end
+			}
+		},
+
+		NewCClosure = {
+			{"newcclosure", "new_cclosure", "newc_closure", "new_c_closure"},
+			function(LClosure: (any) -> any): (any) -> any
+				return LClosure
+			end
+		},
+
+		HookMetaMethod = {"hookmetamethod", "hook_metamethod", "hookmeta_method", "hook_meta_method"},
+
+		Get = {
+			NameCallMethod = {"getnamecallmethod", "get_namecallmethod", "getnamecall_method", "get_namecall_method", "get_name_call_method"},
+			CustomAsset = {"getcustomasset", "get_customasset", "getcustom_asset", "get_custom_asset"},
+			Connections = {"getconnections", "get_connections"}
+		},
+
+		SetFFlag = {"setfflag", "set_fflag", "set_fastflag", "set_fast_flag"},
+
+		Clone = {
+			Function = {"clonefunction", "clone_function","copyfunction", "copy_function"},
+			Ref = {"cloneref", "clone_ref", "clonereference", "clone_reference"}
+		},
+
+		HttpRequest = {"httprequest", "http_request", "request", "HttpPost", "Http_Post"}
+	}
+
+	Module.Errors = 0
+
+	return Module
+]===])(nsloadstring)
 if not Module or (type(Module) == "table" and Module.nsFailed) then
 	warn("Failed to load Module: " .. Module[3])
 	return
@@ -53,16 +210,182 @@ else
 	print("[nikoletoscripts/combat.cc/core]: Loaded Module.")
 end
 
-local Library = Module:Get("Library")
-local ThreadManager = Module:Get("ThreadManager")
-local DrawingManager = Module:Get("DrawingManager")
-local FunctionValidator = Module:Get("FunctionValidator")
+local ThreadManager = loadstring([===[
+	local ThreadManager = {}
+	ThreadManager.__index = ThreadManager
 
-if not Library or not ThreadManager or not DrawingManager or not FunctionValidator then
+	function ThreadManager.new()
+		return setmetatable({
+			Threads = {},
+			Running = false
+		}, ThreadManager)
+	end
+
+	function ThreadManager:Start(Name, Function, Interval)
+		if self.Threads[Name] then
+			return
+		end
+
+		self.Running = true
+		self.Threads[Name] = true
+
+		local Thread = task.spawn(function()
+			while self.Running and self.Threads[Name] do
+				Function()
+				task.wait(Interval)
+			end
+		end)
+
+		self.Threads[Name] = Thread
+	end
+
+	function ThreadManager:Stop(Name)
+		self.Threads[Name] = nil
+	end
+
+	function ThreadManager:StopAll()
+		self.Running = false
+		table.clear(self.Threads)
+	end
+
+	return ThreadManager.new()
+]===])()
+local DrawingManager = loadstring([===[
+	local DrawingNew = (...)
+
+	if not DrawingNew or type(DrawingNew) ~= "function" then
+		return "Failed to get Drawing function."
+	end
+
+	local DrawingManager = {}
+	DrawingManager.__index = DrawingManager
+
+	function DrawingManager.new(Type: string, Properties: table?)
+		local DrawingObject = DrawingNew(Type)
+
+		if Properties then
+			for Property, Value in next, Properties do
+				local Success, Error = pcall(function()
+					if DrawingObject[Property] then
+						DrawingObject[Property] = Value
+					end
+				end)
+
+				if not Success then
+					print("[DEBUG] Error setting", Property, "on", Type .. ":", Error)
+				end
+			end
+		end
+
+		return setmetatable({
+			DrawingObject = DrawingObject
+		}, DrawingManager)
+	end
+
+	DrawingManager.__index = function(self: table?, Key: string?)
+		return DrawingManager[Key] or self.DrawingObject[Key]
+	end
+
+	DrawingManager.__newindex = function(self: table?, Key: string?, Value: any)
+		self.DrawingObject[Key] = Value
+	end
+
+	for _,Property in ipairs({
+		"Visible", "Center", "Size", "Color",
+		"Filled", "Thickness", "Transparency",
+		"Radius", "Text"
+	}) do
+		DrawingManager[Property] = function(self: table?, Value: any)
+			if self.DrawingObject[Property] ~= Value then
+				self.DrawingObject[Property] = Value
+			end
+			return self
+		end
+	end
+
+	for _,Property in ipairs({
+		"Position", "From", "To",
+		"PointA", "PointB", "PointC"
+	}) do
+		DrawingManager[Property] = function(self: table?, Value: any)
+			self.DrawingObject[Property] = Value
+			return self
+		end
+	end
+
+	function DrawingManager:Nil()
+		return pcall(function()
+			self.DrawingObject:Remove()
+		end)
+	end
+
+	return DrawingManager
+]===])(DrawingNew)
+local FunctionValidator = loadstring([===[
+	local Success, Environment = pcall(function()
+		return (
+			getgenv or get_genv or getg_env or get_g_env
+			or getglobalenv or get_globalenv or getglobal_env or get_global_env
+			or getglobalenvironment or get_globalenvironment  or getglobal_environment or get_global_environment
+		)()
+	end)
+
+	if not Environment then
+		Environment = getfenv(0)
+		if not Environment then
+			return nil, "broken ass executor :skull:"
+		end
+	end
+
+	local FunctionValidator = {}
+
+	function FunctionValidator.Validate(Name: string | {string}, Fallback: (...any) -> any, IsSolara: boolean?)
+		local function GetFunction(FunctionName: string)
+			local Function = rawget(Environment, FunctionName) or Environment[FunctionName]
+			if type(Function) == "function" then
+				return Function
+			end
+		end
+
+		local Function
+
+		if type(Name) == "table" then
+			if not (Name[1] == "hookmetamethod" and IsSolara) then
+				for _,FunctionName in Name do
+					Function = GetFunction(FunctionName)
+					if Function then
+						break
+					end
+				end
+			end
+		else
+			Function = GetFunction(Name)
+		end
+
+		Function = Function or Fallback
+
+		return setmetatable({IsWaxxed = Function == Fallback}, {
+			__call = function(_, ...) return
+				Function(...)
+			end
+		})
+	end
+
+	function FunctionValidator:GetEnvironment()
+		if Success then
+			return Environment
+		end
+		return nil
+	end
+
+	return FunctionValidator
+]===])()
+
+if not ThreadManager or not DrawingManager or not FunctionValidator then
 	return "skill issue fr"
 end
 
-local ScriptVersion = "2.9.1"
+local ScriptVersion = "2.9.2"
 
 local FileFunctions = {
     listfiles = FunctionValidator.Validate(Module.Tables.Workspace.ListFiles[1], Module.Tables.Workspace.ListFiles[2]),
@@ -81,10 +404,6 @@ end
 if not FileFunctions.isfolder("combat.cc/Sounds") then
 	FileFunctions.makefolder("combat.cc/Sounds")
 end
-
-local Options = Library.Options
-local Toggles = Library.Toggles
-local Watermark = Library:AddDraggableLabel("[nikoletoscripts/combat.cc] | Unknown | 0 | 0")
 
 local ExecutorName = FunctionValidator.Validate(Module.Tables.IdentifyExecutor, Module.Tables.String)()
 
@@ -234,6 +553,22 @@ local LocalCharacter = nil
 local LocalHumanoid = nil
 local LocalHead = nil
 local LocalRoot = nil
+
+local Library = Module:GetLibrary({
+	Create, nscloneref, GetService, CoreGui, Players, RunService, UserInputService, Teams, FunctionValidator:GetEnvironment(),
+	FunctionValidator.Validate({"gethui", "get_hui", "gethiddenui", "get_hiddenui", "get_hidden_ui"}, function(): CoreGui
+		return CoreGui
+	end), getcustomassetFunction, FunctionValidator.Validate({"setclipboard", "set_clipboard", "writeclipboard", "write_clipboard"}, nil),
+	LocalPlayer, Mouse, FileFunctions.isfolder, FileFunctions.makefolder, FileFunctions.isfile, FileFunctions.writefile
+})
+
+if not Library then
+	return "skill issue fr"
+end
+
+local Options = Library.Options
+local Toggles = Library.Toggles
+local Watermark = Library:AddDraggableLabel("[nikoletoscripts/combat.cc] | Unknown | 0 | 0")
 
 local CachedRobloxGui = nil
 local CachedClippingShield = nil
@@ -3110,6 +3445,10 @@ local AimbotFunctions = {
 	}
 }
 
+if mousemoverel.IsWaxxed then
+	AimbotFunctions.Mouse.TargetAimbot = Module.Tables.Blank
+end
+
 if not Games.Aimblox and not Games.IsStrucid and not Games.IsFantasmaPVP then
 	local Functions = AimbotFunctions.Camera
 	GetClosestPlayer = Functions.GetClosestPlayer
@@ -4294,15 +4633,15 @@ Tabs.HitConfiguration:AddDropdown("AimbotHitSounds", {
 	end
 })
 
-if FileFunctions.listfiles and FileFunctions.isfolder and FileFunctions.makefolder and FileFunctions.isfile and getcustomassetFunction then
-	local DefaultSounds = HitSounds.Options
-	local HitSoundsDropdown = Options["AimbotHitSounds"]
+if not FileFunctions.listfiles.IsWaxxed and not FileFunctions.isfile.IsWaxxed and getcustomassetFunction then
+	local DefaultSounds, HitSoundsDropdown = HitSounds.Options, Options["AimbotHitSounds"]
+	local ListFiles, IsFile = FileFunctions.listfiles, FileFunctions.isfile
 
-	ThreadManager:Start("HitSoundmp3Checker", function()
+	ThreadManager:Start("HitSoundMP3Checker", function()
 		local TableOfHitSounds = table.clone(DefaultSounds)
 
-		for _,File in ipairs(FileFunctions.listfiles("combat.cc/Sounds")) do
-			if FileFunctions.isfile(File) and File:sub(-4):lower() == ".mp3" then
+		for _,File in ipairs(ListFiles("combat.cc/Sounds")) do
+			if IsFile(File) and File:sub(-4):lower() == ".mp3" then
 				local Path = File:gsub("\\", "/"):gsub("^combat%.cc/Sounds/", "")
 				table.insert(TableOfHitSounds, Path)
 			end

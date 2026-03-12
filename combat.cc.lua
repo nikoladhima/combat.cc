@@ -77,31 +77,14 @@ local Module = loadstring([===[
 		return Item
 	end
 
-	local Items = {
-		["ThreadManager"] = Load(
-			"ThreadManager.luau", true, "utils/ThreadManager.luau"
-		),
-
-		["DrawingManager"] = Load(
-			"DrawingManager.luau", true, "utils/DrawingManager.luau", Drawing.new or Drawing.draw
-		),
-
-		["FunctionValidator"] = Load(
-			"FunctionValidator.luau", true, "utils/FunctionValidator.luau"
-		),
-
-		["ThemeManager"] = Load(
-			"ThemeManager.luau", false, "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/addons/ThemeManager.lua"
-		),
-
-		["SaveManager"] = Load(
-			"SaveManager.luau", false, "https://raw.githubusercontent.com/nikoladhima/Obsidian/main/addons/SaveManager.lua"
-		)
-	}
-
-	function Module:Get(Item: string): table?
-		return Items[Item]
+	function Module:GetThemeManager(): table?
+		return Load("ThemeManager.luau", false, "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/addons/ThemeManager.lua")
 	end
+
+	function Module:GetSaveManager(): table?
+		return Load("SaveManager.luau", false, "https://raw.githubusercontent.com/nikoladhima/Obsidian/main/addons/SaveManager.lua")
+	end
+
 
 	function Module:GetLibrary(Table: {any}): table?
 		return Load("Library.luau", true, "core/Library.luau", Table)
@@ -8845,7 +8828,7 @@ Library:Notify({
 
 Library:Toggle(true)
 
-local ThemeManager = Module:Get("ThemeManager")
+local ThemeManager = Module:GetThemeManager()
 if ThemeManager then
 	ThemeManager:SetLibrary(Library)
 	ThemeManager:SetFolder("combat.cc/Themes")
@@ -8854,7 +8837,7 @@ else
 	Module.Errors += 1
 end
 
-local SaveManager = Module:Get("SaveManager")
+local SaveManager = Module:GetSaveManager()
 if SaveManager then
 	SaveManager:SetLibrary(Library)
 	SaveManager:IgnoreThemeSettings()

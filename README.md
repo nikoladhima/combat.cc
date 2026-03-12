@@ -1,4 +1,4 @@
-<img width="2030" height="1080" alt="combat cc" src="https://github.com/user-attachments/assets/e51d4ab6-eb16-4d39-8009-5355b6078553"/>
+<img width="2030" height="1080" alt="combat cc" src="https://github.com/nikoladhima/combat.cc/blob/ad9bf3c99b8b6dd7853bda620ad2f92845418f8a/icons/combat.cc.png"/>
 
 ## COMBAT.CC [UNIVERSAL]
 

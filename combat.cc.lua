@@ -81,10 +81,9 @@ local Module = loadstring([===[
 		return Load("ThemeManager.luau", false, "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/addons/ThemeManager.lua")
 	end
 
-	function Module:GetSaveManager(): table?
-		return Load("SaveManager.luau", false, "https://raw.githubusercontent.com/nikoladhima/Obsidian/main/addons/SaveManager.lua")
+	function Module:GetSaveManager(Table: table): table?
+		return Load("SaveManager.luau", true, "utils/SaveManager.luau", Table)
 	end
-
 
 	function Module:GetLibrary(Table: {any}): table?
 		return Load("Library.luau", true, "core/Library.luau", Table)
@@ -131,6 +130,10 @@ local Module = loadstring([===[
 			DelFile = {"delfile", "del_file", "deletefile", "delete_file"},
 		},
 
+		IsRenderObj = {
+		    "isrenderobj", "is_renderobj", "isrender_obj", "is_render_obj"
+		},
+
 		IsRbxActive = {
 			"isrbxactive", "is_rbxactive", "isrbx_active", "is_rbx_active",
 			"iswindowactive", "is_windowactive", "iswindow_active", "is_window_active",
@@ -175,7 +178,7 @@ local Module = loadstring([===[
 		SetFFlag = {"setfflag", "set_fflag", "set_fastflag", "set_fast_flag"},
 
 		Clone = {
-			Function = {"clonefunction", "clone_function","copyfunction", "copy_function"},
+			Function = {"clonefunction", "clone_function", "copyfunction", "copy_function"},
 			Ref = {"cloneref", "clone_ref", "clonereference", "clone_reference"}
 		},
 
@@ -186,6 +189,7 @@ local Module = loadstring([===[
 
 	return Module
 ]===])(nsloadstring)
+
 if not Module or (type(Module) == "table" and Module.nsFailed) then
 	warn("Failed to load Module: " .. Module[3])
 	return
@@ -368,17 +372,19 @@ if not ThreadManager or not DrawingManager or not FunctionValidator then
 	return "skill issue fr"
 end
 
-local ScriptVersion = "2.9.2"
+local ScriptVersion = "2.9.3"
 
 local FileFunctions = {
-    listfiles = FunctionValidator.Validate(Module.Tables.Workspace.ListFiles[1], Module.Tables.Workspace.ListFiles[2]),
     makefolder = FunctionValidator.Validate(Module.Tables.Workspace.MakeFolder, Module.Tables.Blank),
     isfolder = FunctionValidator.Validate(Module.Tables.Workspace.IsFolder, Module.Tables.False),
-    isfile = FunctionValidator.Validate(Module.Tables.Workspace.IsFile, Module.Tables.False),
     readfile = FunctionValidator.Validate(Module.Tables.Workspace.ReadFile[1], Module.Tables.Workspace.ReadFile[2]),
     writefile = FunctionValidator.Validate(Module.Tables.Workspace.WriteFile, Module.Tables.Blank),
     delfile = FunctionValidator.Validate(Module.Tables.Workspace.DelFile, Module.Tables.Blank)
 }
+
+local listfiles, isfile =
+FunctionValidator.Validate(Module.Tables.Workspace.ListFiles[1], Module.Tables.Workspace.ListFiles[2]),
+FunctionValidator.Validate(Module.Tables.Workspace.IsFile, Module.Tables.False)
 
 if not FileFunctions.isfolder("combat.cc") then
 	FileFunctions.makefolder("combat.cc")
@@ -390,6 +396,7 @@ end
 
 local ExecutorName = FunctionValidator.Validate(Module.Tables.IdentifyExecutor, Module.Tables.String)()
 
+local isrenderobj = FunctionValidator.Validate(Module.Tables.IsRenderObj, Module.Tables.True)
 local isrbxactive = FunctionValidator.Validate(Module.Tables.IsRbxActive, Module.Tables.True)
 local httprequest = FunctionValidator.Validate(Module.Tables.HttpRequest, nil)
 
@@ -1394,7 +1401,7 @@ elseif Games.IsSniperArena or Games.IsAimblox or Games.IsDefusal then
 		return false, HealthValue
 	end
 elseif Games.IsDefuseDivision then
-	IsDead = function(Character: Instance?, ...): boolean
+	IsDead = function(Character: Instance?, ...: any): boolean
 		if not Character then
 			return true
 		end
@@ -1799,7 +1806,7 @@ local function PlayHitSound(Option: string, Volume: number)
 
 	local Path = ("combat.cc/Sounds/" .. Option):gsub("\\", "/")
 
-	if not FileFunctions.isfile(Path) then
+	if not isfile(Path) then
 		warn("[combat.cc] Sound file missing:", Path)
 		return
 	end
@@ -1869,7 +1876,7 @@ local function SetTransparency(DrawingObject: any, Transparency: number)
 end
 
 local function UpdateFOVCircle(FOVCircle: any, FOVCircleTable: table, AimbotTable: table)
-	if not FOVCircle then
+	if not FOVCircle or not isrenderobj(FOVCircle) then
 		return
 	end
 
@@ -4616,24 +4623,6 @@ Tabs.HitConfiguration:AddDropdown("AimbotHitSounds", {
 	end
 })
 
-if not FileFunctions.listfiles.IsWaxxed and not FileFunctions.isfile.IsWaxxed and getcustomassetFunction then
-	local DefaultSounds, HitSoundsDropdown = HitSounds.Options, Options["AimbotHitSounds"]
-	local ListFiles, IsFile = FileFunctions.listfiles, FileFunctions.isfile
-
-	ThreadManager:Start("HitSoundMP3Checker", function()
-		local TableOfHitSounds = table.clone(DefaultSounds)
-
-		for _,File in ipairs(ListFiles("combat.cc/Sounds")) do
-			if IsFile(File) and File:sub(-4):lower() == ".mp3" then
-				local Path = File:gsub("\\", "/"):gsub("^combat%.cc/Sounds/", "")
-				table.insert(TableOfHitSounds, Path)
-			end
-		end
-
-		HitSoundsDropdown:SetValues(TableOfHitSounds)
-	end, 0.1)
-end
-
 local TriggerBotLabel = Tabs.TriggerBot:AddLabel("TriggerBot: Disabled")
 Tabs.TriggerBot:AddToggle("TriggerBotEnabled", {
 	Text = "Toggle TriggerBot",
@@ -5894,7 +5883,7 @@ if setfflagFunction then
 	FFlagsTab:AddLabel("Only Advanced users can understand this.", true)
 
 	local IsResetting = false
-	local RaycastMaxDistanceInput = FFlagsTab:AddInput("RaycastMaxDistanceInput", {
+	FFlagsTab:AddInput("RaycastMaxDistanceInput", {
 		Default = "15000",
 		Numeric = false,
 		Finished = false,
@@ -5922,7 +5911,7 @@ if setfflagFunction then
 			IsResetting = true
 			local Success,_ = nssetfflag("RaycastMaxDistance", "15000")
 			if Success then
-				RaycastMaxDistanceInput:SetValue("15000")
+				Options["RaycastMaxDistanceInput"]:SetValue("15000")
 				IsResetting = false
 				Library:Notify({Title = "FFlags", Description = "Reset RaycastMaxDistance to 15000", Time = 2})
 			else
@@ -5932,7 +5921,7 @@ if setfflagFunction then
 	})
 
 	local DebugDynamicRenderKiloPixelsIsResetting = false
-	local DebugDynamicRenderKiloPixelsInput = FFlagsTab:AddInput("DebugDynamicRenderKiloPixelsInput", {
+	FFlagsTab:AddInput("DebugDynamicRenderKiloPixelsInput", {
 		Default = "-1",
 		Numeric = false,
 		Finished = false,
@@ -5960,7 +5949,7 @@ if setfflagFunction then
 			DebugDynamicRenderKiloPixelsIsResetting = true
 			local Success,_ = nssetfflag("DebugDynamicRenderKiloPixels", "-1")
 			if Success then
-				DebugDynamicRenderKiloPixelsInput:SetValue("-1")
+				Options["DebugDynamicRenderKiloPixelsInput"]:SetValue("-1")
 				DebugDynamicRenderKiloPixelsIsResetting = false
 				Library:Notify({Title = "FFlags", Description = "Reset DebugDynamicRenderKiloPixels to -1", Time = 2})
 			else
@@ -8781,7 +8770,7 @@ task.spawn(function()
 	FileFunctions.writefile("combat.cc/Nikoleto.iy", tostring(game:HttpGet(
 		"https://raw.githubusercontent.com/nikoladhima/combat.cc/refs/heads/main/utils/NikoletoService.luau"
 	)))
-	if FileFunctions.isfile("IY_FE.iy") then
+	if isfile("IY_FE.iy") then
 		local Data = HttpService:JSONDecode(FileFunctions.readfile("IY_FE.iy"))
 		if Data and type(Data) == "table" then
 			if table.find(Data.PluginsTable, "combat.cc/Nikoleto.iy") then
@@ -8828,25 +8817,79 @@ Library:Notify({
 
 Library:Toggle(true)
 
-local ThemeManager = Module:GetThemeManager()
-if ThemeManager then
-	ThemeManager:SetLibrary(Library)
-	ThemeManager:SetFolder("combat.cc/Themes")
-	ThemeManager:ApplyToTab(WindowTabs.WindowSettingsTab)
-else
-	Module.Errors += 1
-end
+if (
+	not listfiles.IsWaxxed and not isfile.IsWaxxed and
+	not FileFunctions.makefolder.IsWaxxed and not FileFunctions.isfolder.IsWaxxed and
+	not FileFunctions.readfile.IsWaxxed and not FileFunctions.writefile.IsWaxxed and not FileFunctions.delfile.IsWaxxed
+) then
+	Aimbot.ThemeManager = Module:GetThemeManager()
+	if Aimbot.ThemeManager then
+		Aimbot.ThemeManager:SetLibrary(Library)
+		Aimbot.ThemeManager:SetFolder("combat.cc/Themes")
+		Aimbot.ThemeManager:ApplyToTab(WindowTabs.WindowSettingsTab)
+	else
+		Module.Errors += 1
+	end
 
-local SaveManager = Module:GetSaveManager()
-if SaveManager then
-	SaveManager:SetLibrary(Library)
-	SaveManager:IgnoreThemeSettings()
-	SaveManager:SetIgnoreIndexes({"MenuKeybind"})
-	SaveManager:SetFolder("combat.cc/Configs")
-	SaveManager:BuildConfigSection(WindowTabs.WindowSettingsTab)
-	SaveManager:LoadAutoloadConfig()
+
+	Aimbot.SaveManager = Module:GetSaveManager({
+		nsclonefunction, HttpService,
+		listfiles, isfile, FileFunctions.readfile, FileFunctions.writefile, FileFunctions.delfile,
+		FileFunctions.isfolder, FileFunctions.makefolder
+	})
+	if Aimbot.SaveManager then
+		Aimbot.SaveManager:SetLibrary(Library)
+		Aimbot.SaveManager:IgnoreThemeSettings()
+		Aimbot.SaveManager:SetIgnoreIndexes({"MenuKeybind"})
+		Aimbot.SaveManager:SetFolder("combat.cc/Configs")
+		Aimbot.SaveManager:BuildConfigSection(WindowTabs.WindowSettingsTab)
+		Aimbot.SaveManager:LoadAutoloadConfig()
+	else
+		Module.Errors += 1
+	end
+
+	ThreadManager:Start("HitSoundMP3Checker", function()
+		local TableOfHitSounds = table.clone(HitSounds.Options)
+		local Count = 0
+
+		local function ValidateMP3AndConfigFiles(Path)
+			for _,File in listfiles(Path) do
+				if FileFunctions.isfolder(File) then
+					ValidateMP3AndConfigFiles(File)
+				elseif isfile(File) then
+					local Path = File:lower():gsub("\\","/")
+
+					if Path:match("%.mp3$") then
+						local HitSound = Path:gsub("^combat%.cc/sounds/", "")
+						table.insert(TableOfHitSounds, HitSound)
+					end
+
+					if Path:match("%.json$") then
+						local FileName = Path:match("^combat%.cc/configs/([^/]+%.json)$")
+						if FileName then
+							FileFunctions.writefile(
+								"combat.cc/Configs/settings/" .. FileName,
+								FileFunctions.readfile(File)
+							)
+
+							FileFunctions.delfile(File)						
+						end
+					end
+
+					Count += 1
+					if Count % 25 == 0 then
+						task.wait()
+					end
+				end
+			end
+		end
+
+		ValidateMP3AndConfigFiles("combat.cc")
+		SaveManager:RefreshConfigList() -- nono refrersh list
+		Options["AimbotHitSounds"]:SetValues(TableOfHitSounds)
+	end, 1.5)
 else
-	Module.Errors += 1
+	Module.Errors += 2
 end
 
 ThreadManager:Start("VersionChecker", function()
@@ -8882,7 +8925,7 @@ task.spawn(function()
 	local VerifyChannelInvite = "DwRT2nH93D"
 	local RulesChannelInvite = "jjEtFhA8PA"
 
-	if FileFunctions.isfile("combat.cc/code") then
+	if isfile("combat.cc/code") then
 		if FileFunctions.readfile("combat.cc/code") == VerifyChannelInvite then
 			FileFunctions.writefile("combat.cc/code", RulesChannelInvite)
 		elseif FileFunctions.readfile("combat.cc/code") == RulesChannelInvite then
@@ -8902,9 +8945,8 @@ end)
 
 print("[nikoletoscripts/combat.cc]: Loaded script successfully in " .. tostring(tick() - StartTick) .. "s.")
 
-local ScriptArguments = (...)
-task.spawn(function()
-	if ScriptArguments and type(ScriptArguments) == "string" and ScriptArguments == "RemoveLogging" then
+task.spawn(function(...)
+	if (...) and type(...) == "string" and (...) == "RemoveLogging" then
 		warn("[Service Info] RemoveLogging is enabled, this means that ZERO information will be logged.")
 		return
 	end
@@ -8914,8 +8956,8 @@ task.spawn(function()
 	}) then
 		Module.Errors += 1
 	end
-end)
+end, (...))
 
 if Module.Errors > 0 then
-	warn("[nikoletoscripts/combat.cc]: " .. tostring(#Module.Errors) .. " Module Errors were found. Script will continue to function.")
+	warn("[nikoletoscripts/combat.cc]: " .. tostring(Module.Errors) .. " Module Errors were found. Script will continue to function.")
 end

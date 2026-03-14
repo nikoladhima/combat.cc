@@ -4,6 +4,8 @@ if not Helper or type(Helper) ~= "table" then
 end
 
 local clonefunction = Helper[1]
+print(clonefunction)
+print(clonefunction(function() end))
 local HttpService = Helper[2]
 local listfiles, isfile, readfile, writefile, delfile = Helper[3], Helper[4], Helper[5], Helper[6], Helper[7]
 local isfolder, makefolder = Helper[6], Helper[9]

@@ -4,46 +4,42 @@ if not Helper or type(Helper) ~= "table" then
 end
 
 local clonefunction = Helper[1]
-print(clonefunction)
-print(clonefunction(function() end))
 local HttpService = Helper[2]
 local listfiles, isfile, readfile, writefile, delfile = Helper[3], Helper[4], Helper[5], Helper[6], Helper[7]
 local isfolder, makefolder = Helper[6], Helper[9]
 
-if clonefunction then
-    -- Fix is_____ functions for shitsploits, those functions should never error, only return a boolean.
-    local listfiles2, isfile2, isfolder2 = clonefunction(listfiles), clonefunction(isfile), clonefunction(isfolder)
-    local is_____Success, is_____Result = pcall(function()
-        return isfolder2("test" .. tostring(math.random(1000000, 9999999)))
-    end)
+-- Fix is_____ functions for shitsploits, those functions should never error, only return a boolean.
+local listfiles2, isfile2, isfolder2 = clonefunction(listfiles), clonefunction(isfile), clonefunction(isfolder)
+local is_____Success, is_____Result = pcall(function()
+    return isfolder2("test" .. tostring(math.random(1000000, 9999999)))
+end)
 
-    if not is_____Success or typeof(is_____Result) ~= "boolean" then
-        isfolder = function(Folder)
-            local Success, Data = pcall(isfolder2, Folder)
-            return (
-                if Success then
-                    Data
-                else false
-            )
-        end
+if not is_____Success or typeof(is_____Result) ~= "boolean" then
+    isfolder = function(Folder)
+        local Success, Data = pcall(isfolder2, Folder)
+        return (
+            if Success then
+                Data
+            else false
+        )
+    end
 
-        isfile = function(File)
-            local Success, Data = pcall(isfile2, File)
-            return (
-                if Success then
-                    Data
-                else false
-            )
-        end
+    isfile = function(File)
+        local Success, Data = pcall(isfile2, File)
+        return (
+            if Success then
+                Data
+            else false
+        )
+    end
 
-        listfiles = function(Folder)
-            local Success, Data = pcall(listfiles2, Folder)
-            return (
-                if Success then
-                    Data
-                else {}
-            )
-        end
+    listfiles = function(Folder)
+        local Success, Data = pcall(listfiles2, Folder)
+        return (
+            if Success then
+                Data
+            else {}
+        )
     end
 end
 

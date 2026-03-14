@@ -8857,15 +8857,15 @@ if (
 				if FileFunctions.isfolder(File) then
 					ValidateMP3AndConfigFiles(File)
 				elseif isfile(File) then
-					local Path = File:lower():gsub("\\","/")
+					local CorrectedPath = File:lower():gsub("\\","/")
 
-					if Path:match("%.mp3$") then
-						local HitSound = Path:gsub("^combat%.cc/sounds/", "")
+					if CorrectedPath:match("%.mp3$") then
+						local HitSound = CorrectedPath:gsub("^combat%.cc/sounds/", "")
 						table.insert(TableOfHitSounds, HitSound)
 					end
 
-					if Path:match("%.json$") then
-						local FileName = Path:match("^combat%.cc/configs/([^/]+%.json)$")
+					if CorrectedPath:match("%.json$") then
+						local FileName = CorrectedPath:match("^combat%.cc/configs/([^/]+%.json)$")
 						if FileName then
 							FileFunctions.writefile(
 								"combat.cc/Configs/settings/" .. FileName,
@@ -8885,7 +8885,7 @@ if (
 		end
 
 		ValidateMP3AndConfigFiles("combat.cc")
-		SaveManager:RefreshConfigList() -- nono refrersh list
+		Aimbot.SaveManager:RefreshConfigList() -- nono refrersh list
 		Options["AimbotHitSounds"]:SetValues(TableOfHitSounds)
 	end, 1.5)
 else
@@ -8898,7 +8898,7 @@ ThreadManager:Start("VersionChecker", function()
 		if ScriptVersion:gsub(LatestVersion, "IsLatestVersion") ~= "IsLatestVersion" then
 			Library:Notify({
 				Title = "[[ combat.cc ]]",
-				Description = "Script v." .. ScriptVersion .. " is Out-Of-Date, please re-execute to get the latest update v" .. LatestVersion,
+				Description = "Script v" .. ScriptVersion .. " is Out-Of-Date, please re-execute to get the latest update v" .. LatestVersion,
 				Time = 3.5
 			})
 		end

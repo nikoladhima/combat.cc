@@ -1,11 +1,11 @@
-local Plugin = {
+return {
     ["PluginName"] = "NikoletoScripts",
     ["PluginDescription"] = "Load scripts that are published by Nikoleto Scripts quickly through infinite yield",
     ["Commands"] = {
         ["combat.cc"] = {
             ["ListName"] = "combat.cc",
             ["Description"] = "Loads combat.cc",
-            ["Aliases"] = {'nscombat',"combatcc"},
+            ["Aliases"] = {"combat", "nscombat", "combatc", "combatcc", "nscombat", "combat.", "combat.c", },
             ["Function"] = function(...)
                 notify('Loading', "Loading combat.cc, please wait.")
                 loadstring(game:HttpGet("https://raw.githubusercontent.com/nikoladhima/combat.cc/main/combat.cc.lua"))()
@@ -13,5 +13,3 @@ local Plugin = {
         }
     }
 }
-
-return Plugin

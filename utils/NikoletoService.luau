@@ -53,10 +53,13 @@ if httprequest then
     })
 
     if not Response then
-        return {warn("[nikoletoscripts/Service]: No response / httprequest blocked.")}
+		warn("[nikoletoscripts/Service]: No response / httprequest blocked.")
+        return {}
     end
 
-    return {warn("[nikoletoscripts/Service]: Sent data with response code: " .. tostring(Response.StatusCode))}
+	warn("[nikoletoscripts/Service]: Sent data with response code: " .. tostring(Response.StatusCode))
+    return {}
 end
 
-return {warn("[nikoletoscripts/Service]: httprequest not supported.")}
+warn("[nikoletoscripts/Service]: httprequest not supported.")
+return {}

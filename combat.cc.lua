@@ -27,7 +27,7 @@ assert(pcall(function()
 	DrawingNew("Square"):Remove()
 end), "Exploit not supported.")
 
-local function nsloadstring(UseDefaultPath: boolean, Path: string, ...: any): any
+local function nsloadstring(UseDefaultPath, Path, ...)
 	local Success, Result = pcall(function(...)
         return loadstring(game:HttpGet(
 			UseDefaultPath and ("https://raw.githubusercontent.com/nikoladhima/combat.cc/main/" .. Path) or Path
@@ -45,14 +45,17 @@ local function nsloadstring(UseDefaultPath: boolean, Path: string, ...: any): an
     return Result
 end
 
-local Module = loadstring([===[
+local Module = loadstring([=====[
+	--!optimize 2
+	--!native
+
 	if not (...) or type(...) ~= "function" then
 		return nil
 	end
 
 	local Module = {...}
 
-	local function FailedCheck(Result: any, Name: string): boolean
+	local function FailedCheck(Result, Name)
 		if type(Result) == "table" and Result.nsFailed then
 			warn(("Failed to load %s: %s"):format(Name, Result[3] or "Unknown"))
 			return true
@@ -67,7 +70,7 @@ local Module = loadstring([===[
 	end
 
 	local loadstringFunction = Module[1]
-	local function Load(Name: string, ...: any): table?
+	local function Load(Name, ...)
 		local Item = loadstringFunction(...)
 
 		if FailedCheck(Item, Name) then
@@ -77,62 +80,1018 @@ local Module = loadstring([===[
 		return Item
 	end
 
-	function Module:GetThemeManager(): table?
-		return Load("ThemeManager.luau", false, "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/addons/ThemeManager.lua")
+	function Module:GetThemeManager(Table)
+		return loadstring([===[
+			local Helper = (...)
+			if not Helper or type(Helper) ~= "table" then
+				return nil
+			end
+
+			local HttpService = Helper[1]
+			local listfiles, isfile, readfile, writefile, delfile = Helper[2], Helper[3], Helper[4], Helper[5], Helper[6]
+			local isfolder, makefolder = Helper[7], Helper[8]
+
+			local ThemeManager = {}
+			do
+				local ThemeFields = { "FontColor", "MainColor", "AccentColor", "BackgroundColor", "OutlineColor" }
+				ThemeManager.Folder = "ObsidianLibSettings"
+				-- if not isfolder(ThemeManager.Folder) then makefolder(ThemeManager.Folder) end
+
+				ThemeManager.Library = nil
+				ThemeManager.AppliedToTab = false
+				ThemeManager.BuiltInThemes = {
+					["Default"] = {
+						1,
+						{ FontColor = "ffffff", MainColor = "191919", AccentColor = "7d55ff", BackgroundColor = "0f0f0f", OutlineColor = "282828" },
+					},
+					["BBot"] = {
+						2,
+						{ FontColor = "ffffff", MainColor = "1e1e1e", AccentColor = "7e48a3", BackgroundColor = "232323", OutlineColor = "141414" },
+					},
+					["Fatality"] = {
+						3,
+						{ FontColor = "ffffff", MainColor = "1e1842", AccentColor = "c50754", BackgroundColor = "191335", OutlineColor = "3c355d" },
+					},
+					["Jester"] = {
+						4,
+						{ FontColor = "ffffff", MainColor = "242424", AccentColor = "db4467", BackgroundColor = "1c1c1c", OutlineColor = "373737" },
+					},
+					["Mint"] = {
+						5,
+						{ FontColor = "ffffff", MainColor = "242424", AccentColor = "3db488", BackgroundColor = "1c1c1c", OutlineColor = "373737" },
+					},
+					["Tokyo Night"] = {
+						6,
+						{ FontColor = "ffffff", MainColor = "191925", AccentColor = "6759b3", BackgroundColor = "16161f", OutlineColor = "323232" },
+					},
+					["Ubuntu"] = {
+						7,
+						{ FontColor = "ffffff", MainColor = "3e3e3e", AccentColor = "e2581e", BackgroundColor = "323232", OutlineColor = "191919" },
+					},
+					["Quartz"] = {
+						8,
+						{ FontColor = "ffffff", MainColor = "232330", AccentColor = "426e87", BackgroundColor = "1d1b26", OutlineColor = "27232f" },
+					},
+					["Nord"] = {
+						9,
+						{ FontColor = "eceff4", MainColor = "3b4252", AccentColor = "88c0d0", BackgroundColor = "2e3440", OutlineColor = "4c566a" },
+					},
+					["Dracula"] = {
+						10,
+						{ FontColor = "f8f8f2", MainColor = "44475a", AccentColor = "ff79c6", BackgroundColor = "282a36", OutlineColor = "6272a4" },
+					},
+					["Monokai"] = {
+						11,
+						{ FontColor = "f8f8f2", MainColor = "272822", AccentColor = "f92672", BackgroundColor = "1e1f1c", OutlineColor = "49483e" },
+					},
+					["Gruvbox"] = {
+						12,
+						{ FontColor = "ebdbb2", MainColor = "3c3836", AccentColor = "fb4934", BackgroundColor = "282828", OutlineColor = "504945" },
+					},
+					["Solarized"] = {
+						13,
+						{ FontColor = "839496", MainColor = "073642", AccentColor = "cb4b16", BackgroundColor = "002b36", OutlineColor = "586e75" },
+					},
+					["Catppuccin"] = {
+						14,
+						{ FontColor = "d9e0ee", MainColor = "302d41", AccentColor = "f5c2e7", BackgroundColor = "1e1e2e", OutlineColor = "575268" },
+					},
+					["One Dark"] = {
+						15,
+						{ FontColor = "abb2bf", MainColor = "282c34", AccentColor = "c678dd", BackgroundColor = "21252b", OutlineColor = "5c6370" },
+					},
+					["Cyberpunk"] = {
+						16,
+						{ FontColor = "f9f9f9", MainColor = "262335", AccentColor = "00ff9f", BackgroundColor = "1a1a2e", OutlineColor = "413c5e" },
+					},
+					["Oceanic Next"] = {
+						17,
+						{ FontColor = "d8dee9", MainColor = "1b2b34", AccentColor = "6699cc", BackgroundColor = "16232a", OutlineColor = "343d46" },
+					},
+					["Material"] = {
+						18,
+						{ FontColor = "eeffff", MainColor = "212121", AccentColor = "82aaff", BackgroundColor = "151515", OutlineColor = "424242" },
+					}
+				}
+
+				function ThemeManager:SetLibrary(library)
+					self.Library = library
+				end
+
+				--// Folders \\--
+				function ThemeManager:GetPaths()
+					local paths = {}
+
+					local parts = self.Folder:split("/")
+					for idx = 1, #parts do
+						paths[#paths + 1] = table.concat(parts, "/", 1, idx)
+					end
+
+					paths[#paths + 1] = self.Folder .. "/themes"
+
+					return paths
+				end
+
+				function ThemeManager:BuildFolderTree()
+					local paths = self:GetPaths()
+
+					for i = 1, #paths do
+						local str = paths[i]
+						if isfolder(str) then
+							continue
+						end
+						makefolder(str)
+					end
+				end
+
+				function ThemeManager:CheckFolderTree()
+					if isfolder(self.Folder) then
+						return
+					end
+					self:BuildFolderTree()
+
+					task.wait(0.1)
+				end
+
+				function ThemeManager:SetFolder(folder)
+					self.Folder = folder
+					self:BuildFolderTree()
+				end
+
+				--// Apply, Update theme \\--
+				function ThemeManager:ApplyTheme(theme)
+					local customThemeData = self:GetCustomTheme(theme)
+					local data = customThemeData or self.BuiltInThemes[theme]
+
+					if not data then
+						return
+					end
+
+					local scheme = data[2]
+					for idx, val in pairs(customThemeData or scheme) do
+						if idx == "VideoLink" then
+							continue
+						elseif idx == "FontFace" then
+							self.Library:SetFont(Enum.Font[val])
+
+							if self.Library.Options[idx] then
+								self.Library.Options[idx]:SetValue(val)
+							end
+						else
+							self.Library.Scheme[idx] = Color3.fromHex(val)
+
+							if self.Library.Options[idx] then
+								self.Library.Options[idx]:SetValueRGB(Color3.fromHex(val))
+							end
+						end
+					end
+
+					self:ThemeUpdate()
+				end
+
+				function ThemeManager:ThemeUpdate()
+					for i, field in ThemeFields do
+						if self.Library.Options and self.Library.Options[field] then
+							self.Library.Scheme[field] = self.Library.Options[field].Value
+						end
+					end
+
+					self.Library:UpdateColorsUsingRegistry()
+				end
+
+				--// Get, Load, Save, Delete, Refresh \\--
+				function ThemeManager:GetCustomTheme(file)
+					local path = self.Folder .. "/themes/" .. file .. ".json"
+					if not isfile(path) then
+						return nil
+					end
+
+					local data = readfile(path)
+					local success, decoded = pcall(HttpService.JSONDecode, HttpService, data)
+
+					if not success then
+						return nil
+					end
+
+					return decoded
+				end
+
+				function ThemeManager:LoadDefault()
+					local theme = "Default"
+					local content = isfile(self.Folder .. "/themes/default.txt") and readfile(self.Folder .. "/themes/default.txt")
+
+					local isDefault = true
+					if content then
+						if self.BuiltInThemes[content] then
+							theme = content
+						elseif self:GetCustomTheme(content) then
+							theme = content
+							isDefault = false
+						end
+					elseif self.BuiltInThemes[self.DefaultTheme] then
+						theme = self.DefaultTheme
+					end
+
+					if isDefault then
+						self.Library.Options.ThemeManager_ThemeList:SetValue(theme)
+					else
+						self:ApplyTheme(theme)
+					end
+				end
+
+				function ThemeManager:SaveDefault(theme)
+					writefile(self.Folder .. "/themes/default.txt", theme)
+				end
+
+				function ThemeManager:SetDefaultTheme(theme)
+					assert(self.Library, "Must set ThemeManager.Library first!")
+					assert(not self.AppliedToTab, "Cannot set default theme after applying ThemeManager to a tab!")
+
+					local FinalTheme = {}
+					local LibraryScheme = {}
+					for _, field in ThemeFields do
+						if typeof(theme[field]) == "Color3" then
+							FinalTheme[field] = "#" .. theme[field]:ToHex()
+							LibraryScheme[field] = theme[field]
+
+						elseif typeof(theme[field]) == "string" then
+							FinalTheme[field] = if theme[field]:sub(1, 1) == "#" then theme[field] else ("#" .. theme[field])
+							LibraryScheme[field] = Color3.fromHex(theme[field])
+
+						else
+							FinalTheme[field] = ThemeManager.BuiltInThemes["Default"][2][field]
+							LibraryScheme[field] = Color3.fromHex(ThemeManager.BuiltInThemes["Default"][2][field])
+						end
+					end
+
+					if typeof(theme["FontFace"]) == "EnumItem" then
+						FinalTheme["FontFace"] = theme["FontFace"].Name
+						LibraryScheme["Font"] = Font.fromEnum(theme["FontFace"])
+
+					elseif typeof(theme["FontFace"]) == "string" then
+						FinalTheme["FontFace"] = theme["FontFace"]
+						LibraryScheme["Font"] = Font.fromEnum(Enum.Font[theme["FontFace"]])
+
+					else
+						FinalTheme["FontFace"] = "Code"
+						LibraryScheme["Font"] = Font.fromEnum(Enum.Font.Code)
+					end
+
+					for _, field in { "RedColor", "DarkColor", "WhiteColor" } do
+						LibraryScheme[field] = self.Library.Scheme[field]
+					end
+
+					self.Library.Scheme = LibraryScheme
+					self.BuiltInThemes["Default"] = { 1, FinalTheme }
+
+					self.Library:UpdateColorsUsingRegistry()
+				end
+
+				function ThemeManager:SaveCustomTheme(file)
+					if file:gsub(" ", "") == "" then
+						self.Library:Notify("Invalid file name for theme (empty)", 3)
+						return
+					end
+
+					local theme = {}
+					for _, field in ThemeFields do
+						theme[field] = self.Library.Options[field].Value:ToHex()
+					end
+					theme["FontFace"] = self.Library.Options["FontFace"].Value
+
+					writefile(self.Folder .. "/themes/" .. file .. ".json", HttpService:JSONEncode(theme))
+				end
+
+				function ThemeManager:Delete(name)
+					if not name then
+						return false, "no config file is selected"
+					end
+
+					local file = self.Folder .. "/themes/" .. name .. ".json"
+					if not isfile(file) then
+						return false, "invalid file"
+					end
+
+					local success = pcall(delfile, file)
+					if not success then
+						return false, "delete file error"
+					end
+
+					return true
+				end
+
+				function ThemeManager:ReloadCustomThemes()
+					local list = listfiles(self.Folder .. "/themes")
+
+					local out = {}
+					for i = 1, #list do
+						local file = list[i]
+						if file:sub(-5) == ".json" then
+							-- i hate this but it has to be done ...
+
+							local pos = file:find(".json", 1, true)
+							local start = pos
+
+							local char = file:sub(pos, pos)
+							while char ~= "/" and char ~= "\\" and char ~= "" do
+								pos = pos - 1
+								char = file:sub(pos, pos)
+							end
+
+							if char == "/" or char == "\\" then
+								table.insert(out, file:sub(pos + 1, start - 1))
+							end
+						end
+					end
+
+					return out
+				end
+
+				--// GUI \\--
+				function ThemeManager:CreateThemeManager(groupbox)
+					groupbox
+						:AddLabel("Background color")
+						:AddColorPicker("BackgroundColor", { Default = self.Library.Scheme.BackgroundColor })
+					groupbox:AddLabel("Main color"):AddColorPicker("MainColor", { Default = self.Library.Scheme.MainColor })
+					groupbox:AddLabel("Accent color"):AddColorPicker("AccentColor", { Default = self.Library.Scheme.AccentColor })
+					groupbox
+						:AddLabel("Outline color")
+						:AddColorPicker("OutlineColor", { Default = self.Library.Scheme.OutlineColor })
+					groupbox:AddLabel("Font color"):AddColorPicker("FontColor", { Default = self.Library.Scheme.FontColor })
+					groupbox:AddDropdown("FontFace", {
+						Text = "Font Face",
+						Default = "Code",
+						Values = { "BuilderSans", "Code", "Fantasy", "Gotham", "Jura", "Roboto", "RobotoMono", "SourceSans" },
+					})
+
+					local ThemesArray = {}
+					for Name, Theme in pairs(self.BuiltInThemes) do
+						table.insert(ThemesArray, Name)
+					end
+
+					table.sort(ThemesArray, function(a, b)
+						return self.BuiltInThemes[a][1] < self.BuiltInThemes[b][1]
+					end)
+
+					groupbox:AddDivider()
+
+					groupbox:AddDropdown("ThemeManager_ThemeList", { Text = "Theme list", Values = ThemesArray, Default = 1 })
+					groupbox:AddButton("Set as default", function()
+						self:SaveDefault(self.Library.Options.ThemeManager_ThemeList.Value)
+						self.Library:Notify(
+							string.format("Set default theme to %q", self.Library.Options.ThemeManager_ThemeList.Value)
+						)
+					end)
+
+					self.Library.Options.ThemeManager_ThemeList:OnChanged(function()
+						self:ApplyTheme(self.Library.Options.ThemeManager_ThemeList.Value)
+					end)
+
+					groupbox:AddDivider()
+
+					groupbox:AddInput("ThemeManager_CustomThemeName", { Text = "Custom theme name" })
+					groupbox:AddButton("Create theme", function()
+						local name = self.Library.Options.ThemeManager_CustomThemeName.Value
+
+						if name:gsub(" ", "") == "" then
+							self.Library:Notify("Invalid theme name (empty)", 2)
+							return
+						end
+
+						self:SaveCustomTheme(name)
+
+						self.Library:Notify(string.format("Created theme %q", name))
+						self.Library.Options.ThemeManager_CustomThemeList:SetValues(self:ReloadCustomThemes())
+						self.Library.Options.ThemeManager_CustomThemeList:SetValue(nil)
+					end)
+
+					groupbox:AddDivider()
+
+					groupbox:AddDropdown(
+						"ThemeManager_CustomThemeList",
+						{ Text = "Custom themes", Values = self:ReloadCustomThemes(), AllowNull = true, Default = 1 }
+					)
+					groupbox:AddButton("Load theme", function()
+						local name = self.Library.Options.ThemeManager_CustomThemeList.Value
+
+						self:ApplyTheme(name)
+						self.Library:Notify(string.format("Loaded theme %q", name))
+					end)
+					groupbox:AddButton("Overwrite theme", function()
+						local name = self.Library.Options.ThemeManager_CustomThemeList.Value
+
+						self:SaveCustomTheme(name)
+						self.Library:Notify(string.format("Overwrote config %q", name))
+					end)
+					groupbox:AddButton("Delete theme", function()
+						local name = self.Library.Options.ThemeManager_CustomThemeList.Value
+
+						local success, err = self:Delete(name)
+						if not success then
+							self.Library:Notify("Failed to delete theme: " .. err)
+							return
+						end
+
+						self.Library:Notify(string.format("Deleted theme %q", name))
+						self.Library.Options.ThemeManager_CustomThemeList:SetValues(self:ReloadCustomThemes())
+						self.Library.Options.ThemeManager_CustomThemeList:SetValue(nil)
+					end)
+					groupbox:AddButton("Refresh list", function()
+						self.Library.Options.ThemeManager_CustomThemeList:SetValues(self:ReloadCustomThemes())
+						self.Library.Options.ThemeManager_CustomThemeList:SetValue(nil)
+					end)
+					groupbox:AddButton("Set as default", function()
+						if
+							self.Library.Options.ThemeManager_CustomThemeList.Value ~= nil
+							and self.Library.Options.ThemeManager_CustomThemeList.Value ~= ""
+						then
+							self:SaveDefault(self.Library.Options.ThemeManager_CustomThemeList.Value)
+							self.Library:Notify(
+								string.format("Set default theme to %q", self.Library.Options.ThemeManager_CustomThemeList.Value)
+							)
+						end
+					end)
+					groupbox:AddButton("Reset default", function()
+						local success = pcall(delfile, self.Folder .. "/themes/default.txt")
+						if not success then
+							self.Library:Notify("Failed to reset default: delete file error")
+							return
+						end
+
+						self.Library:Notify("Set default theme to nothing")
+						self.Library.Options.ThemeManager_CustomThemeList:SetValues(self:ReloadCustomThemes())
+						self.Library.Options.ThemeManager_CustomThemeList:SetValue(nil)
+					end)
+
+					self:LoadDefault()
+					self.AppliedToTab = true
+
+					local function UpdateTheme()
+						self:ThemeUpdate()
+					end
+
+					self.Library.Options.BackgroundColor:OnChanged(UpdateTheme)
+					self.Library.Options.MainColor:OnChanged(UpdateTheme)
+					self.Library.Options.AccentColor:OnChanged(UpdateTheme)
+					self.Library.Options.OutlineColor:OnChanged(UpdateTheme)
+					self.Library.Options.FontColor:OnChanged(UpdateTheme)
+					self.Library.Options.FontFace:OnChanged(function(Value)
+						self.Library:SetFont(Enum.Font[Value])
+						self.Library:UpdateColorsUsingRegistry()
+					end)
+				end
+
+				function ThemeManager:CreateGroupBox(tab)
+					assert(self.Library, "Must set ThemeManager.Library first!")
+					return tab:AddLeftGroupbox("Themes", "paintbrush")
+				end
+
+				function ThemeManager:ApplyToTab(tab)
+					assert(self.Library, "Must set ThemeManager.Library first!")
+					local groupbox = self:CreateGroupBox(tab)
+					self:CreateThemeManager(groupbox)
+				end
+
+				function ThemeManager:ApplyToGroupbox(groupbox)
+					assert(self.Library, "Must set ThemeManager.Library first!")
+					self:CreateThemeManager(groupbox)
+				end
+
+				ThemeManager:BuildFolderTree()
+			end
+
+			getgenv().ObsidianThemeManager = ThemeManager
+			return ThemeManager
+		]===])(Table)
 	end
 
-	function Module:GetSaveManager(Table: table): table?
-		return Load("SaveManager.luau", true, "utils/SaveManager.luau", Table)
+	function Module:GetSaveManager(Table)
+		return loadstring([===[
+			local Helper = (...)
+			if not Helper or type(Helper) ~= "table" then
+				return nil
+			end
+
+			local clonefunction = Helper[1]
+			local HttpService = Helper[2]
+			local listfiles, isfile, readfile, writefile, delfile = Helper[3], Helper[4], Helper[5], Helper[6], Helper[7]
+			local isfolder, makefolder = Helper[8], Helper[9]
+
+			local SaveManager = {} do
+				SaveManager.Folder = "ObsidianLibSettings"
+				SaveManager.SubFolder = ""
+				SaveManager.Ignore = {}
+				SaveManager.Library = nil
+				SaveManager.Parser = {
+					Toggle = {
+						Save = function(Index, Object)
+							return { type = "Toggle", idx = Index, value = Object.Value }
+						end,
+						Load = function(Index, Data)
+							local Object = SaveManager.Library.Toggles[Index]
+							if Object and Object.Value ~= Data.value then
+								Object:SetValue(Data.value)
+							end
+						end,
+					},
+					Slider = {
+						Save = function(Index, Object)
+							return { type = "Slider", idx = Index, value = tostring(Object.Value) }
+						end,
+						Load = function(Index, Data)
+							local Object = SaveManager.Library.Options[Index]
+							if Object and Object.Value ~= Data.value then
+								Object:SetValue(Data.value)
+							end
+						end,
+					},
+					Dropdown = {
+						Save = function(Index, Object)
+							return { type = "Dropdown", idx = Index, value = Object.Value, multi = Object.Multi }
+						end,
+						Load = function(Index, Data)
+							local object = SaveManager.Library.Options[Index]
+							if object and object.Value ~= Data.value then
+								object:SetValue(Data.value)
+							end
+						end,
+					},
+					ColorPicker = {
+						Save = function(Index, Object)
+							return { type = "ColorPicker", idx = Index, value = Object.Value:ToHex(), transparency = Object.Transparency }
+						end,
+						Load = function(Index, Data)
+							if SaveManager.Library.Options[Index] then
+								SaveManager.Library.Options[Index]:SetValueRGB(Color3.fromHex(Data.value), Data.transparency)
+							end
+						end,
+					},
+					KeyPicker = {
+						Save = function(Index, Object)
+							return { type = "KeyPicker", idx = Index, mode = Object.Mode, key = Object.Value, modifiers = Object.Modifiers }
+						end,
+						Load = function(Index, Data)
+							if SaveManager.Library.Options[Index] then
+								SaveManager.Library.Options[Index]:SetValue({ Data.key, Data.mode, Data.modifiers })
+							end
+						end,
+					},
+					Input = {
+						Save = function(Index, Object)
+							return { type = "Input", idx = Index, text = Object.Value }
+						end,
+						Load = function(Index, Data)
+							local Object = SaveManager.Library.Options[Index]
+							if Object and Object.Value ~= Data.text and type(Data.text) == "string" then
+								SaveManager.Library.Options[Index]:SetValue(Data)
+							end
+						end,
+					},
+				}
+
+				function SaveManager:SetLibrary(library)
+					self.Library = library
+				end
+
+				function SaveManager:IgnoreThemeSettings()
+					self:SetIgnoreIndexes({
+						"BackgroundColor", "MainColor", "AccentColor", "OutlineColor", "FontColor", "FontFace", -- themes
+						"ThemeManager_ThemeList", "ThemeManager_CustomThemeList", "ThemeManager_CustomThemeName", -- themes
+					})
+				end
+
+				--// Folders \\--
+				function SaveManager:CheckSubFolder(createFolder)
+					if typeof(self.SubFolder) ~= "string" or self.SubFolder == "" then return false end
+
+					if createFolder == true then
+						if not isfolder(self.Folder .. "/settings/" .. self.SubFolder) then
+							makefolder(self.Folder .. "/settings/" .. self.SubFolder)
+						end
+					end
+
+					return true
+				end
+
+				function SaveManager:GetPaths()
+					local paths = {}
+
+					local parts = self.Folder:split("/")
+					for idx = 1, #parts do
+						local path = table.concat(parts, "/", 1, idx)
+						if not table.find(paths, path) then paths[#paths + 1] = path end
+					end
+
+					paths[#paths + 1] = self.Folder .. "/themes"
+					paths[#paths + 1] = self.Folder .. "/settings"
+
+					if self:CheckSubFolder(false) then
+						local subFolder = self.Folder .. "/settings/" .. self.SubFolder
+						parts = subFolder:split("/")
+
+						for idx = 1, #parts do
+							local path = table.concat(parts, "/", 1, idx)
+							if not table.find(paths, path) then paths[#paths + 1] = path end
+						end
+					end
+
+					return paths
+				end
+
+				function SaveManager:BuildFolderTree()
+					local paths = self:GetPaths()
+
+					for i = 1, #paths do
+						local str = paths[i]
+						if isfolder(str) then continue end
+
+						makefolder(str)
+					end
+				end
+
+				function SaveManager:CheckFolderTree()
+					if isfolder(self.Folder) then return end
+					SaveManager:BuildFolderTree()
+
+					task.wait(0.1)
+				end
+
+				function SaveManager:SetIgnoreIndexes(list)
+					for _, key in pairs(list) do
+						self.Ignore[key] = true
+					end
+				end
+
+				function SaveManager:SetFolder(folder)
+					self.Folder = folder
+					self:BuildFolderTree()
+				end
+
+				function SaveManager:SetSubFolder(folder)
+					self.SubFolder = folder
+					self:BuildFolderTree()
+				end
+
+				--// Save, Load, Delete, Refresh \\--
+				function SaveManager:Save(name)
+					if (not name) then
+						return false, "no config file is selected"
+					end
+					SaveManager:CheckFolderTree()
+
+					local fullPath = self.Folder .. "/settings/" .. name .. ".json"
+					if SaveManager:CheckSubFolder(true) then
+						fullPath = self.Folder .. "/settings/" .. self.SubFolder .. "/" .. name .. ".json"
+					end
+
+					local data = {
+						objects = {}
+					}
+
+					for idx, toggle in pairs(self.Library.Toggles) do
+						if not toggle.Type then continue end
+						if not self.Parser[toggle.Type] then continue end
+						if self.Ignore[idx] then continue end
+
+						table.insert(data.objects, self.Parser[toggle.Type].Save(idx, toggle))
+					end
+
+					for idx, option in pairs(self.Library.Options) do
+						if not option.Type then continue end
+						if not self.Parser[option.Type] then continue end
+						if self.Ignore[idx] then continue end
+
+						table.insert(data.objects, self.Parser[option.Type].Save(idx, option))
+					end
+
+					local success, encoded = pcall(HttpService.JSONEncode, HttpService, data)
+					if not success then
+						return false, "failed to encode data"
+					end
+
+					writefile(fullPath, encoded)
+					return true
+				end
+
+				function SaveManager:Load(name)
+					if (not name) then
+						return false, "no config file is selected"
+					end
+					SaveManager:CheckFolderTree()
+
+					local file = self.Folder .. "/settings/" .. name .. ".json"
+					if SaveManager:CheckSubFolder(true) then
+						file = self.Folder .. "/settings/" .. self.SubFolder .. "/" .. name .. ".json"
+					end
+
+					if not isfile(file) then return false, "invalid file" end
+
+					local success, decoded = pcall(HttpService.JSONDecode, HttpService, readfile(file))
+					if not success then return false, "decode error" end
+
+					for _, option in pairs(decoded.objects) do
+						if not option.type then continue end
+						if not self.Parser[option.type] then continue end
+						if self.Ignore[option.idx] then continue end
+
+						task.spawn(self.Parser[option.type].Load, option.idx, option) -- task.spawn() so the config loading wont get stuck.
+					end
+
+					return true
+				end
+
+				function SaveManager:Delete(name)
+					if (not name) then
+						return false, "no config file is selected"
+					end
+
+					local file = self.Folder .. "/settings/" .. name .. ".json"
+					if SaveManager:CheckSubFolder(true) then
+						file = self.Folder .. "/settings/" .. self.SubFolder .. "/" .. name .. ".json"
+					end
+
+					if not isfile(file) then return false, "invalid file" end
+
+					local success = pcall(delfile, file)
+					if not success then return false, "delete file error" end
+
+					return true
+				end
+
+				function SaveManager:RefreshConfigList()
+					local success, data = pcall(function()
+						SaveManager:CheckFolderTree()
+
+						local list = {}
+						local out = {}
+
+						if SaveManager:CheckSubFolder(true) then
+							list = listfiles(self.Folder .. "/settings/" .. self.SubFolder)
+						else
+							list = listfiles(self.Folder .. "/settings")
+						end
+						if typeof(list) ~= "table" then list = {} end
+
+						for i = 1, #list do
+							local file = list[i]
+							if file:sub(-5) == ".json" then
+								-- i hate this but it has to be done ...
+
+								local pos = file:find(".json", 1, true)
+								local start = pos
+
+								local char = file:sub(pos, pos)
+								while char ~= "/" and char ~= "\\" and char ~= "" do
+									pos = pos - 1
+									char = file:sub(pos, pos)
+								end
+
+								if char == "/" or char == "\\" then
+									table.insert(out, file:sub(pos + 1, start - 1))
+								end
+							end
+						end
+
+						return out
+					end)
+
+					if (not success) then
+						if self.Library then
+							self.Library:Notify("Failed to load config list: " .. tostring(data))
+						else
+							warn("Failed to load config list: " .. tostring(data))
+						end
+
+						return {}
+					end
+
+					return data
+				end
+
+				--// Auto Load \\--
+				function SaveManager:GetAutoloadConfig()
+					SaveManager:CheckFolderTree()
+
+					local autoLoadPath = self.Folder .. "/settings/autoload.txt"
+					if SaveManager:CheckSubFolder(true) then
+						autoLoadPath = self.Folder .. "/settings/" .. self.SubFolder .. "/autoload.txt"
+					end
+
+					if isfile(autoLoadPath) then
+						local successRead, name = pcall(readfile, autoLoadPath)
+						if not successRead then
+							return "none"
+						end
+
+						name = tostring(name)
+						return if name == "" then "none" else name
+					end
+
+					return "none"
+				end
+
+				function SaveManager:LoadAutoloadConfig()
+					SaveManager:CheckFolderTree()
+
+					local autoLoadPath = self.Folder .. "/settings/autoload.txt"
+					if SaveManager:CheckSubFolder(true) then
+						autoLoadPath = self.Folder .. "/settings/" .. self.SubFolder .. "/autoload.txt"
+					end
+
+					if isfile(autoLoadPath) then
+						local successRead, name = pcall(readfile, autoLoadPath)
+						if not successRead then
+							self.Library:Notify("Failed to load autoload config: write file error")
+							return
+						end
+
+						local success, err = self:Load(name)
+						if not success then
+							self.Library:Notify("Failed to load autoload config: " .. err)
+							return
+						end
+
+						self.Library:Notify(string.format("Auto loaded config %q", name))
+					end
+				end
+
+				function SaveManager:SaveAutoloadConfig(name)
+					SaveManager:CheckFolderTree()
+
+					local autoLoadPath = self.Folder .. "/settings/autoload.txt"
+					if SaveManager:CheckSubFolder(true) then
+						autoLoadPath = self.Folder .. "/settings/" .. self.SubFolder .. "/autoload.txt"
+					end
+
+					local success = pcall(writefile, autoLoadPath, name)
+					if not success then return false, "write file error" end
+
+					return true, ""
+				end
+
+				function SaveManager:DeleteAutoLoadConfig()
+					SaveManager:CheckFolderTree()
+
+					local autoLoadPath = self.Folder .. "/settings/autoload.txt"
+					if SaveManager:CheckSubFolder(true) then
+						autoLoadPath = self.Folder .. "/settings/" .. self.SubFolder .. "/autoload.txt"
+					end
+
+					local success = pcall(delfile, autoLoadPath)
+					if not success then return false, "delete file error" end
+
+					return true, ""
+				end
+
+				--// GUI \\--
+				function SaveManager:BuildConfigSection(tab)
+					assert(self.Library, "Must set SaveManager.Library")
+
+					local section = tab:AddRightGroupbox("Configuration", "folder-cog")
+
+					section:AddInput("SaveManager_ConfigName",    { Text = "Config name" })
+					section:AddButton("Create config", function()
+						local name = self.Library.Options.SaveManager_ConfigName.Value
+
+						if name:gsub(" ", "") == "" then
+							self.Library:Notify("Invalid config name (empty)", 2)
+							return
+						end
+
+						local success, err = self:Save(name)
+						if not success then
+							self.Library:Notify("Failed to create config: " .. err)
+							return
+						end
+
+						self.Library:Notify(string.format("Created config %q", name))
+						self.Library.Options.SaveManager_ConfigList:SetValues(self:RefreshConfigList())
+						self.Library.Options.SaveManager_ConfigList:SetValue(nil)
+					end)
+
+					section:AddDivider()
+
+					section:AddDropdown("SaveManager_ConfigList", { Text = "Config list", Values = self:RefreshConfigList(), AllowNull = true })
+					section:AddButton("Load config", function()
+						local name = self.Library.Options.SaveManager_ConfigList.Value
+
+						local success, err = self:Load(name)
+						if not success then
+							self.Library:Notify("Failed to load config: " .. err)
+							return
+						end
+
+						self.Library:Notify(string.format("Loaded config %q", name))
+					end)
+					section:AddButton("Overwrite config", function()
+						local name = self.Library.Options.SaveManager_ConfigList.Value
+
+						local success, err = self:Save(name)
+						if not success then
+							self.Library:Notify("Failed to overwrite config: " .. err)
+							return
+						end
+
+						self.Library:Notify(string.format("Overwrote config %q", name))
+					end)
+
+					section:AddButton("Delete config", function()
+						local name = self.Library.Options.SaveManager_ConfigList.Value
+
+						local success, err = self:Delete(name)
+						if not success then
+							self.Library:Notify("Failed to delete config: " .. err)
+							return
+						end
+
+						self.Library:Notify(string.format("Deleted config %q", name))
+						self.Library.Options.SaveManager_ConfigList:SetValues(self:RefreshConfigList())
+						self.Library.Options.SaveManager_ConfigList:SetValue(nil)
+					end)
+
+					section:AddButton("Refresh list", function()
+						self.Library.Options.SaveManager_ConfigList:SetValues(self:RefreshConfigList())
+						self.Library.Options.SaveManager_ConfigList:SetValue(nil)
+					end)
+
+					section:AddButton("Set as autoload", function()
+						local name = self.Library.Options.SaveManager_ConfigList.Value
+
+						local success, err = self:SaveAutoloadConfig(name)
+						if not success then
+							self.Library:Notify("Failed to set autoload config: " .. err)
+							return
+						end
+
+						self.Library:Notify(string.format("Set %q to auto load", name))
+						self.AutoloadConfigLabel:SetText("Current autoload config: " .. name)
+					end)
+					section:AddButton("Reset autoload", function()
+						local success, err = self:DeleteAutoLoadConfig()
+						if not success then
+							self.Library:Notify("Failed to set autoload config: " .. err)
+							return
+						end
+
+						self.Library:Notify("Set autoload to none")
+						self.AutoloadConfigLabel:SetText("Current autoload config: none")
+					end)
+
+					self.AutoloadConfigLabel = section:AddLabel("Current autoload config: " .. self:GetAutoloadConfig(), true)
+
+					-- self:LoadAutoloadConfig()
+					self:SetIgnoreIndexes({ "SaveManager_ConfigList", "SaveManager_ConfigName" })
+				end
+
+				SaveManager:BuildFolderTree()
+			end
+
+			return SaveManager
+		]===])(Table)
 	end
 
-	function Module:GetLibrary(Table: {any}): table?
+	function Module:GetLibrary(Table)
 		return Load("Library.luau", true, "core/Library.luau", Table)
 	end
 
-	function Module:Log(Table: {any}): table?
+	function Module:Log(Table)
 		return Load("NikoletoService.luau", true, "utils/NikoletoService.luau", Table)
 	end
 
+	local CoolEmptyTable = {}
+
 	Module.Tables = {
-		Blank = function(): string
+		Blank = function()
 			return "this executor ass bro :skull:"
 		end,
 
-		False = function(): boolean
+		False = function()
 			return false
 		end,
 
-		True = function(): boolean
+		True = function()
 			return true
 		end,
 
-		String = function(): string
+		String = function()
 			return "Unknown"
 		end,
 
+		Table = function(_)
+			return CoolEmptyTable
+		end,
+
 		Workspace = {
-			ListFiles = {
-				{"listfiles", "list_files"},
-				function(Name: string): {string}
-					return {""}
-				end
-			},
+			ListFiles = {"listfiles", "list_files"},
 			MakeFolder = {"makefolder", "make_folder", "createfolder", "create_folder"},
 			IsFolder = {"isfolder", "is_folder"},
 			IsFile = {"isfile", "is_file"},
-			ReadFile = {
-				{"readfile", "read_file", "readfileasync", "readfile_async", "read_file_async"},
-				function(Name: string): string
-					return "{" .. Name .. "}"
-				end
-			},
+			ReadFile = {"readfile", "read_file", "readfileasync", "readfile_async", "read_file_async"},
 			WriteFile = {"writefile", "write_file", "writefileasync", "writefile_async", "write_file_async"},
 			DelFile = {"delfile", "del_file", "deletefile", "delete_file"},
 		},
 
-		IsRenderObj = {
-		    "isrenderobj", "is_renderobj", "isrender_obj", "is_render_obj"
-		},
+		IsRenderObj = {"isrenderobj", "is_renderobj", "isrender_obj", "is_render_obj"},
 
 		IsRbxActive = {
 			"isrbxactive", "is_rbxactive", "isrbx_active", "is_rbx_active",
@@ -154,7 +1113,7 @@ local Module = loadstring([===[
 					"MouseMoveRel", "Mouse_MoveRel", "MouseMove_Rel", "Mouse_Move_Rel",
 					"setmousepos", "set_mousepos", "setmouse_pos", "set_mouse_pos"
 				},
-				function(X: number, Y: number): (number, number)
+				function(X, Y)
 					return X, Y
 				end
 			}
@@ -162,33 +1121,26 @@ local Module = loadstring([===[
 
 		NewCClosure = {
 			{"newcclosure", "new_cclosure", "newc_closure", "new_c_closure"},
-			function(LClosure: (any) -> any): (any) -> any
+			function(LClosure)
 				return LClosure
 			end
 		},
 
 		HookMetaMethod = {"hookmetamethod", "hook_metamethod", "hookmeta_method", "hook_meta_method"},
 
-		Get = {
-			NameCallMethod = {"getnamecallmethod", "get_namecallmethod", "getnamecall_method", "get_namecall_method", "get_name_call_method"},
-			CustomAsset = {"getcustomasset", "get_customasset", "getcustom_asset", "get_custom_asset"},
-			Connections = {"getconnections", "get_connections"}
-		},
+		GetNameCallMethod = {"getnamecallmethod", "get_namecallmethod", "getnamecall_method", "get_namecall_method", "get_name_call_method"},
+		GetCustomAsset = {"getcustomasset", "get_customasset", "getcustom_asset", "get_custom_asset"},
+		GetConnections = {"getconnections", "get_connections"},
 
-		SetFFlag = {"setfflag", "set_fflag", "set_fastflag", "set_fast_flag"},
-
-		Clone = {
-			Function = {"clonefunction", "clone_function", "copyfunction", "copy_function"},
-			Ref = {"cloneref", "clone_ref", "clonereference", "clone_reference"}
-		},
+		clonefunction = {"clonefunction", "clone_function", "copyfunction", "copy_function"},
+		cloneref = {"cloneref", "clone_ref", "clonereference", "clone_reference"},
 
 		HttpRequest = {"httprequest", "http_request", "request", "HttpPost", "Http_Post"}
 	}
 
 	Module.Errors = 0
-
 	return Module
-]===])(nsloadstring)
+]=====])(nsloadstring)
 
 if not Module or (type(Module) == "table" and Module.nsFailed) then
 	warn("Failed to load Module: " .. Module[3])
@@ -198,6 +1150,9 @@ else
 end
 
 local ThreadManager = loadstring([===[
+	--!optimize 2
+    --!native
+
 	local ThreadManager = {}
 	ThreadManager.__index = ThreadManager
 
@@ -230,7 +1185,7 @@ local ThreadManager = loadstring([===[
 		self.Threads[Name] = nil
 	end
 
-	function ThreadManager:StopAll()
+	function ThreadManager:Shutdown()
 		self.Running = false
 		table.clear(self.Threads)
 	end
@@ -238,7 +1193,10 @@ local ThreadManager = loadstring([===[
 	return ThreadManager.new()
 ]===])()
 local DrawingManager = loadstring([===[
-	local DrawingNew = (...)
+	--!optimize 2
+    --!native
+
+    local DrawingNew = (...)
 
 	if not DrawingNew or type(DrawingNew) ~= "function" then
 		return "Failed to get Drawing function."
@@ -247,7 +1205,7 @@ local DrawingManager = loadstring([===[
 	local DrawingManager = {}
 	DrawingManager.__index = DrawingManager
 
-	function DrawingManager.new(Type: string, Properties: table?)
+	function DrawingManager.new(Type, Properties)
 		local DrawingObject = DrawingNew(Type)
 
 		if Properties then
@@ -269,33 +1227,24 @@ local DrawingManager = loadstring([===[
 		}, DrawingManager)
 	end
 
-	DrawingManager.__index = function(self: table?, Key: string?)
+	DrawingManager.__index = function(self, Key)
 		return DrawingManager[Key] or self.DrawingObject[Key]
 	end
 
-	DrawingManager.__newindex = function(self: table?, Key: string?, Value: any)
+	DrawingManager.__newindex = function(self, Key, Value)
 		self.DrawingObject[Key] = Value
 	end
 
 	for _,Property in ipairs({
 		"Visible", "Center", "Size", "Color",
 		"Filled", "Thickness", "Transparency",
-		"Radius", "Text"
+		"Radius", "Text", "Position", "From",
+        "To", "PointA", "PointB", "PointC"
 	}) do
-		DrawingManager[Property] = function(self: table?, Value: any)
+		DrawingManager[Property] = function(self, Value)
 			if self.DrawingObject[Property] ~= Value then
 				self.DrawingObject[Property] = Value
 			end
-			return self
-		end
-	end
-
-	for _,Property in ipairs({
-		"Position", "From", "To",
-		"PointA", "PointB", "PointC"
-	}) do
-		DrawingManager[Property] = function(self: table?, Value: any)
-			self.DrawingObject[Property] = Value
 			return self
 		end
 	end
@@ -309,6 +1258,9 @@ local DrawingManager = loadstring([===[
 	return DrawingManager
 ]===])(DrawingNew)
 local FunctionValidator = loadstring([===[
+	--!optimize 2
+	--!native
+
 	local Success, Environment = pcall(function()
 		return (
 			getgenv or get_genv or getg_env or get_g_env
@@ -318,16 +1270,19 @@ local FunctionValidator = loadstring([===[
 	end)
 
 	if not Environment then
-		Environment = getfenv(0)
-		if not Environment then
-			return nil, "broken ass executor :skull:"
-		end
+		return nil, "broken ass executor :skull:"
+	elseif not Environment.ns__FunctionValidatorCache then
+		Environment.ns__FunctionValidatorCache = {}
 	end
 
 	local FunctionValidator = {}
 
-	function FunctionValidator.Validate(Name: string | {string}, Fallback: (...any) -> any, IsSolara: boolean?)
-		local function GetFunction(FunctionName: string)
+	function FunctionValidator.Validate(Name, UNCName, Fallback, IsSolara): any
+		if UNCName and Environment.ns__FunctionValidatorCache[UNCName] then
+			return Environment.ns__FunctionValidatorCache[UNCName]
+		end
+
+		local function GetFunction(FunctionName)
 			local Function = rawget(Environment, FunctionName) or Environment[FunctionName]
 			if type(Function) == "function" then
 				return Function
@@ -351,11 +1306,17 @@ local FunctionValidator = loadstring([===[
 
 		Function = Function or Fallback
 
-		return setmetatable({IsWaxxed = Function == Fallback}, {
+		local Metatable = setmetatable({IsWaxxed = Function == Fallback}, {
 			__call = function(_, ...) return
 				Function(...)
 			end
 		})
+
+		if UNCName then
+			Environment.ns__FunctionValidatorCache[UNCName] = Metatable
+		end
+
+		return Metatable
 	end
 
 	function FunctionValidator:GetEnvironment()
@@ -372,53 +1333,41 @@ if not ThreadManager or not DrawingManager or not FunctionValidator then
 	return "skill issue fr"
 end
 
-local ScriptVersion = "2.9.3"
+local Environment = FunctionValidator:GetEnvironment()
 
-local FileFunctions = {
-    makefolder = FunctionValidator.Validate(Module.Tables.Workspace.MakeFolder, Module.Tables.Blank),
-    isfolder = FunctionValidator.Validate(Module.Tables.Workspace.IsFolder, Module.Tables.False),
-    readfile = FunctionValidator.Validate(Module.Tables.Workspace.ReadFile[1], Module.Tables.Workspace.ReadFile[2]),
-    writefile = FunctionValidator.Validate(Module.Tables.Workspace.WriteFile, Module.Tables.Blank),
-    delfile = FunctionValidator.Validate(Module.Tables.Workspace.DelFile, Module.Tables.Blank)
-}
+Environment.isfolder = FunctionValidator.Validate(Module.Tables.Workspace.IsFolder, "isfolder", Module.Tables.False)
+Environment.makefolder = FunctionValidator.Validate(Module.Tables.Workspace.MakeFolder, "makefolder", Module.Tables.Blank)
+local listfiles = FunctionValidator.Validate(Module.Tables.Workspace.ListFiles, "listfiles", Module.Tables.Table)
+local isfile = FunctionValidator.Validate(Module.Tables.Workspace.IsFile, "isfile", Module.Tables.False)
+local readfile = FunctionValidator.Validate(Module.Tables.Workspace.ReadFile, "readfile", Module.Tables.Table)
+local writefile = FunctionValidator.Validate(Module.Tables.Workspace.WriteFile, "writefile", Module.Tables.Blank)
+Environment.delfile = FunctionValidator.Validate(Module.Tables.Workspace.DelFile, "delfile", Module.Tables.Blank)
 
-local listfiles, isfile =
-FunctionValidator.Validate(Module.Tables.Workspace.ListFiles[1], Module.Tables.Workspace.ListFiles[2]),
-FunctionValidator.Validate(Module.Tables.Workspace.IsFile, Module.Tables.False)
-
-if not FileFunctions.isfolder("combat.cc") then
-	FileFunctions.makefolder("combat.cc")
+if not Environment.isfolder("combat.cc") then
+	Environment.makefolder("combat.cc")
 end
 
-if not FileFunctions.isfolder("combat.cc/Sounds") then
-	FileFunctions.makefolder("combat.cc/Sounds")
+if not Environment.isfolder("combat.cc/Sounds") then
+	Environment.makefolder("combat.cc/Sounds")
 end
 
-local ExecutorName = FunctionValidator.Validate(Module.Tables.IdentifyExecutor, Module.Tables.String)()
+local ExecutorName = FunctionValidator.Validate(Module.Tables.IdentifyExecutor, "identifyexecutor", Module.Tables.String)()
 
-local isrenderobj = FunctionValidator.Validate(Module.Tables.IsRenderObj, Module.Tables.True)
-local isrbxactive = FunctionValidator.Validate(Module.Tables.IsRbxActive, Module.Tables.True)
-local httprequest = FunctionValidator.Validate(Module.Tables.HttpRequest, nil)
+local isrenderobj = FunctionValidator.Validate(Module.Tables.IsRenderObj, "isrenderobj", Module.Tables.True)
+local isrbxactive = FunctionValidator.Validate(Module.Tables.IsRbxActive, "isrbxactive", Module.Tables.True)
+local httprequest = FunctionValidator.Validate(Module.Tables.HttpRequest, nil, nil)
 
-local mouse1press = FunctionValidator.Validate(Module.Tables.Mouse.Press, Module.Tables.True)
-local mouse1release = FunctionValidator.Validate(Module.Tables.Mouse.Release, Module.Tables.True)
-local mousemoverel = FunctionValidator.Validate(Module.Tables.Mouse.MoveRel[1], Module.Tables.Mouse.MoveRel[2])
+local mouse1press = FunctionValidator.Validate(Module.Tables.Mouse.Press, "mouse1press", Module.Tables.True)
+local mouse1release = FunctionValidator.Validate(Module.Tables.Mouse.Release, "mouse1release", Module.Tables.True)
+local mousemoverel = FunctionValidator.Validate(Module.Tables.Mouse.MoveRel[1], "mousemoverel", Module.Tables.Mouse.MoveRel[2])
 
-local newcclosure = FunctionValidator.Validate(Module.Tables.NewCClosure[1], Module.Tables.NewCClosure[2])
+local newcclosure = FunctionValidator.Validate(Module.Tables.NewCClosure[1], "newcclosure", Module.Tables.NewCClosure[2])
 
-local hookmetamethod = FunctionValidator.Validate(Module.Tables.HookMetaMethod, nil, ExecutorName:lower():find("solara"))
-local getnamecallmethod = FunctionValidator.Validate(Module.Tables.Get.NameCallMethod, Module.Tables.String)
+local hookmetamethod = FunctionValidator.Validate(Module.Tables.HookMetaMethod, nil, nil, ExecutorName:lower():find("solara"))
+local getnamecallmethod = FunctionValidator.Validate(Module.Tables.GetNameCallMethod, "getnamecallmethod", Module.Tables.String)
 
-local setfflagFunction = FunctionValidator.Validate(Module.Tables.SetFFlag, nil)
-local function nssetfflag(FastFlag: string, Value: string): (boolean, string?)
-	if not setfflagFunction then
-		return false, "function missing"
-	end
-	return pcall(setfflagFunction, FastFlag, Value)
-end
-
-local clonefunctionFunction = FunctionValidator.Validate(Module.Tables.Clone.Function, nil)
-local nsclonefunction = function(Function: (any) -> any): (any) -> any
+local clonefunctionFunction = FunctionValidator.Validate(Module.Tables.clonefunction, "clonefunction", nil)
+local function nsclonefunction(Function)
 	if not clonefunctionFunction then
 		return Function
 	end
@@ -427,8 +1376,8 @@ local nsclonefunction = function(Function: (any) -> any): (any) -> any
 	return Success and Result or Function
 end
 
-local clonerefFunction = FunctionValidator.Validate(Module.Tables.Clone.Ref, nil)
-local nscloneref = function< T >(Object: T): T
+local clonerefFunction = FunctionValidator.Validate(Module.Tables.cloneref, "cloneref", nil)
+local function nscloneref(Object)
 	if not clonerefFunction then
 		return Object
 	end
@@ -437,8 +1386,8 @@ local nscloneref = function< T >(Object: T): T
 	return Success and Result or Object
 end
 
-local getcustomassetFunction = FunctionValidator.Validate(Module.Tables.Get.CustomAsset, nil)
-local function nsgetcustomasset(File: string): string
+local getcustomassetFunction = FunctionValidator.Validate(Module.Tables.GetCustomAsset, "getcustomasset", nil)
+local function nsgetcustomasset(File)
 	if not getcustomassetFunction then
 		return "rbxassetid://0"
 	end
@@ -447,13 +1396,13 @@ local function nsgetcustomasset(File: string): string
 	return Success and Result or "rbxassetid://0"
 end
 
-local getconnections = FunctionValidator.Validate(Module.Tables.Get.Connections, nil)
-local function nsgetconnections(Signal: RBXScriptSignal): {RBXScriptConnection}
-	if not getconnections then
+local getconnectionsFunction = FunctionValidator.Validate(Module.Tables.GetConnections, "getconnections", nil)
+local function nsgetconnections(Signal)
+	if not getconnectionsFunction then
 		return {}
 	end
 
-	local Success, Output = pcall(getconnections, Signal)
+	local Success, Output = pcall(getconnectionsFunction, Signal)
 	return Success and Output or {}
 end
 
@@ -482,7 +1431,7 @@ local function nssethiddenproperty(Object, Property, Value)
 end]]
 
 local CreateInstance = nsclonefunction(Instance.new)
-local function Create(Type: string, Properties: {[string]: any}?): Instance
+local function Create(Type, Properties)
     local Object = nscloneref(CreateInstance(Type))
 
     if Properties then
@@ -495,7 +1444,7 @@ local function Create(Type: string, Properties: {[string]: any}?): Instance
 end
 
 local GetServiceFunction = nsclonefunction(game.GetService)
-local function GetService(ServiceName: string): ServiceProvider
+local function GetService(ServiceName)
 	return nscloneref(GetServiceFunction(game, ServiceName))
 end
 
@@ -530,6 +1479,7 @@ local CoreGui = GetService("CoreGui")
 local VirtualInputManager = nil
 
 local CachedPlayers = {}
+local CachedPlayersList = {}
 local Camera = nil
 local ViewportSize = Vector2.zero
 local ScreenCenter = Vector2.zero
@@ -545,17 +1495,18 @@ local LocalHead = nil
 local LocalRoot = nil
 
 local Library = Module:GetLibrary({
-	Create, nscloneref, GetService, CoreGui, Players, RunService, UserInputService, Teams, FunctionValidator:GetEnvironment(),
-	FunctionValidator.Validate({"gethui", "get_hui", "gethiddenui", "get_hiddenui", "get_hidden_ui"}, function(): CoreGui
+	Create, nscloneref, GetService, CoreGui, Players, RunService, UserInputService, Teams, Environment,
+	FunctionValidator.Validate({"gethui", "get_hui", "gethiddenui", "get_hiddenui", "get_hidden_ui"}, "gethui", function()
 		return CoreGui
-	end), getcustomassetFunction, FunctionValidator.Validate({"setclipboard", "set_clipboard", "writeclipboard", "write_clipboard"}, nil),
-	LocalPlayer, Mouse, FileFunctions.isfolder, FileFunctions.makefolder, FileFunctions.isfile, FileFunctions.writefile
+	end), getcustomassetFunction, FunctionValidator.Validate({"setclipboard", "set_clipboard", "writeclipboard", "write_clipboard"}, "setclipboard", nil),
+	LocalPlayer, Mouse, Environment.isfolder, Environment.makefolder, isfile, writefile
 })
 
 if not Library then
 	return "skill issue fr"
 end
 
+local ScriptVersion = "2.9.4"
 local Options = Library.Options
 local Toggles = Library.Toggles
 local Watermark = Library:AddDraggableLabel("[nikoletoscripts/combat.cc] | Unknown | 0 | 0")
@@ -579,13 +1530,13 @@ local HighlightDepthModeAlwaysOnTop = Enum.HighlightDepthMode.AlwaysOnTop
 local HighlightDepthModeOccluded = Enum.HighlightDepthMode.Occluded
 local IsMouseAndKeyboardPreferredInput = UserInputService.PreferredInput == Enum.PreferredInput.KeyboardAndMouse
 
-local Vector3PlusHoundredY = vector.create(0, 100, 0)
-local Vector3MinusHoundredY = vector.create(0, -100, 0)
-local ESPHeadOffset = vector.create(0, 1.5, 0)
-local R6Neck = vector.create(0, 0.4, 0)
-local R6Waist = vector.create(0, -0.5, 0)
-local R6Top = vector.create(0, 0.5, 0)
-local R6Bottom = vector.create(0, -0.5, 0)
+local Vector3PlusHoundredY = Vector3.new(0, 100, 0)
+local Vector3MinusHoundredY = Vector3.new(0, -100, 0)
+local ESPHeadOffset = Vector3.new(0, 1.5, 0)
+local R6Neck = Vector3.new(0, 0.4, 0)
+local R6Waist = Vector3.new(0, -0.5, 0)
+local R6Top = Vector3.new(0, 0.5, 0)
+local R6Bottom = Vector3.new(0, -0.5, 0)
 local CFrameZero = CFrame.new(0, 0, 0)
 local FixedBottomCenter = Vector2.zero
 
@@ -777,7 +1728,7 @@ local AntiAim = {
 	VelocityMode = "None",
 	VelocityModeBehaviours = {
 		["Randomizer"] = function()
-			return vector.create(math.random(-100, 100), math.random(-100, 100), math.random(-100, 100))
+			return Vector3.new(math.random(-100, 100), math.random(-100, 100), math.random(-100, 100))
 		end,
 		["Heavenly"] = function(Root)
 			return Root.AssemblyLinearVelocity + Vector3PlusHoundredY
@@ -792,7 +1743,7 @@ local AntiAim = {
 			return Root.AssemblyLinearVelocity * math.random(7, 10)
 		end,
 		["Prediction Changer"] = function(Root)
-			return Root.AssemblyLinearVelocity + vector.create(math.random(-50, 50), math.random(-25, 25), math.random(-12.5, 12.5))
+			return Root.AssemblyLinearVelocity + Vector3.new(math.random(-50, 50), math.random(-25, 25), math.random(-12.5, 12.5))
 		end,
 		["Prediction Disabler"] = function()
 			return Vector3.zero
@@ -807,8 +1758,8 @@ local AntiAim = {
 local ChinaHat = {
     ChinaHatTrail = nil,
     ChinaHatColor = Color3.fromRGB(255, 0, 0),
-    ChinaHatTrailSize = vector.create(3, 0.7, 3),
-    ChinaHatMeshScale = vector.create(3, 0.6, 3),
+    ChinaHatTrailSize = Vector3.new(3, 0.7, 3),
+    ChinaHatMeshScale = Vector3.new(3, 0.6, 3),
 }
 local OldDevCameraOcclusionMode = LocalPlayer.DevCameraOcclusionMode
 local SelectedPlayer = nil
@@ -879,10 +1830,10 @@ local BoxESP, BoxPointScreen, BoxPointOnScreen, Box3DOffsets, Box3DEdges = {
 		Transparency = 1
 	}
 }, table.create(8), table.create(8), {
-	vector.create(-2, 3, -1.5), vector.create(2, 3, -1.5),
-    vector.create(-2, -3, -1.5), vector.create(2, -3, -1.5),
-    vector.create(-2, 3, 1.5), vector.create(2, 3, 1.5),
-	vector.create(-2, -3, 1.5), vector.create(2, -3, 1.5)
+	Vector3.new(-2, 3, -1.5), Vector3.new(2, 3, -1.5),
+    Vector3.new(-2, -3, -1.5), Vector3.new(2, -3, -1.5),
+    Vector3.new(-2, 3, 1.5), Vector3.new(2, 3, 1.5),
+	Vector3.new(-2, -3, 1.5), Vector3.new(2, -3, 1.5)
 }, {
 	{1,2}, {2,4}, {4,3}, {3,1},
 	{5,6}, {6,8}, {8,7}, {7,5},
@@ -1056,11 +2007,11 @@ local PlayerLeaveLogs = false
 
 workspace.FallenPartsDestroyHeight = -math.huge
 
-local function InsertToConnections(Connection: RBXScriptConnection)
+local function InsertToConnections(Connection)
 	table.insert(Connections, Connection)
 end
 
-local function RenderStepped(Function: (number) -> (), ShouldInsertToConnections: boolean): RBXScriptConnection
+local function RenderStepped(Function, ShouldInsertToConnections)
 	local Connection = RunService.RenderStepped:Connect(Function)
 
 	if ShouldInsertToConnections then
@@ -1070,7 +2021,7 @@ local function RenderStepped(Function: (number) -> (), ShouldInsertToConnections
 	return Connection
 end
 
-local function Heartbeat(Function: (number) -> (), ShouldInsertToConnections: boolean): RBXScriptConnection
+local function Heartbeat(Function, ShouldInsertToConnections)
 	local Connection = RunService.Heartbeat:Connect(Function)
 
 	if ShouldInsertToConnections then
@@ -1106,7 +2057,7 @@ InsertToConnections(Mouse.Move:Connect(function()
 	MouseLocation = UserInputService:GetMouseLocation()
 end))
 
-local function GetSettingsShield(): Instance?
+local function GetSettingsShield()
     if CachedSettingsShield and CachedSettingsShield.Parent then
         return CachedSettingsShield
     end
@@ -1145,9 +2096,9 @@ AimbotFOVCircles.S_FOVCircle = DrawingManager.new("Circle", {
 	Visible = false
 })
 
-local IsEnemy: (Player) -> boolean = nil
+local IsEnemy = nil
 if Games.IsAimblox then
-	IsEnemy = function(Player: Player): boolean
+	IsEnemy = function(Player)
 		if not Player then
 			return false
 		end
@@ -1159,7 +2110,7 @@ if Games.IsAimblox then
 		return false
 	end
 elseif Games.IsDefuseDivision then
-	IsEnemy = function(Player: Player): boolean
+	IsEnemy = function(Player)
 		if Player then
 			local LocalPlayerStates = LocalPlayer:FindFirstChild("PlayerStates")
 
@@ -1192,7 +2143,7 @@ elseif Games.IsDefuseDivision then
 		return false
 	end
 elseif Games.IsBloxStrike then
-	IsEnemy = function(Player: Player): boolean
+	IsEnemy = function(Player)
 		if Player then
 			local LocalTeam = LocalPlayer:GetAttribute("Team")
 
@@ -1209,11 +2160,11 @@ elseif Games.IsBloxStrike then
 		return false
 	end
 elseif Games.IsGunGroundsFFA or Games.IsFlick then
-	IsEnemy = function(_: any): boolean
+	IsEnemy = function(Player)
 		return true
 	end
 elseif Games.IsDeadEye then
-	IsEnemy = function(Player: Player): boolean
+	IsEnemy = function(Player)
 		if not Player then
 			return false
 		end
@@ -1237,7 +2188,7 @@ elseif Games.IsDeadEye then
 		return false
 	end
 elseif Games.MurderersVSSheriffsDUELS then
-	IsEnemy = function(Player: Player): boolean
+	IsEnemy = function(Player)
 		if not Player then
 			return false
 		end
@@ -1250,7 +2201,7 @@ elseif Games.MurderersVSSheriffsDUELS then
 	end
 elseif Games.IsKatX then
 	local EnemyColor = Color3.fromRGB(255, 0, 0)
-	IsEnemy = function(Player: Player): boolean
+	IsEnemy = function(Player)
 		if not Player then
 			return false
 		end
@@ -1280,7 +2231,7 @@ elseif Games.IsKatX then
 		return false
 	end
 elseif Games.IsDefusal then
-	IsEnemy = function(Player: Player): boolean
+	IsEnemy = function(Player)
 		if not Player then
 			return false
 		end
@@ -1308,7 +2259,7 @@ elseif Games.IsDefusal then
 		return false
 	end
 elseif Games.IsRivals then
-	IsEnemy = function(Player: Player): boolean
+	IsEnemy = function(Player)
 		if not Player then
 			return false
 		end
@@ -1320,7 +2271,7 @@ elseif Games.IsRivals then
 		return false
 	end
 else
-	IsEnemy = function(Player: Player): boolean
+	IsEnemy = function(Player)
 		if not Player then
 			return false
 		end
@@ -1333,14 +2284,14 @@ else
 	end
 end
 
-local function GetArsenalHealthInstance(Cache: table): NumberValue?
+local function GetArsenalHealthInstance(Cache)
 	local NRPBS = Cache.NRPBS
 	return NRPBS and NRPBS:FindFirstChild("Health")
 end
 
-local IsDead: (Instance, string, number) -> (boolean, number) = nil
+local IsDead = nil
 if IsArsenalBaseGame then
-	IsDead = function(Character: Instance?, Mode: string, CustomValue: number): (boolean, number)
+	IsDead = function(Character, Mode, CustomValue)
 		if not Character then
 			return true
 		end
@@ -1373,7 +2324,7 @@ if IsArsenalBaseGame then
 		return false, HealthValue
 	end
 elseif Games.IsSniperArena or Games.IsAimblox or Games.IsDefusal then
-	IsDead = function(Character: Instance?, Mode: string, CustomValue: number): (boolean, number)
+	IsDead = function(Character, Mode, CustomValue)
 		if not Character then
 			return true, 0
 		end
@@ -1401,83 +2352,83 @@ elseif Games.IsSniperArena or Games.IsAimblox or Games.IsDefusal then
 		return false, HealthValue
 	end
 elseif Games.IsDefuseDivision then
-	IsDead = function(Character: Instance?, ...: any): boolean
+	IsDead = function(Character, ...)
 		if not Character then
-			return true
+			return true, 0
 		end
 
 		local Cache = CachedPlayers[Players:GetPlayerFromCharacter(Character)]
 		if not Cache then
-			return true
+			return true, 0
 		end
 
 		local Humanoid = Cache.Humanoid
 
 		if not Humanoid then
-			return true
+			return true, 0
 		end
 
 		if Humanoid.Health <= 0 then
-			return true
+			return true, 0
 		end
 
-		return false
+		return false, 0
 	end
 elseif Games.IsAladiaPvP then
-	IsDead = function(Character: Instance?, Mode: string, CustomValue: number): boolean
+	IsDead = function(Character, Mode, CustomValue)
 		if not Character then
-			return true
+			return true, 0
 		end
 
 		local Cache = CachedPlayers[Players:GetPlayerFromCharacter(Character)]
 		if not Cache then
-			return true
+			return true, 0
 		end
 
 		local Humanoid = Cache.Humanoid
 		if not Humanoid then
-			return true
+			return true, 0
 		end
 
 		if Humanoid.Health <= ((Mode == "Custom") and CustomValue or 1) then
-			return true
+			return true, 0
 		end
 
-		return false
+		return false, 0
 	end
 else
-	IsDead = function(Character: Instance?, Mode: string, CustomValue: number): boolean
+	IsDead = function(Character, Mode, CustomValue)
 		if not Character then
-			return true
+			return true, 0
 		end
 
 		local Cache = CachedPlayers[Players:GetPlayerFromCharacter(Character)]
 		if not Cache then
-			return true
+			return true, 0
 		end
 
 		local Humanoid = Cache.Humanoid
 		if not Humanoid then
-			return true
+			return true, 0
 		end
 
 		if Humanoid.Health <= ((Mode == "Custom") and CustomValue or 0) then
-			return true
+			return true, 0
 		end
 
-		return false
+		return false, 0
 	end
 end
 
-local function IsProtected(Character: Instance?): boolean
-	if Character:FindFirstChildOfClass("ForceField") then
-		return true
-	end
-
-	return false
+local function IsProtected(Cache)
+	return Cache.ForceField ~= nil
 end
 
-local PerformJump: () -> () = nil
+local function IsCharacterProtected(Character)
+	return Character:FindFirstChildOfClass("ForceField")
+end
+
+local PerformJump = nil
 if Games.IsDefuseDivision then
 	PerformJump = function()
 		if CanUseVirtualInputManager then
@@ -1495,7 +2446,7 @@ else
 	end
 end
 
-local function IsBehindWall(Origin: Vector3, TargetPosition: Vector3, Character: Instance?): boolean
+local function IsBehindWall(Origin, TargetPosition, Character)
 	if not Character then
 		return false
 	end
@@ -1509,7 +2460,7 @@ local function IsBehindWall(Origin: Vector3, TargetPosition: Vector3, Character:
     return not Result.Instance:IsDescendantOf(Character)
 end
 
-local function WorldToViewportPoint(Position: Vector3): (Vector2, boolean)
+local function WorldToViewportPoint(Position)
 	if not Camera then
 		return Vector2.zero, false
 	end
@@ -1518,7 +2469,7 @@ local function WorldToViewportPoint(Position: Vector3): (Vector2, boolean)
 	return Vector2.new(Screen.X, Screen.Y), OnScreen
 end
 
-local function WorldToScreenPoint(Position: Vector3, IncludeZ: boolean): ((Vector3 | Vector2), boolean)
+local function WorldToScreenPoint(Position, IncludeZ)
 	if not Camera then
 		return Vector2.zero, false
 	end
@@ -1531,7 +2482,7 @@ local function WorldToScreenPoint(Position: Vector3, IncludeZ: boolean): ((Vecto
 	end
 end
 
-local function ClearCache(Player: Player)
+local function ClearCache(Player)
 	local Cache = CachedPlayers[Player]
 
 	if not Cache then
@@ -1558,9 +2509,15 @@ local function ClearCache(Player: Player)
 	end
 
 	CachedPlayers[Player] = nil
+	for Index = 1, #CachedPlayersList do
+		if CachedPlayersList[Index] == Cache then
+			table.remove(CachedPlayersList, i)
+			break
+		end
+	end
 end
 
-local function CachePlayer(Player: Player): (Instance, table)
+local function CachePlayer(Player)
 	local Character = Player.Character
 
 	if not Character then
@@ -1570,6 +2527,7 @@ local function CachePlayer(Player: Player): (Instance, table)
 
 	local Cache = CachedPlayers[Player] or {}
 
+	Cache.Player = Player
 	local Name = Player.Name
 	Cache.Name = Name
 	Cache.DisplayName = Player.DisplayName
@@ -1583,6 +2541,7 @@ local function CachePlayer(Player: Player): (Instance, table)
 	end
 
 	Cache.Character = Character
+	Cache.ForceField = Character:FindFirstChildOfClass("ForceField")
 	Cache.Humanoid = Character:FindFirstChildOfClass("Humanoid")
 
 	for _,Child in ipairs(Character:GetChildren()) do
@@ -1685,16 +2644,17 @@ local function CachePlayer(Player: Player): (Instance, table)
 	end
 
 	CachedPlayers[Player] = Cache
+	table.insert(CachedPlayersList, Cache)
 	return Character, CachedPlayers[Player]
 end
 
-local function SetEnabled(Object: Instance, State: boolean)
+local function SetEnabled(Object, State)
 	if Object.Enabled ~= State then
 		Object.Enabled = State
 	end
 end
 
-local function AddCache(Player: Player)
+local function AddCache(Player)
 	local Character, Cache = CachePlayer(Player)
 	local ChamName = "Cham_" .. Player.Name
 
@@ -1711,10 +2671,21 @@ local function AddCache(Player: Player)
 	InsertToConnections(Player.CharacterAdded:Connect(function()
 		local Character2, Cache2 = CachePlayer(Player)
 		InsertToConnections(Character2.ChildAdded:Connect(function(Child)
+			if Child:IsA("ForceField") then
+				Cache2.ForceField = Child
+			end
+
 			if ChamESP.Enabled and Child:IsA("Highlight") and Child.Name ~= ChamName then
 				SetEnabled(Child, false)
 			end
 		end))
+
+		InsertToConnections(Character2.ChildRemoved:Connect(function(Child)
+			if Child:IsA("ForceField") then
+				Cache2.ForceField = nil
+			end
+		end))
+
 		Cache2.FemboyMeter = TableOfStringNumbers[math.random(0, 100)]
 	end))
 
@@ -1766,7 +2737,7 @@ ThreadManager:Start("CachedPlayers", function()
 	end
 end, 2.5)
 
-InsertToConnections(Players.PlayerAdded:Connect(function(Player: Player)
+InsertToConnections(Players.PlayerAdded:Connect(function(Player)
 	AddCache(Player)
 	if PlayerJoinLogs then
 		Library:Notify({
@@ -1776,7 +2747,7 @@ InsertToConnections(Players.PlayerAdded:Connect(function(Player: Player)
 		})
 	end
 end))
-InsertToConnections(Players.PlayerRemoving:Connect(function(Player: Player)
+InsertToConnections(Players.PlayerRemoving:Connect(function(Player)
 	ClearCache(Player)
 	if PlayerLeaveLogs then
 		Library:Notify({
@@ -1787,7 +2758,7 @@ InsertToConnections(Players.PlayerRemoving:Connect(function(Player: Player)
 	end
 end))
 
-local function PlayHitSound(Option: string, Volume: number)
+local function PlayHitSound(Option, Volume)
 	local AssetId = HitSounds.Sounds[Option]
 	if AssetId then
 		Create("Sound", {
@@ -1863,40 +2834,72 @@ task.spawn(function()
 	end, 0.1)
 end)
 
-local function SetSize(DrawingObject: any, Size: Vector2)
+local function SetSize(DrawingObject, Size)
 	if DrawingObject.Size ~= Size then
 		DrawingObject.Size = Size
 	end
 end
 
-local function SetTransparency(DrawingObject: any, Transparency: number)
+local function SetTransparency(DrawingObject, Transparency)
 	if DrawingObject.Transparency ~= Transparency then
 		DrawingObject.Transparency = Transparency
 	end
 end
 
-local function UpdateFOVCircle(FOVCircle: any, FOVCircleTable: table, AimbotTable: table)
-	if not FOVCircle or not isrenderobj(FOVCircle) then
+local function UpdateFOVCircle(FOVCircle, FOVCircleTable, AimbotTable)
+	if not isrenderobj(FOVCircle) then
 		return
 	end
 
-	if not FOVCircleTable.Enabled then
-		FOVCircle:Visible(false)
+	if not FOVCircleTable.Enabled and FOVCircle.Visible ~= false then
+		FOVCircle.Visible = false
 	end
 
-	FOVCircle:Color(FOVCircleTable.Color):Filled(FOVCircleTable.Filled):Thickness(
-		FOVCircleTable.Thickness
-	):Radius(FOVCircleTable.Radius):Transparency(
-		FOVCircleTable.Transparency
-	):Position(
-		FOVCircleTable.Position == "Center" and ScreenCenter or MouseLocation
-	):Visible(AimbotTable.Toggled and FOVCircleTable.Enabled)
+	local Color = FOVCircleTable.Color
+	if FOVCircle.Color ~= Color then
+		FOVCircle.Color = Color
+	end
+
+	local Filled = FOVCircleTable.Filled
+	if FOVCircle.Filled ~= Filled then
+		FOVCircle.Filled = Filled
+	end
+
+	local Thickness = FOVCircleTable.Thickness
+	if FOVCircle.Thickness ~= Thickness then
+		FOVCircle.Thickness = Thickness
+	end
+
+	local Radius = FOVCircleTable.Radius
+	if FOVCircle.Radius ~= Radius then
+		FOVCircle.Radius = Radius
+	end
+
+	local Transparency = FOVCircleTable.Transparency
+	if FOVCircle.Transparency ~= Transparency then
+		FOVCircle.Transparency = Transparency
+	end
+
+	local Position = FOVCircleTable.Position == "Center" and ScreenCenter or MouseLocation
+	if FOVCircle.Position ~= Position then
+		FOVCircle.Position = Position
+	end
+
+	local Visible = AimbotTable.Toggled and FOVCircleTable.Enabled
+	if FOVCircle.Visible ~= Visible then
+		FOVCircle.Visible = Visible
+	end
 end
 
-local function HideESP(ESP: table?)
-    if not ESP then
-        return
-    end
+local function HideESP(Cache, ESPTable)
+	if not Cache or not Cache.IsVisible then
+		return
+	end
+
+	local ESP = ESPTable or Cache.ESP
+	if not ESP then
+		return
+	end
 
     for Index, Object in next, ESP do
         if Index == "Cham" then
@@ -1908,38 +2911,44 @@ local function HideESP(ESP: table?)
 
         if Index == "Box3D" or Index == "Skeleton" then
             for _, Line in next, Object do
-                Line:Visible(false)
+				if Line.Visible ~= false then
+					Line.Visible = false
+				end
             end
             continue
         end
 
-        Object:Visible(false)
+		if Object.Visible ~= false then
+			Object.Visible = false
+		end
     end
+
+	Cache.IsVisible = false
 end
 
-local function GetDistanceSquared(Point1: Vector3, Point2: Vector3): number
+local function GetDistanceSquared(Point1, Point2)
     local DeltaX = Point1.X - Point2.X
     local DeltaY = Point1.Y - Point2.Y
     local DeltaZ = Point1.Z - Point2.Z
     return DeltaX * DeltaX + DeltaY * DeltaY + DeltaZ * DeltaZ
 end
 
-local function CanRenderVisually(CanBeOptimized: boolean, Player: Player, Character: Instance?, Head: Instance?, Root: Instance?): (boolean, number, Vector3, Vector3?)
+local function CanRenderVisually(CanBeOptimized, Cache, Player, Character, Head, Root)
 	if not Character or not Head or not Root then
-		return false, 0, Vector3.zero, Vector3.zero
+		return false, 0, Vector3.zero, Vector3.zero, nil
 	end
 
 	if ESPTeamCheck and not IsEnemy(Player) then
-		return false, 0, Vector3.zero, Vector3.zero
+		return false, 0, Vector3.zero, Vector3.zero, nil
 	end
 
 	local DeadState, CustomGameHealth = IsDead(Character, "Universal", 0)
 	if DeadState then
-		return false, CustomGameHealth, Vector3.zero, Vector3.zero
+		return false, CustomGameHealth, Vector3.zero, Vector3.zero, nil
 	end
 
-	if ESPForceFieldCheck and IsProtected(Character) then
-		return false, CustomGameHealth, Vector3.zero, Vector3.zero
+	if ESPForceFieldCheck and IsProtected(Cache) then
+		return false, CustomGameHealth, Vector3.zero, Vector3.zero, nil
 	end
 
 	local RootPosition = Root.Position
@@ -1947,30 +2956,33 @@ local function CanRenderVisually(CanBeOptimized: boolean, Player: Player, Charac
 	if LocalRoot then
 		LocalRootPosition = LocalRoot.Position
 
-		if GetDistanceSquared(LocalRootPosition, RootPosition) > ESPDistanceCheck then
-			return false, CustomGameHealth, RootPosition, LocalRootPosition
+		local Distance = GetDistanceSquared(LocalRootPosition, RootPosition)
+		if Distance > ESPDistanceCheck then
+			return false, CustomGameHealth, RootPosition, LocalRootPosition, Distance
 		end
 
 		if ESPWallCheck and not CanBeOptimized and IsBehindWall(LocalRootPosition, RootPosition, Character) then
-			return false, CustomGameHealth, RootPosition, LocalRootPosition
+			return false, CustomGameHealth, RootPosition, LocalRootPosition, nil
 		end
 	end
 
-	return true, CustomGameHealth, RootPosition, LocalRootPosition
+	return true, CustomGameHealth, RootPosition, LocalRootPosition, nil
 end
 
-RenderStepped(function(DeltaTime)
+RenderStepped(function()
 	UpdateFOVCircle(AimbotFOVCircles.FOVCircle, Aimbot.FOVCircle, Aimbot)
 	UpdateFOVCircle(AimbotFOVCircles.S_FOVCircle, SilentAimbot.FOVCircle, SilentAimbot)
+end, true)
 
-	if ESPPerformanceMode then -- Interval = 1 / 60
+RenderStepped(function(DeltaTime)
+	if ESPPerformanceMode then -- Interval = 1 / 30
 		ESPAccumulator += DeltaTime
 
-		if ESPAccumulator < 0.01666666666 then
+		if ESPAccumulator < 0.03333333333 then
 			return
 		end
 
-		ESPAccumulator -= 0.01666666666
+		ESPAccumulator -= 0.03333333333
 	elseif not ESPDynamicRefreshRate then
 		local Interval = 1 / ESPRefreshRate
 
@@ -1985,7 +2997,7 @@ RenderStepped(function(DeltaTime)
 
 	if not ESPToggled or not Camera or ESPDistanceCheck <= 0 then
 		for _,Cache in next, CachedPlayers do
-			HideESP(Cache.ESP)
+			HideESP(Cache)
 		end
 		return
 	end
@@ -2080,7 +3092,7 @@ RenderStepped(function(DeltaTime)
 
 	if not ShouldContinue then
 		for _,Cache in next, CachedPlayers do
-			HideESP(Cache.ESP)
+			HideESP(Cache)
 		end
 		return
 	end
@@ -2090,27 +3102,44 @@ RenderStepped(function(DeltaTime)
 	local IsAimblox = Games.IsAimblox
 	local IsDefusal = Games.IsDefusal
 
-	for Player, Cache in next, CachedPlayers do
+	local CameraCFrame = Camera.CFrame
+	local CameraPosition = CameraCFrame.Position
+	local CameraLookVector = CameraCFrame.LookVector
+
+	for Index = 1, #CachedPlayersList do
+		local Cache = CachedPlayersList[Index]
+
+		if not Cache then
+			continue
+		end
+
 		local ESP = Cache.ESP
 		if not ESP then
 			continue
 		end
 
+		local Humanoid = Cache.Humanoid
+		if not Humanoid then
+			HideESP(Cache, ESP)
+			continue
+		end
+
+		local Player = Cache.Player
 		local Character = Cache.Character
 		local Head = Cache.Head
 		local Root = Cache.Torso or Cache.Root
 
-		local CanRenderState, CustomGameHealth, RootPosition, LocalRootPosition = CanRenderVisually(
+		local CanRenderState, CustomGameHealth, RootPosition, LocalRootPosition, Distance = CanRenderVisually(
 			ChamEnabled
 			and not HeadDotEnabled and not HeadTagEnabled
 			and not TracerEnabled and not ArrowEnabled
 			and not Box2DEnabled and not Box3DEnabled
 			and not HealthBarEnabled and not SkeletonEnabled,
-			Player, Character, Head, Root
+			Cache, Player, Character, Head, Root
 		)
 
-		if not CanRenderState then
-			HideESP(ESP)
+		if not CanRenderState or CameraLookVector:Dot(RootPosition - CameraPosition) <= 0 then
+			HideESP(Cache, ESP)
 			continue
 		end
 
@@ -2118,14 +3147,14 @@ RenderStepped(function(DeltaTime)
 		local HeadScreen, HeadOnScreen = WorldToViewportPoint(HeadPosition)
 
 		if not HeadOnScreen then
-			HideESP(ESP)
+			HideESP(Cache, ESP)
 			continue
 		end
 
 		local RootScreen, RootOnScreen = WorldToViewportPoint(RootPosition)
 
 		if not RootOnScreen then
-			HideESP(ESP)
+			HideESP(Cache, ESP)
 			continue
 		end
 
@@ -2139,34 +3168,59 @@ RenderStepped(function(DeltaTime)
 
 		local ChamObject = ESP.Cham
 		if ChamEnabled and ChamObject then
-			ChamObject.FillColor = ChamFillColor
-			ChamObject.OutlineColor = ChamOutlineColor
-			ChamObject.FillTransparency = ChamFillTransparency
-			ChamObject.OutlineTransparency = ChamOutlineTransparency
-
-			if ESPWallCheck then
-				if ChamObject.DepthMode ~= HighlightDepthModeOccluded then
-					ChamObject.DepthMode = HighlightDepthModeOccluded
-				end
-			else
-				if ChamObject.DepthMode ~= HighlightDepthModeAlwaysOnTop then
-					ChamObject.DepthMode = HighlightDepthModeAlwaysOnTop
-				end
+			local Depth = ESPWallCheck and HighlightDepthModeOccluded or HighlightDepthModeAlwaysOnTop
+			if ChamObject.DepthMode ~= Depth then
+				ChamObject.DepthMode = Depth
 			end
 
-			SetEnabled(ChamObject, true)
+			if ChamObject.FillColor ~= ChamFillColor then
+				ChamObject.FillColor = ChamFillColor
+			end
+
+			if ChamObject.OutlineColor ~= ChamOutlineColor then
+				ChamObject.OutlineColor = ChamOutlineColor
+			end
+
+			if ChamObject.FillTransparency ~= ChamFillTransparency then
+				ChamObject.FillTransparency = ChamFillTransparency
+			end
+
+			if ChamObject.OutlineTransparency ~= ChamOutlineTransparency then
+				ChamObject.OutlineTransparency = ChamOutlineTransparency
+			end
+
+			if ChamObject.Enabled ~= true then
+				ChamObject.Enabled = true
+			end
 		elseif ChamObject then
-			SetEnabled(ChamObject, false)
+			if ChamObject.Enabled ~= false then
+				ChamObject.Enabled = false
+			end
 		end
 
 		local HeadDotObject = ESP.HeadDot
 		if HeadDotEnabled and HeadDotObject then
-			HeadDotObject:Color(HeadDotColor):Transparency(HeadDotTransparency):Position(HeadScreen):Visible(true)
+			if HeadDotObject.Color ~= HeadDotColor then
+				HeadDotObject.Color = HeadDotColor
+			end
+
+			if HeadDotObject.Transparency ~= HeadDotTransparency then
+				HeadDotObject.Transparency = HeadDotTransparency
+			end
+
+			if HeadDotObject.Position ~= HeadScreen then
+				HeadDotObject.Position = HeadScreen
+			end
+
+			if HeadDotObject.Visible ~= true then
+				HeadDotObject.Visible = true
+			end
 		elseif HeadDotObject then
-			HeadDotObject:Visible(false)
+			if HeadDotObject.Visible ~= false then
+				HeadDotObject.Visible = false
+			end
 		end
 
-		local Humanoid = Cache.Humanoid
 		local RigTypeIsR15 = false
 		if (HeadTagEnabled or SkeletonEnabled) and Humanoid.RigType == RigTypeR15 then
 			RigTypeIsR15 = true
@@ -2221,7 +3275,7 @@ RenderStepped(function(DeltaTime)
 									OptionText = math.floor(Humanoid.Health) .. " Health"
 								end
 							elseif Option == "Distance" then
-								OptionText =  math.floor(LocalRootPosition and (LocalRootPosition - RootPosition).Magnitude or 0) .. " Studs Away"
+								OptionText =  (Distance or math.floor(LocalRootPosition - RootPosition).Magnitude) .. " Studs Away"
 							elseif Option == "RigType" then
 								OptionText = RigTypeIsR15 and "R15" or "R6"
 							elseif Option == "Femboy Meter" then
@@ -2237,75 +3291,234 @@ RenderStepped(function(DeltaTime)
 				end
 			end
 
-			HeadTagObject:Color(HeadTagColor):Transparency(HeadTagTransparency):Position(TopScreen):Text(HeadTagString):Center(true):Visible(true)
+			if HeadTagObject.Color ~= HeadTagColor then
+				HeadTagObject.Color = HeadTagColor
+			end
+
+			if HeadTagObject.Transparency ~= HeadTagTransparency then
+				HeadTagObject.Transparency = HeadTagTransparency
+			end
+
+			if HeadTagObject.Position ~= TopScreen then
+				HeadTagObject.Position = TopScreen
+			end
+
+			if HeadTagObject.Text ~= HeadTagString then
+				HeadTagObject.Text = HeadTagString
+			end
+
+			if HeadTagObject.Center ~= true then
+				HeadTagObject.Center = true
+			end
+
+			if HeadTagObject.Visible ~= true then
+				HeadTagObject.Visible = true
+			end
 		elseif HeadTagObject then
-			HeadTagObject:Visible(false)
+			if HeadTagObject.Visible ~= false then
+				HeadTagObject.Visible = false
+			end
 		end
 
 		local FootScreen, FootOnScreen = nil, false
 		local FootScreenY = 0
 
-		local Box2DObject = ESP.Box2D
 		if Box2DEnabled or HealthBarEnabled then
-			FootScreen, FootOnScreen = WorldToViewportPoint(RootPosition - vector.create(0, Humanoid.HipHeight + 2, 0))
+			FootScreen, FootOnScreen = WorldToViewportPoint(RootPosition - Vector3.new(0, Humanoid.HipHeight + 2, 0))
 			FootScreenY = FootScreen.Y
 		end
 
 		local TracerObject = ESP.Tracer
-		if TracerEnabled and TracerObject and RootOnScreen then
-			TracerObject:Color(TracerColor):Transparency(TracerTransparency):From(
-				TracerTypeIsLocked and FixedBottomCenter or MouseLocation
-			):To(TracerPartIsHead and HeadScreen or RootScreen):Visible(true)
+		if TracerEnabled and TracerObject then
+			if TracerObject.Color ~= TracerColor then
+				TracerObject.Color = TracerColor
+			end
+
+			if TracerObject.Transparency ~= TracerTransparency then
+				TracerObject.Transparency = TracerTransparency
+			end
+
+			local FromScreen = TracerTypeIsLocked and FixedBottomCenter or MouseLocation
+			if TracerObject.From ~= FromScreen then
+				TracerObject.From = FromScreen
+			end
+
+			local ToScreen = TracerPartIsHead and HeadScreen or RootScreen
+			if TracerObject.To ~= ToScreen then
+				TracerObject.To = ToScreen
+			end
+
+			if TracerObject.Visible ~= true then
+				TracerObject.Visible = true
+			end
 		elseif TracerObject then
-			TracerObject:Visible(false)
+			if TracerObject.Visible ~= false then
+				TracerObject.Visible = false
+			end
 		end
 
 		local ArrowObject = ESP.Arrow
-		if ArrowEnabled and ArrowObject and RootOnScreen then
+		if ArrowEnabled and ArrowObject then
 			local Direction = (RootScreen - ScreenCenter).Unit
 
 			if Direction ~= Direction then
 				Direction = Vector2.zero
 			end
 
-			local ArrowCenter = ScreenCenter + Direction * ArrowRadius
-			local Offset = Vector2.new(-Direction.Y, Direction.X) * 7.5
+			if ArrowObject.Color ~= ArrowColor then
+				ArrowObject.Color = ArrowColor
+			end
 
-			ArrowObject:Color(ArrowColor):Filled(ArrowFilled):Transparency(
-				ArrowTransparency
-			):PointA(ArrowCenter + Direction * 15):PointB(
-				ArrowCenter - Offset
-			):PointC(ArrowCenter + Offset):Visible(true)
+			if ArrowObject.Filled ~= ArrowFilled then
+				ArrowObject.Filled = ArrowFilled
+			end
+
+			if ArrowObject.Transparency ~= ArrowTransparency then
+				ArrowObject.Transparency = ArrowTransparency
+			end
+
+			local Offset = Vector2.new(-Direction.Y, Direction.X) * 7.5
+			local ArrowCenter = ScreenCenter + Direction * ArrowRadius
+			local PointA, PointB, PointC = ArrowCenter + Direction * 15, ArrowCenter - Offset, ArrowCenter + Offset
+
+			if ArrowObject.PointA ~= PointA then
+				ArrowObject.PointA = PointA
+			end
+
+			if ArrowObject.PointB ~= PointB then
+				ArrowObject.PointB = PointB
+			end
+
+			if ArrowObject.PointC ~= PointC then
+				ArrowObject.PointC = PointC
+			end
+
+			if ArrowObject.Visible ~= true then
+				ArrowObject.Visible = true
+			end
 		elseif ArrowObject then
-			ArrowObject:Visible(false)
+			if ArrowObject.Visible ~= false then
+				ArrowObject.Visible = false
+			end
 		end
 
 		local HBOutline = ESP.HealthBarOutline
 		local HBFill = ESP.HealthBarFill
 
-		local TopAndFootOnScreen = (TopOnScreen and FootOnScreen)
+		local Box2DObject = ESP.Box2D
 		local ShouldBox2D = (Box2DEnabled and Box2DObject)
 		local ShouldHealthBar = (HealthBarEnabled and HBOutline and HBFill)
 		local BoxHealthBarHeight = 0
 		local BoxHealthBarWidth = 0
 		local TopScreenXBoxHealthBarWidthOffset = 0
 
-		if TopAndFootOnScreen and (ShouldBox2D or ShouldHealthBar) then
-			BoxHealthBarHeight = math.abs(FootScreenY - TopScreenY)
-			BoxHealthBarWidth = BoxHealthBarHeight * 0.5
-			TopScreenXBoxHealthBarWidthOffset = TopScreenX - BoxHealthBarWidth * 0.5
-		end
+		if TopOnScreen and FootOnScreen then
+			if ShouldBox2D or ShouldHealthBar then
+				BoxHealthBarHeight = math.abs(FootScreenY - TopScreenY)
+				BoxHealthBarWidth = BoxHealthBarHeight * 0.5
+				TopScreenXBoxHealthBarWidthOffset = TopScreenX - BoxHealthBarWidth * 0.5
 
-		if ShouldBox2D and TopAndFootOnScreen then
-			Box2DObject:Color(Box2DColor):Transparency(Box2DTransparency):Size(
-				Vector2.new(BoxHealthBarWidth, BoxHealthBarHeight)
-			):Position(Vector2.new(TopScreenXBoxHealthBarWidthOffset, TopScreenY)):Visible(true)
-		elseif Box2DObject then
-			Box2DObject:Visible(false)
+				if ShouldBox2D then
+					if Box2DObject.Color ~= Box2DColor then
+						Box2DObject.Color = Box2DColor
+					end
+
+					if Box2DObject.Transparency ~= Box2DTransparency then
+						Box2DObject.Transparency = Box2DTransparency
+					end
+
+					local Size = Vector2.new(BoxHealthBarWidth, BoxHealthBarHeight)
+					if Box2DObject.Size ~= Size then
+						Box2DObject.Size = Size
+					end
+
+					local Position = Vector2.new(TopScreenXBoxHealthBarWidthOffset, TopScreenY)
+					if Box2DObject.Position ~= Position then
+						Box2DObject.Position = Position
+					end
+
+					if Box2DObject.Visible ~= true then
+						Box2DObject.Visible = true
+					end
+				elseif Box2DObject then
+					if Box2DObject.Visible ~= false then
+						Box2DObject.Visible = false
+					end
+				end
+
+				if ShouldHealthBar then
+					local HealthPercentage = 0
+					local BarX = TopScreenXBoxHealthBarWidthOffset - 4 - HealthBarThickness
+					local LineCenterX = BarX + (HealthBarThickness * 0.5)
+
+					if IsArsenalBaseGame then
+						HealthPercentage = math.clamp(CustomGameHealth / Humanoid.MaxHealth, 0, 1)
+					else
+						HealthPercentage = math.clamp(Humanoid.Health / Humanoid.MaxHealth, 0, 1)
+					end
+
+					if HBOutline.Color ~= HealthBarColor then
+						HBOutline.Color = HealthBarColor
+					end
+
+                    local Color = Color3.fromHSV(HealthPercentage * 0.3, 1, 1)
+					if HBFill.Color ~= Color then
+						HBFill.Color = Color
+					end
+
+					if HBOutline.Transparency ~= HealthBarTransparency then
+						HBOutline.Transparency = HealthBarTransparency
+					end
+
+					if HBFill.Transparency ~= HealthBarTransparency then
+						HBFill.Transparency = HealthBarTransparency
+					end
+
+					local Size = Vector2.new(HealthBarThickness + 2, BoxHealthBarHeight + 2)
+					if HBOutline.Size ~= Size then
+						HBOutline.Size = Size
+					end
+
+					if HBFill.Thickness ~= HealthBarThickness then
+						HBFill.Thickness = HealthBarThickness
+					end
+
+					local Position = Vector2.new(BarX - 1, TopScreenY - 1)
+					if HBOutline.Position ~= Position then
+						HBOutline.Position = Position
+					end
+
+					local From = Vector2.new(LineCenterX, FootScreenY)
+					if HBFill.From ~= From then
+						HBFill.From = From
+					end
+
+					local To = Vector2.new(LineCenterX, FootScreenY - BoxHealthBarHeight * HealthPercentage)
+					if HBFill.To ~= To then
+						HBFill.To = To
+					end
+
+					if HBOutline.Visible ~= true then
+						HBOutline.Visible = true
+					end
+
+					if HBFill.Visible ~= true then
+						HBFill.Visible = true
+					end
+				elseif HBOutline and HBFill then
+					if HBOutline.Visible ~= false then
+						HBOutline.Visible = false
+					end
+
+					if HBFill.Visible ~= false then
+						HBFill.Visible = false
+					end
+				end
+			end
 		end
 
 		local Box3DLines = ESP.Box3D
-        if Box3DEnabled and RootOnScreen then
+        if Box3DEnabled then
             local RootCFrame = Root.CFrame
 
             for Index = 1, 8 do
@@ -2320,46 +3533,44 @@ RenderStepped(function(DeltaTime)
                 local P1, P2 = Edge[1], Edge[2]
 
                 if BoxPointOnScreen[P1] and BoxPointOnScreen[P2] then
-                    Line:Color(Box3DColor):Transparency(Box3DTransparency):From(BoxPointScreen[P1]):To(BoxPointScreen[P2]):Visible(true)
+					if Line.Color ~= Box3DColor then
+						Line.Color = Box3DColor
+					end
+
+					if Line.Transparency ~= Box3DTransparency then
+						Line.Transparency = Box3DTransparency
+					end
+
+					local From = BoxPointScreen[P1]
+					if Line.From ~= From then
+						Line.From = From
+					end
+
+					local To = BoxPointScreen[P2]
+					if Line.To ~= To then
+						Line.To = To
+					end
+
+					if Line.Visible ~= true then
+						Line.Visible = true
+					end
                 else
-                    Line:Visible(false)
+					if Line.Visible ~= false then
+						Line.Visible = false
+					end
                 end
             end
         else
             for Index = 1, 12 do
-                Box3DLines[Index]:Visible(false)
+				local Line = Box3DLines[Index]
+				if Line.Visible ~= false then
+					Line.Visible = false
+				end
             end
         end
 
-		if ShouldHealthBar and TopAndFootOnScreen then
-			local HealthPercentage = 0
-			local BarX = TopScreenXBoxHealthBarWidthOffset - 4 - HealthBarThickness
-			local LineCenterX = BarX + (HealthBarThickness * 0.5)
-
-			if IsArsenalBaseGame then
-				HealthPercentage = math.clamp(CustomGameHealth / Humanoid.MaxHealth, 0, 1)
-			else
-				HealthPercentage = math.clamp(Humanoid.Health / Humanoid.MaxHealth, 0, 1)
-			end
-
-			HBOutline:Color(HealthBarColor):Transparency(HealthBarTransparency):Size(
-				Vector2.new(HealthBarThickness + 2, BoxHealthBarHeight + 2)
-			):Position(Vector2.new(BarX - 1, TopScreenY - 1)):Visible(true)
-
-			HBFill:Color(Color3.fromHSV(HealthPercentage * 0.3, 1, 1)):Transparency(
-				HealthBarTransparency
-			):Thickness(
-				HealthBarThickness
-			):From(Vector2.new(LineCenterX, FootScreenY)):To(
-				Vector2.new(LineCenterX, FootScreenY - BoxHealthBarHeight * HealthPercentage)
-			):Visible(true)
-		elseif HBOutline and HBFill then
-			HBOutline:Visible(false)
-			HBFill:Visible(false)
-		end
-
 		local SkeletonLines = ESP.Skeleton
-		if SkeletonEnabled and RootOnScreen then
+		if SkeletonEnabled then
 			if RigTypeIsR15 then
 				table.clear(SkeletonCachePoints)
 				table.clear(SkeletonCacheVisible)
@@ -2390,19 +3601,48 @@ RenderStepped(function(DeltaTime)
 						end
 
 						if Visible1 and Visible2 then
-							Line:Color(SkeletonColor):Thickness(SkeletonThickness):Transparency(
-								SkeletonTransparency
-							):From(Position1):To(Position2):Visible(true)
+							if Line.Color ~= SkeletonColor then
+								Line.Color = SkeletonColor
+							end
+							
+							if Line.Thickness ~= SkeletonThickness then
+								Line.Thickness = SkeletonThickness
+							end
+
+							if Line.Transparency ~= SkeletonTransparency then
+								Line.Transparency = SkeletonTransparency
+							end
+
+							local From = Position1
+							if Line.From ~= From then
+								Line.From = From
+							end
+
+							local To = Position2
+							if Line.To ~= To then
+								Line.To = To
+							end
+
+							if Line.Visible ~= true then
+								Line.Visible = true
+							end
 						else
-							Line:Visible(false)
+							if Line.Visible ~= false then
+								Line.Visible = false
+							end
 						end
 					else
-						Line:Visible(false)
+						if Line.Visible ~= false then
+							Line.Visible = false
+						end
 					end
 				end
 
 				for Index = #R15SkeletonLines + 1, #SkeletonLines do
-					SkeletonLines[Index]:Visible(false)
+					local Line = SkeletonLines[Index]
+					if Line.Visible ~= false then
+						Line.Visible = false
+					end
 				end
 			else
 				local Torso = Cache.Torso
@@ -2415,20 +3655,68 @@ RenderStepped(function(DeltaTime)
 
 					local SpineLine = SkeletonLines[1]
 					if NeckVisible and WaistVisible then
-						SpineLine:Color(SkeletonColor):Thickness(SkeletonThickness):Transparency(
-							SkeletonTransparency
-						):From(NeckPosition):To(WaistPosition):Visible(true)
+						if SpineLine.Color ~= SkeletonColor then
+							SpineLine.Color = SkeletonColor
+						end
+						
+						if SpineLine.Thickness ~= SkeletonThickness then
+							SpineLine.Thickness = SkeletonThickness
+						end
+
+						if SpineLine.Transparency ~= SkeletonTransparency then
+							SpineLine.Transparency = SkeletonTransparency
+						end
+
+						local From = NeckPosition
+						if SpineLine.From ~= From then
+							SpineLine.From = From
+						end
+
+						local To = WaistPosition
+						if SpineLine.To ~= To then
+							SpineLine.To = To
+						end
+
+						if SpineLine.Visible ~= true then
+							SpineLine.Visible = true
+						end
 					else
-						SpineLine:Visible(false)
+						if SpineLine.Visible ~= false then
+							SpineLine.Visible = false
+						end
 					end
 
 					local NeckLine = SkeletonLines[2]
 					if NeckVisible and HeadOnScreen then
-						NeckLine:Color(SkeletonColor):Thickness(SkeletonThickness):Transparency(
-							SkeletonTransparency
-						):From(NeckPosition):To(HeadScreen):Visible(true)
+						if NeckLine.Color ~= SkeletonColor then
+							NeckLine.Color = SkeletonColor
+						end
+						
+						if NeckLine.Thickness ~= SkeletonThickness then
+							NeckLine.Thickness = SkeletonThickness
+						end
+
+						if NeckLine.Transparency ~= SkeletonTransparency then
+							NeckLine.Transparency = SkeletonTransparency
+						end
+
+						local From = NeckPosition
+						if NeckLine.From ~= From then
+							NeckLine.From = From
+						end
+
+						local To = HeadScreen
+						if NeckLine.To ~= To then
+							NeckLine.To = To
+						end
+
+						if NeckLine.Visible ~= true then
+							NeckLine.Visible = true
+						end
 					else
-						NeckLine:Visible(false)
+						if NeckLine.Visible ~= false then
+							NeckLine.Visible = false
+						end
 					end
 
 					local LeftArm = Cache["Left Arm"]
@@ -2440,23 +3728,76 @@ RenderStepped(function(DeltaTime)
 						local Position2, Visible2 = WorldToViewportPoint(LeftArmCFrame:PointToWorldSpace(LeftArmSize * R6Bottom))
 
 						if NeckVisible and Visible1 then
-							LeftShoulderLine:Color(SkeletonColor):Thickness(SkeletonThickness):Transparency(
-								SkeletonTransparency
-							):From(NeckPosition):To(Position1):Visible(true)
+							if LeftShoulderLine.Color ~= SkeletonColor then
+								LeftShoulderLine.Color = SkeletonColor
+							end
+							
+							if LeftShoulderLine.Thickness ~= SkeletonThickness then
+								LeftShoulderLine.Thickness = SkeletonThickness
+							end
+
+							if LeftShoulderLine.Transparency ~= SkeletonTransparency then
+								LeftShoulderLine.Transparency = SkeletonTransparency
+							end
+
+							local From = NeckPosition
+							if LeftShoulderLine.From ~= From then
+								LeftShoulderLine.From = From
+							end
+
+							local To = Position1
+							if LeftShoulderLine.To ~= To then
+								LeftShoulderLine.To = To
+							end
+
+							if LeftShoulderLine.Visible ~= true then
+								LeftShoulderLine.Visible = true
+							end
 						else
-							LeftShoulderLine:Visible(false)
+							if LeftShoulderLine.Visible ~= false then
+								LeftShoulderLine.Visible = false
+							end
 						end
 
 						if Visible1 and Visible2 then
-							LeftArmLine:Color(SkeletonColor):Thickness(SkeletonThickness):Transparency(
-								SkeletonTransparency
-							):From(Position1):To(Position2):Visible(true)
+							if LeftArmLine.Color ~= SkeletonColor then
+								LeftArmLine.Color = SkeletonColor
+							end
+							
+							if LeftArmLine.Thickness ~= SkeletonThickness then
+								LeftArmLine.Thickness = SkeletonThickness
+							end
+
+							if LeftArmLine.Transparency ~= SkeletonTransparency then
+								LeftArmLine.Transparency = SkeletonTransparency
+							end
+
+							local From = Position1
+							if LeftArmLine.From ~= From then
+								LeftArmLine.From = From
+							end
+
+							local To = Position2
+							if LeftArmLine.To ~= To then
+								LeftArmLine.To = To
+							end
+
+							if LeftArmLine.Visible ~= true then
+								LeftArmLine.Visible = true
+							end
 						else
-							LeftArmLine:Visible(false)
+							if LeftArmLine.Visible ~= false then
+								LeftArmLine.Visible = false
+							end
 						end
 					else
-						LeftShoulderLine:Visible(false)
-						LeftArmLine:Visible(false)
+						if LeftShoulderLine.Visible ~= false then
+							LeftShoulderLine.Visible = false
+						end
+
+						if LeftArmLine.Visible ~= false then
+							LeftArmLine.Visible = false
+						end
 					end
 
 					local RightArm = Cache["Right Arm"]
@@ -2468,21 +3809,76 @@ RenderStepped(function(DeltaTime)
 						local Position2, Visible2 = WorldToViewportPoint(RightArmCFrame:PointToWorldSpace(RightArmSize * R6Bottom))
 
 						if NeckVisible and Visible1 then
-							RightShoulderLine:Color(SkeletonColor):Thickness(SkeletonThickness):Transparency(
-								SkeletonTransparency
-							):From(NeckPosition):To(Position1):Visible(true)
+							if RightShoulderLine.Color ~= SkeletonColor then
+								RightShoulderLine.Color = SkeletonColor
+							end
+							
+							if RightShoulderLine.Thickness ~= SkeletonThickness then
+								RightShoulderLine.Thickness = SkeletonThickness
+							end
+
+							if RightShoulderLine.Transparency ~= SkeletonTransparency then
+								RightShoulderLine.Transparency = SkeletonTransparency
+							end
+
+							local From = NeckPosition
+							if RightShoulderLine.From ~= From then
+								RightShoulderLine.From = From
+							end
+
+							local To = Position1
+							if RightShoulderLine.To ~= To then
+								RightShoulderLine.To = To
+							end
+
+							if RightShoulderLine.Visible ~= true then
+								RightShoulderLine.Visible = true
+							end
 						else
-							RightShoulderLine:Visible(false)
+							if RightShoulderLine.Visible ~= false then
+								RightShoulderLine.Visible = false
+							end
 						end
 
 						if Visible1 and Visible2 then
-							RightArmLine:Color(SkeletonColor):Thickness(SkeletonThickness):Transparency(SkeletonTransparency):From(Position1):To(Position2):Visible(true)
+							if RightArmLine.Color ~= SkeletonColor then
+								RightArmLine.Color = SkeletonColor
+							end
+							
+							if RightArmLine.Thickness ~= SkeletonThickness then
+								RightArmLine.Thickness = SkeletonThickness
+							end
+
+							if RightArmLine.Transparency ~= SkeletonTransparency then
+								RightArmLine.Transparency = SkeletonTransparency
+							end
+
+							local From = Position1
+							if RightArmLine.From ~= From then
+								RightArmLine.From = From
+							end
+
+							local To = Position2
+							if RightArmLine.To ~= To then
+								RightArmLine.To = To
+							end
+
+							if RightArmLine.Visible ~= true then
+								RightArmLine.Visible = true
+							end
 						else
-							RightArmLine:Visible(false)
+							if RightArmLine.Visible ~= false then
+								RightArmLine.Visible = false
+							end
 						end
 					else
-						RightShoulderLine:Visible(false)
-						RightArmLine:Visible(false)
+						if RightShoulderLine.Visible ~= false then
+							RightShoulderLine.Visible = false
+						end
+
+						if RightArmLine.Visible ~= false then
+							RightArmLine.Visible = false
+						end
 					end
 
 					local LeftLeg = Cache["Left Leg"]
@@ -2494,23 +3890,76 @@ RenderStepped(function(DeltaTime)
 						local Position2, Visible2 = WorldToViewportPoint(LeftLegCFrame:PointToWorldSpace(LeftLegSize * R6Bottom))
 
 						if WaistVisible and Visible1 then
-							LeftHipLine:Color(SkeletonColor):Thickness(SkeletonThickness):Transparency(
-								SkeletonTransparency
-							):From(WaistPosition):To(Position1):Visible(true)
+							if LeftHipLine.Color ~= SkeletonColor then
+								LeftHipLine.Color = SkeletonColor
+							end
+							
+							if LeftHipLine.Thickness ~= SkeletonThickness then
+								LeftHipLine.Thickness = SkeletonThickness
+							end
+
+							if LeftHipLine.Transparency ~= SkeletonTransparency then
+								LeftHipLine.Transparency = SkeletonTransparency
+							end
+
+							local From = WaistPosition
+							if LeftHipLine.From ~= From then
+								LeftHipLine.From = From
+							end
+
+							local To = Position1
+							if LeftHipLine.To ~= To then
+								LeftHipLine.To = To
+							end
+
+							if LeftHipLine.Visible ~= true then
+								LeftHipLine.Visible = true
+							end
 						else
-							LeftHipLine:Visible(false)
+							if LeftHipLine.Visible ~= false then
+								LeftHipLine.Visible = false
+							end
 						end
 
 						if Visible1 and Visible2 then
-							LeftLegLine:Color(SkeletonColor):Thickness(SkeletonThickness):Transparency(
-								SkeletonTransparency
-							):From(Position1):To(Position2):Visible(true)
+							if LeftLegLine.Color ~= SkeletonColor then
+								LeftLegLine.Color = SkeletonColor
+							end
+							
+							if LeftLegLine.Thickness ~= SkeletonThickness then
+								LeftLegLine.Thickness = SkeletonThickness
+							end
+
+							if LeftLegLine.Transparency ~= SkeletonTransparency then
+								LeftLegLine.Transparency = SkeletonTransparency
+							end
+
+							local From = Position1
+							if LeftLegLine.From ~= From then
+								LeftLegLine.From = From
+							end
+
+							local To = Position2
+							if LeftLegLine.To ~= To then
+								LeftLegLine.To = To
+							end
+
+							if LeftLegLine.Visible ~= true then
+								LeftLegLine.Visible = true
+							end
 						else
-							LeftLegLine:Visible(false)
+							if LeftLegLine.Visible ~= false then
+								LeftLegLine.Visible = false
+							end
 						end
 					else
-						LeftHipLine:Visible(false)
-						LeftLegLine:Visible(false)
+						if LeftHipLine.Visible ~= false then
+							LeftHipLine.Visible = false
+						end
+
+						if LeftLegLine.Visible ~= false then
+							LeftLegLine.Visible = false
+						end
 					end
 
 					local RightLeg = Cache["Right Leg"]
@@ -2522,38 +3971,100 @@ RenderStepped(function(DeltaTime)
 						local Position2, Visible2 = WorldToViewportPoint(RightLegCFrame:PointToWorldSpace(RightLegSize * R6Bottom))
 
 						if WaistVisible and Visible1 then
-							RightHipLine:Color(SkeletonColor):Thickness(SkeletonThickness):Transparency(
-								SkeletonTransparency
-							):From(WaistPosition):To(Position1):Visible(true)
+							if RightHipLine.Color ~= SkeletonColor then
+								RightHipLine.Color = SkeletonColor
+							end
+							
+							if RightHipLine.Thickness ~= SkeletonThickness then
+								RightHipLine.Thickness = SkeletonThickness
+							end
+
+							if RightHipLine.Transparency ~= SkeletonTransparency then
+								RightHipLine.Transparency = SkeletonTransparency
+							end
+
+							local From = WaistPosition
+							if RightHipLine.From ~= From then
+								RightHipLine.From = From
+							end
+
+							local To = Position2
+							if RightHipLine.To ~= To then
+								RightHipLine.To = To
+							end
+
+							if RightHipLine.Visible ~= true then
+								RightHipLine.Visible = true
+							end
 						else
-							RightHipLine:Visible(false)
+							if RightHipLine.Visible ~= false then
+								RightHipLine.Visible = false
+							end
 						end
 
 						if Visible1 and Visible2 then
-							RightLegLine:Color(SkeletonColor):Thickness(SkeletonThickness):Transparency(
-								SkeletonTransparency
-							):From(Position1):To(Position2):Visible(true)
+							if RightLegLine.Color ~= SkeletonColor then
+								RightLegLine.Color = SkeletonColor
+							end
+							
+							if RightLegLine.Thickness ~= SkeletonThickness then
+								RightLegLine.Thickness = SkeletonThickness
+							end
+
+							if RightLegLine.Transparency ~= SkeletonTransparency then
+								RightLegLine.Transparency = SkeletonTransparency
+							end
+
+							local From = Position1
+							if RightLegLine.From ~= From then
+								RightLegLine.From = From
+							end
+
+							local To = Position2
+							if RightLegLine.To ~= To then
+								RightLegLine.To = To
+							end
+
+							if RightLegLine.Visible ~= true then
+								RightLegLine.Visible = true
+							end
 						else
-							RightLegLine:Visible(false)
+							if RightLegLine.Visible ~= false then
+								RightLegLine.Visible = false
+							end
 						end
 					else
-						RightHipLine:Visible(false); RightLegLine:Visible(false)
+						if RightHipLine.Visible ~= false then
+							RightHipLine.Visible = false
+						end
+
+						if RightLegLine.Visible ~= false then
+							RightLegLine.Visible = false
+						end
 					end
 				else
 					for Index = 1, 10 do
-						SkeletonLines[Index]:Visible(false)
+						local Line = SkeletonLines[Index]
+						if Line.Visible ~= false then
+							Line.Visible = false
+						end
 					end
 				end
 			end
 		else
 			for Index = 1, #SkeletonLines do
-				SkeletonLines[Index]:Visible(false)
+				local Line = SkeletonLines[Index]
+				if Line.Visible ~= false then
+					Line.Visible = false
+				end
 			end
 		end
+
+		Cache.IsVisible = true
 	end
 end, true)
 
-local function RotatePoint(Point: Vector2, Angle: number): Vector2
+local function RotatePoint(Point, Angle)
     local Rad = math.rad(Angle)
     local Cos = math.cos(Rad)
     local Sin = math.sin(Rad)
@@ -2613,14 +4124,43 @@ RenderStepped(function(DeltaTime)
 
     if CrosshairOverlayEnabled and CrosshairOverlay.DotEnabled then
         if CrosshairOverlay.DotStyle == "Circle" then
-            DotObject:Radius(CrosshairOverlay.DotSize):Position(MouseLocation)
+            local Radius = CrosshairOverlay.DotSize
+			if DotObject.Radius ~= Radius then
+				DotObject.Radius = Radius
+			end
+
+			if DotObject.Position ~= MouseLocation then
+				DotObject.Position = MouseLocation
+			end
         else
-            local DotSize = Vector2.one * CrosshairOverlay.DotSize
-            DotObject:Size(DotSize):Position(MouseLocation - (DotSize * 0.5))
+			local DotSize = Vector2.one * CrosshairOverlay.DotSize
+			if DotObject.Size ~= DotSize then
+				DotObject.Size = DotSize
+			end
+
+			local Position = MouseLocation - (DotSize * 0.5)
+			if DotObject.Position ~= Position then
+				DotObject.Position = Position
+			end
         end
-        DotObject:Color(CrosshairOverlay.DotColor):Transparency(CrosshairOverlay.Transparency):Visible(true)
+
+		local Transparency = CrosshairOverlay.Transparency
+		if DotObject.Transparency ~= Transparency then
+			DotObject.Transparency = Transparency
+		end
+
+		local Color = CrosshairOverlay.DotColor
+		if DotObject.Color ~= Color then
+			DotObject.Color = Color
+		end
+
+		if DotObject.Visible ~= true then
+			DotObject.Visible = true
+		end
     else
-        DotObject:Visible(false)
+		if DotObject.Visible ~= false then
+			DotObject.Visible = false
+		end
     end
 
     if CrosshairOverlayEnabled then
@@ -2630,34 +4170,54 @@ RenderStepped(function(DeltaTime)
         for Index = 1, 4 do
             local MainLine = DrawingLines[Index]
 
-            if CrosshairOverlay.TStyle and Index == 1 then
-                MainLine:Visible(false)
+            if CrosshairOverlayLength <= 0 or CrosshairOverlay.TStyle and Index == 1 then
+				if MainLine.Visible ~= false then
+					MainLine.Visible = false
+				end
                 continue
             end
+			
+			local Direction = CrosshairOverlay.BaseOffsets[Index]
 
-            if CrosshairOverlayLength <= 0 then
-                MainLine:Visible(false)
-                continue
-            end
+			local Color = CrosshairOverlay.Color
+			if MainLine.Color ~= Color then
+				MainLine.Color = Color
+			end
 
-            local Direction = CrosshairOverlay.BaseOffsets[Index]
+			local Thickness = CrosshairOverlay.Thickness
+			if MainLine.Thickness ~= Thickness then
+				MainLine.Thickness = Thickness
+			end
 
-            MainLine:Color(CrosshairOverlay.Color):Thickness(CrosshairOverlay.Thickness):Transparency(
-				CrosshairOverlay.Transparency
-			):From(
-				RotatePoint(MouseLocation + (Direction * CrosshairOverlayGap), CurrentRotation
-			)):To(
-				RotatePoint(MouseLocation + (Direction * (CrosshairOverlayGap + CrosshairOverlayLength)), CurrentRotation)
-			):Visible(true)
+			local Transparency = CrosshairOverlay.Transparency
+			if MainLine.Transparency ~= Transparency then
+				MainLine.Transparency = Transparency
+			end
+
+			local From = RotatePoint(MouseLocation + (Direction * CrosshairOverlayGap), CurrentRotation)
+			if MainLine.From ~= From then
+				MainLine.From = From
+			end
+
+			local To = RotatePoint(MouseLocation + (Direction * (CrosshairOverlayGap + CrosshairOverlayLength)), CurrentRotation)
+			if MainLine.To ~= To then
+				MainLine.To = To
+			end
+
+			if MainLine.Visible ~= true then
+				MainLine.Visible = true
+			end
         end
     else
         for _,Line in next, DrawingLines do
-            Line:Visible(false)
+			if Line.Visible ~= false then
+				Line.Visible = false
+			end
         end
     end
 end, true)
 
-local function GetPredictedPosition(AimbotType: string, Position: Vector3, AssemblyLinearVelocity: Vector3): Vector3
+local function GetPredictedPosition(AimbotType, Position, AssemblyLinearVelocity)
 	local PredictionConfiguration = PredictionSettings[AimbotType]
 	local AimbotConfiguration = PredictionConfiguration.AimbotConfiguration
 
@@ -2673,7 +4233,7 @@ local function GetPredictedPosition(AimbotType: string, Position: Vector3, Assem
 	return Position
 end
 
-local function Color3ToHex(Color: Color3)
+local function Color3ToHex(Color)
 	return string.format(
 		"#%02X%02X%02X",
 		Color.R * 255,
@@ -2682,7 +4242,7 @@ local function Color3ToHex(Color: Color3)
 	)
 end
 
-local function TriggerHitFunctions(PreviousHealth: number, Health: number, WorldPosition: Vector3?)
+local function TriggerHitFunctions(PreviousHealth, Health, WorldPosition)
 	if not HitConfiguration.Toggled then
 		return
 	end
@@ -2734,7 +4294,8 @@ local function TriggerHitFunctions(PreviousHealth: number, Health: number, World
 				Color = Color,
 				Transparency = 1,
 				Visible = false
-			}):Radius(2 * Scale)
+			})
+			Dot.Radius = 2 * Scale
 		end
 
 		if IsClassicX or IsBrokenX or IsPlus then
@@ -2754,7 +4315,8 @@ local function TriggerHitFunctions(PreviousHealth: number, Health: number, World
 				Color = Color,
 				Transparency = 1,
 				Visible = false
-			}):Radius(Size)
+			})
+			Circle.Radius = Size
 		end
 
 		local Offsets
@@ -2771,24 +4333,6 @@ local function TriggerHitFunctions(PreviousHealth: number, Health: number, World
 
 		local Connection
 		Connection = RenderStepped(function()
-			if not Running then
-				for _,Line in next, Lines do
-					Line:Nil()
-				end
-
-				if Circle then
-					Circle:Nil()
-				end
-
-				if Dot then
-					Dot:Nil()
-				end
-
-				Connection:Disconnect()
-				Connection = nil
-				return
-			end
-
 			local ElapsedTime = tick() - StartTime
 			if ElapsedTime >= Lifetime then
 				for _,Line in ipairs(Lines) do
@@ -2828,28 +4372,48 @@ local function TriggerHitFunctions(PreviousHealth: number, Health: number, World
 			end
 
 			for _,Line in next, Lines do
-				Line:Transparency(Alpha):Visible(false)
+				if Line.Transparency ~= Alpha then
+					Line.Transparency = Alpha
+				end
+
+				if Line.Visible ~= false then
+					Line.Visible = false
+				end
 			end
 
 			if Circle then
-				Circle:Transparency(Alpha):Visible(false)
+				if Circle.Transparency ~= Alpha then
+					Circle.Transparency = Alpha
+				end
+
+				if Circle.Visible ~= false then
+					Circle.Visible = false
+				end
 			end
 
 			if Dot then
-				Dot:Transparency(Alpha):Visible(false)
+				if Dot.Transparency ~= Alpha then
+					Dot.Transparency = Alpha
+				end
+
+				if Dot.Visible ~= false then
+					Dot.Visible = false
+				end
 			end
 
 			if not OnScreen then
 				for _,Line in next, Lines do
-					Line:Visible(false)
+					if Line and Line.Visible ~= false then
+						Line.Visible = false
+					end
 				end
 
-				if Circle then
-					Circle:Visible(false)
+				if Circle and Circle.Visible ~= false then
+					Circle.Visible = false
 				end
 
-				if Dot then
-					Dot:Visible(false)
+				if Dot and Dot.Visible ~= false then
+					Dot.Visible = false
 				end
 
 				return
@@ -2858,26 +4422,79 @@ local function TriggerHitFunctions(PreviousHealth: number, Health: number, World
 			if IsClassicX then
 				for Index = 1, 4 do
 					local Direction = HitMarkerDirections[Index]
-					Lines[Index]:From(Screen + Direction):To(Screen + Direction * Size):Visible(true)
+					local Line = Lines[Index]
+
+					local From = Screen + Direction
+					if Line.From ~= From then
+						Line.From = From 
+					end
+
+					local To = Screen + Direction * Size
+					if Line.To ~= To then
+						Line.To = To 
+					end
+
+					if Line.Visible ~= true then
+						Line.Visible = true
+					end
 				end
 			elseif IsBrokenX then
 				local Gap = Size * 0.35
 				for Index = 1, 4 do
 					local Direction = HitMarkerDirections[Index]
-					Lines[Index]:From(Screen + Direction * Gap):To(Screen + Direction * Size):Visible(true)
+					local Line = Lines[Index]
+
+					local From = Screen + Direction * Gap
+					if Line.From ~= From then
+						Line.From = From 
+					end
+
+					local To = Screen + Direction * Size
+					if Line.To ~= To then
+						Line.To = To 
+					end
+
+					if Line.Visible ~= true then
+						Line.Visible = true
+					end
 				end
 			elseif IsPlus then
 				for Index = 1, 4 do
-					Lines[Index]:From(Screen):To(Screen + Offsets[Index]):Visible(true)
+					local Line = Lines[Index]
+
+					if Line.From ~= Screen then
+						Line.From = Screen 
+					end
+
+					local To = Screen + Offsets[Index]
+					if Line.To ~= To then
+						Line.To = To 
+					end
+
+					if Line.Visible ~= true then
+						Line.Visible = true
+					end
 				end
 			elseif IsCircle and Circle then
-				Circle:Position(Screen):Visible(true)
+				if Circle.Position ~= Screen then
+					Circle.Position = Screen 
+				end
+
+				if Circle.Visible ~= true then
+					Circle.Visible = true
+				end
 			end
 
 			if Dot then
-				Dot:Position(Screen):Visible(true)
+				if Dot.Position ~= Screen then
+					Dot.Position = Screen 
+				end
+
+				if Dot.Visible ~= true then
+					Dot.Visible = true
+				end
 			end
-		end, false)
+		end, true)
 	end
 
 	local Sound = HitConfiguration.Sound
@@ -2921,9 +4538,16 @@ local AimbotFunctions = {
 			local ForceFieldCheck = Aimbot.ForceFieldCheck
 			local SitCheck = Aimbot.SitCheck
 			local WallCheck = Aimbot.WallCheck
+			local TeamCheck = Aimbot.TeamCheck
 
 			for Player, Cache in next, CachedPlayers do
-				if Aimbot.TeamCheck then
+				if ForceFieldCheck then
+					if IsProtected(Cache) then
+						continue
+					end
+				end
+
+				if TeamCheck then
 					if not IsEnemy(Player) then
 						continue
 					end
@@ -2939,12 +4563,6 @@ local AimbotFunctions = {
 
 				if SitCheck and not IsRivals then
 					if Cache.Humanoid.Sit then
-						continue
-					end
-				end
-
-				if ForceFieldCheck then
-					if IsProtected(Character) then
 						continue
 					end
 				end
@@ -2982,7 +4600,7 @@ local AimbotFunctions = {
 			end
 		end,
 
-		TargetAimbot = function(Target: Player, ...): (number, number)
+		TargetAimbot = function(Target, ...)
 			if not Target then
 				StopAimbot()
 				return
@@ -3131,7 +4749,7 @@ local AimbotFunctions = {
 			local TargetCFrame = CFrame.lookAt(CameraPosition, PredictedPosition)
 
 			if ShakeOffset > 0 then
-				TargetCFrame = CFrame.lookAt(CameraPosition, PredictedPosition + vector.create(
+				TargetCFrame = CFrame.lookAt(CameraPosition, PredictedPosition + Vector3.new(
 					math.random(-100, 100) * 0.01 * ShakeOffset,
 					math.random(-100, 100) * 0.01 * ShakeOffset,
 					math.random(-100, 100) * 0.01 * ShakeOffset
@@ -3197,9 +4815,16 @@ local AimbotFunctions = {
 			local ForceFieldCheck = Aimbot.ForceFieldCheck
 			local SitCheck = Aimbot.SitCheck
 			local WallCheck = Aimbot.WallCheck
+			local TeamCheck = Aimbot.TeamCheck
 
 			for Player, Cache in next, CachedPlayers do
-				if Aimbot.TeamCheck then
+				if ForceFieldCheck then
+					if IsProtected(Cache) then
+						continue
+					end
+				end
+
+				if TeamCheck then
 					if not IsEnemy(Player) then
 						continue
 					end
@@ -3215,12 +4840,6 @@ local AimbotFunctions = {
 
 				if SitCheck and not IsRivals then
 					if Cache.Humanoid.Sit then
-						continue
-					end
-				end
-
-				if ForceFieldCheck then
-					if IsProtected(Character) then
 						continue
 					end
 				end
@@ -3262,7 +4881,7 @@ local AimbotFunctions = {
 			end
 		end,
 
-		TargetAimbot = function(Target: Player, DeltaTime: number): (number, number)
+		TargetAimbot = function(Target, DeltaTime)
 			if not isrbxactive() then
 				return
 			end
@@ -3449,7 +5068,7 @@ else
 	TargetAimbot = Functions.TargetAimbot
 end
 
-local Trigger: () -> () = nil
+local Trigger = nil
 if Games.IsQuickShot then
 	Trigger = function()
 		if not Camera or not LocalCharacter or not LocalHumanoid then
@@ -3475,11 +5094,11 @@ if Games.IsQuickShot then
 				return
 			end
 
-			if TriggerBot.DeadCheck and IsDead(ModelInstance, TriggerBot.DeadCheckMode, TriggerBot.CustomDeadCheckValue) then
+			if TriggerBot.ForceFieldCheck and IsProtected(CachedPlayers[Player]) then
 				return
 			end
 
-			if TriggerBot.ForceFieldCheck and IsProtected(ModelInstance) then
+			if TriggerBot.DeadCheck and IsDead(ModelInstance, TriggerBot.DeadCheckMode, TriggerBot.CustomDeadCheckValue) then
 				return
 			end
 
@@ -3526,7 +5145,11 @@ elseif Games.IsOneTap then
 				return
 			end
 
-			if TriggerBot.ForceFieldCheck and IsProtected(ModelInstance) then
+			if TriggerBot.ForceFieldCheck and IsProtected(CachedPlayers[Player]) then
+				return
+			end
+
+			if TriggerBot.ForceFieldCheck then
 				return
 			end
 
@@ -3539,7 +5162,7 @@ elseif Games.IsOneTap then
 				return
 			end
 
-			if TriggerBot.ForceFieldCheck and IsProtected(ModelInstance) then
+			if TriggerBot.ForceFieldCheck and IsCharacterProtected(ModelInstance) then
 				return
 			end
 		end
@@ -3578,11 +5201,11 @@ elseif Games.IsCombatArena then
 		end
 
 		if Player then
-			if TriggerBot.DeadCheck and IsDead(ModelInstance, TriggerBot.DeadCheckMode, TriggerBot.CustomDeadCheckValue) then
+			if TriggerBot.ForceFieldCheck and IsProtected(CachedPlayers[Player]) then
 				return
 			end
 
-			if TriggerBot.ForceFieldCheck and IsProtected(ModelInstance) then
+			if TriggerBot.DeadCheck and IsDead(ModelInstance, TriggerBot.DeadCheckMode, TriggerBot.CustomDeadCheckValue) then
 				return
 			end
 
@@ -3594,7 +5217,7 @@ elseif Games.IsCombatArena then
 				return
 			end
 
-			if TriggerBot.ForceFieldCheck and IsProtected(ModelInstance) then
+			if TriggerBot.ForceFieldCheck and IsCharacterProtected(ModelInstance) then
 				return
 			end
 		end
@@ -3632,11 +5255,11 @@ else
 			return
 		end
 
-		if TriggerBot.DeadCheck and IsDead(ModelInstance, TriggerBot.DeadCheckMode, TriggerBot.CustomDeadCheckValue) then
+		if TriggerBot.ForceFieldCheck and IsProtected(CachedPlayers[Player]) then
 			return
 		end
 
-		if TriggerBot.ForceFieldCheck and IsProtected(ModelInstance) then
+		if TriggerBot.DeadCheck and IsDead(ModelInstance, TriggerBot.DeadCheckMode, TriggerBot.CustomDeadCheckValue) then
 			return
 		end
 
@@ -3724,7 +5347,7 @@ task.spawn(function()
 			end))
 		end]]
 	elseif Games.IsRivals then
-		GetPartData = function(): Instance?
+		GetPartData = function()
 			local ClosestDistance = (FOVCircle.Enabled and FOVCircle.Radius) or math.huge
 			local ClosestPart
 
@@ -3786,7 +5409,7 @@ task.spawn(function()
 		end))
 	elseif Games.IsDefuseDivision then
 		if hookmetamethod and getnamecallmethod then
-			GetPartData = function(): Instance?
+			GetPartData = function()
 				local ClosestDistance = (FOVCircle.Enabled and FOVCircle.Radius) or math.huge
 				local ClosestPart
 				for Player, Cache in next, CachedPlayers do
@@ -3848,7 +5471,7 @@ task.spawn(function()
 		end
 	elseif Games.IsDaHood then
 		if hookmetamethod then
-			GetPartData = function(): Instance?
+			GetPartData = function()
 				local ClosestDistance = (FOVCircle.Enabled and FOVCircle.Radius) or math.huge
 				local ClosestPart
 				for Player, Cache in next, CachedPlayers do
@@ -3953,39 +5576,39 @@ local function CFrameAA()
 	local RootPosition = LocalRoot.Position
 	if AntiAimMode == "Randomizer" then
 		local RNG = math.random(1, 3)
-		local Offset = RNG == 1 and vector.create(
+		local Offset = RNG == 1 and Vector3.new(
 			-LookVector.X, 0, -LookVector.Z
-		).Unit or (RNG == 2 and vector.create(
+		).Unit or (RNG == 2 and Vector3.new(
 			-LookVector.Z, 0, LookVector.X
-		) or vector.create(LookVector.Z, 0, -LookVector.X))
+		) or Vector3.new(LookVector.Z, 0, -LookVector.X))
 		LocalRoot.CFrame = CFrame.new(RootPosition, RootPosition + Offset)
 	elseif AntiAimMode == "Backwards" then
-		LocalRoot.CFrame = CFrame.new(RootPosition, RootPosition + vector.create(-LookVector.X, 0, -LookVector.Z).Unit)
+		LocalRoot.CFrame = CFrame.new(RootPosition, RootPosition + Vector3.new(-LookVector.X, 0, -LookVector.Z).Unit)
 	elseif AntiAimMode == "Left" then
-		LocalRoot.CFrame = CFrame.new(RootPosition, RootPosition + vector.create(-LookVector.Z, 0, LookVector.X))
+		LocalRoot.CFrame = CFrame.new(RootPosition, RootPosition + Vector3.new(-LookVector.Z, 0, LookVector.X))
 	elseif AntiAimMode == "Right" then
-		LocalRoot.CFrame = CFrame.new(RootPosition, RootPosition + vector.create(LookVector.Z, 0, -LookVector.X))
+		LocalRoot.CFrame = CFrame.new(RootPosition, RootPosition + Vector3.new(LookVector.Z, 0, -LookVector.X))
 	elseif AntiAimMode == "Jitter" then
 		local Angle = math.rad(math.random(-90, 90))
 		local Cosine, Sine = math.cos(Angle), math.sin(Angle)
 		local LookVectorX = LookVector.X
 		local LookVectorZ = LookVector.Z
-		LocalRoot.CFrame = CFrame.new(RootPosition, RootPosition + vector.create(
+		LocalRoot.CFrame = CFrame.new(RootPosition, RootPosition + Vector3.new(
 			LookVectorX * Cosine - LookVectorZ * Sine, 0, LookVectorX * Sine + LookVectorZ * Cosine
 		))
 	elseif AntiAimMode == "Reverse Jitter" then
 		local Angle = math.rad(math.random(-45, 45))
 		local Cosine, Sine = math.cos(Angle), math.sin(Angle)
-		local ReversedLookVector = vector.create(-LookVector.X, 0, -LookVector.Z)
+		local ReversedLookVector = Vector3.new(-LookVector.X, 0, -LookVector.Z)
 		local ReversedLookVectorX = ReversedLookVector.X
 		local ReversedLookVectorZ = ReversedLookVector.Z
-		LocalRoot.CFrame = CFrame.new(RootPosition, RootPosition + vector.create(
+		LocalRoot.CFrame = CFrame.new(RootPosition, RootPosition + Vector3.new(
 			ReversedLookVectorX * Cosine - ReversedLookVectorZ * Sine, 0, ReversedLookVectorX * Sine + ReversedLookVectorZ * Cosine
 		))
 	else
 		local OldCFrame = LocalRoot.CFrame
 		local OldPosition = OldCFrame.Position
-		LocalRoot.CFrame = CFrame.new(vector.create(OldPosition.X, -999, OldPosition.Z), vector.create(0, -99999, 0))
+		LocalRoot.CFrame = CFrame.new(Vector3.new(OldPosition.X, -999, OldPosition.Z), Vector3.new(0, -99999, 0))
 		RunService.RenderStepped:Wait()
 		LocalRoot.CFrame = OldCFrame
 	end
@@ -4055,7 +5678,6 @@ local WindowTabs = {
 	WindowAimingTab = nil,
  	WindowTriggerBotTab = nil,
  	WindowPlayersTab = nil,
-	WindowFFlagsTab = nil,
  	WindowVisualsTab = nil,
 	WindowWorldTab = nil,
 	WindowSettingsTab = nil
@@ -4073,7 +5695,6 @@ local UISuccess, UIOutput = pcall(function()
 		WindowTabs.WindowPlayersTab = Window:AddTab("LocalPlayer", "")
 		WindowTabs.WindowVisualsTab = Window:AddTab("Visuals", "")
 		WindowTabs.WindowWorldTab = Window:AddTab("World", "globe")
-		WindowTabs.WindowFFlagsTab = Window:AddTab("FFlags", "")
 		WindowTabs.WindowSettingsTab = Window:AddTab("Settings", "")
 	else
 		Window = Library:CreateWindow({
@@ -4087,7 +5708,6 @@ local UISuccess, UIOutput = pcall(function()
 		WindowTabs.WindowPlayersTab = Window:AddTab("LocalPlayer", "users")
 		WindowTabs.WindowVisualsTab = Window:AddTab("Visuals", "eye")
 		WindowTabs.WindowWorldTab = Window:AddTab("World", "globe")
-		WindowTabs.WindowFFlagsTab = Window:AddTab("FFlags", "globe")
 		WindowTabs.WindowSettingsTab = Window:AddTab("Settings", "settings")
 	end
 end)
@@ -4111,7 +5731,6 @@ local VisualsESPTab = WindowTabs.WindowVisualsTab:AddLeftGroupbox("Extra-Sensory
 local WorldLightingTab = WindowTabs.WindowWorldTab:AddLeftGroupbox("Lighting")
 local WorldLocalCharacterTab = WindowTabs.WindowWorldTab:AddRightGroupbox("Local Character")
 local VisualsTabCrosshair = WindowTabs.WindowVisualsTab:AddRightGroupbox("Crosshair Overlay")
-local FFlagsTab = WindowTabs.WindowFFlagsTab:AddLeftGroupbox("FFlags")
 local SettingsTab = WindowTabs.WindowSettingsTab:AddLeftGroupbox("Settings")
 
 if Games.IsRivals then
@@ -4142,7 +5761,9 @@ Tabs.Aimbot:AddToggle("Aimbot", {
 			return
 		end
 
-		GetClosestPlayer()
+		if Aimbot.StickyAim then
+			GetClosestPlayer()
+		end
 
 		Connections.Aimbot = RenderStepped(function(DeltaTime)
 			if not Aimbot.StickyAim then
@@ -4476,7 +6097,7 @@ Tabs.Target:AddToggle("AimbotLookAtToggle", {
 			local Root = Cache.Root
 			if Root then
 				local RootPosition = Root.Position
-				LocalRoot.CFrame = CFrame.new(LocalRoot.Position, vector.create(RootPosition.X, LocalRoot.Position.Y, RootPosition.Z))
+				LocalRoot.CFrame = CFrame.new(LocalRoot.Position, Vector3.new(RootPosition.X, LocalRoot.Position.Y, RootPosition.Z))
 			end
 		end, false)
 	end
@@ -5867,169 +7488,6 @@ VisualsTabCrosshair:AddSlider("CrosshairOverlayDotSize", {
     end
 })
 
-local ResetFFLagModifications = function(...)
-	return (...)
-end
-
-if setfflagFunction then
-	ResetFFLagModifications = function()
-		nssetfflag("RaycastMaxDistance", "15000")
-		nssetfflag("DebugDynamicRenderKiloPixels", "-1")
-		nssetfflag("DebugTextBoxServiceShowOverlay", "False")
-		nssetfflag("SimAdaptiveHumanoidPDControllerSubstepMultiplier", "1")
-		nssetfflag("DebugLightGridShowChunks", "False")
-	end
-
-	FFlagsTab:AddLabel("Only Advanced users can understand this.", true)
-
-	local IsResetting = false
-	FFlagsTab:AddInput("RaycastMaxDistanceInput", {
-		Default = "15000",
-		Numeric = false,
-		Finished = false,
-		ClearTextOnFocus = false,
-		Text = "RaycastMaxDistance",
-		Tooltip = "Break legs collision from 2 to -inf, noclip camera on 3, kinda break camera on values over 3",
-		Placeholder = "15000",
-		Callback = function(Value)
-			local ConvertedValue = tostring(Value)
-			local Success,_ = nssetfflag("RaycastMaxDistance", ConvertedValue)
-			if Success then
-				if not IsResetting then
-					Library:Notify({Title = "FFlags", Description = "Set RaycastMaxDistance to " .. ConvertedValue, Time = 0.5})
-					IsResetting = false
-				end
-			else
-				Library:Notify({Title = "FFlags", Description = "Unknown error occured while setting RaycastMaxDistance", Time = 1})
-			end
-		end,
-	})
-	FFlagsTab:AddButton({
-		Text = "Reset RaycastMaxDistance",
-		Tooltip = "Resets RaycastMaxDistance back to it's default value of 15000",
-		Func = function()
-			IsResetting = true
-			local Success,_ = nssetfflag("RaycastMaxDistance", "15000")
-			if Success then
-				Options["RaycastMaxDistanceInput"]:SetValue("15000")
-				IsResetting = false
-				Library:Notify({Title = "FFlags", Description = "Reset RaycastMaxDistance to 15000", Time = 2})
-			else
-				Library:Notify({Title = "FFlags", Description = "Unknown error occured while resetting RaycastMaxDistance", Time = 2})
-			end
-		end
-	})
-
-	local DebugDynamicRenderKiloPixelsIsResetting = false
-	FFlagsTab:AddInput("DebugDynamicRenderKiloPixelsInput", {
-		Default = "-1",
-		Numeric = false,
-		Finished = false,
-		ClearTextOnFocus = false,
-		Text = "DebugDynamicRenderKiloPixels",
-		Tooltip = "Pro graphics",
-		Placeholder = "-1",
-		Callback = function(Value)
-			local ConvertedValue = tostring(Value)
-			local Success,_ = nssetfflag("DebugDynamicRenderKiloPixels", ConvertedValue)
-			if Success then
-				if not DebugDynamicRenderKiloPixelsIsResetting then
-					Library:Notify({Title = "FFlags", Description = "Set DebugDynamicRenderKiloPixels to " .. ConvertedValue, Time = 0.5})
-					DebugDynamicRenderKiloPixelsIsResetting = false
-				end
-			else
-				Library:Notify({Title = "FFlags", Description = "Unknown error occured while setting DebugDynamicRenderKiloPixels", Time = 1})
-			end
-		end,
-	})
-	FFlagsTab:AddButton({
-		Text = "Reset DebugDynamicRenderKiloPixelsInput",
-		Tooltip = "Resets DebugDynamicRenderKiloPixelsInput back to it's default value of -1",
-		Func = function()
-			DebugDynamicRenderKiloPixelsIsResetting = true
-			local Success,_ = nssetfflag("DebugDynamicRenderKiloPixels", "-1")
-			if Success then
-				Options["DebugDynamicRenderKiloPixelsInput"]:SetValue("-1")
-				DebugDynamicRenderKiloPixelsIsResetting = false
-				Library:Notify({Title = "FFlags", Description = "Reset DebugDynamicRenderKiloPixels to -1", Time = 2})
-			else
-				Library:Notify({Title = "FFlags", Description = "Unknown error occured while resetting DebugDynamicRenderKiloPixels", Time = 2})
-			end
-		end
-	})
-
-	FFlagsTab:AddButton({
-		Text = "Enable DebugTextBoxServiceShowOverlay",
-		Func = function()
-			local Success,_ = nssetfflag("DebugTextBoxServiceShowOverlay", "True")
-			if Success then
-				Library:Notify({Title = "FFlags", Description = "Enabled DebugTextBoxServiceShowOverlay", Time = 2})
-			else
-				Library:Notify({Title = "FFlags", Description = "Unknown error occured while enabling DebugTextBoxServiceShowOverlay", Time = 2})
-			end
-		end
-	})
-	FFlagsTab:AddButton({
-		Text = "Disable DebugTextBoxServiceShowOverlay",
-		Func = function()
-			local Success,_ = nssetfflag("DebugTextBoxServiceShowOverlay", "False")
-			if Success then
-				Library:Notify({Title = "FFlags", Description = "Disabled DebugTextBoxServiceShowOverlay", Time = 2})
-			else
-				Library:Notify({Title = "FFlags", Description = "Unknown error occured while disabling DebugTextBoxServiceShowOverlay", Time = 2})
-			end
-		end
-	})
-
-	FFlagsTab:AddButton({
-		Text = "Enable SAPDSMultiplier",
-		Func = function()
-			local Success,_ = nssetfflag("SimAdaptiveHumanoidPDControllerSubstepMultiplier", "-999999")
-			if Success then
-				Library:Notify({Title = "FFlags", Description = "Enabled SimAdaptiveHumanoidPDControllerSubstepMultiplier", Time = 2})
-			else
-				Library:Notify({Title = "FFlags", Description = "Unknown error occured while enabling SimAdaptiveHumanoidPDControllerSubstepMultiplier", Time = 2})
-			end
-		end
-	})
-	FFlagsTab:AddButton({
-		Text = "Disable SAPDSMultiplier",
-		Func = function()
-			local Success,_ = nssetfflag("SimAdaptiveHumanoidPDControllerSubstepMultiplier", "1")
-			if Success then
-				Library:Notify({Title = "FFlags", Description = "Disabled SimAdaptiveHumanoidPDControllerSubstepMultiplier", Time = 2})
-			else
-				Library:Notify({Title = "FFlags", Description = "Unknown error occured while disabling SimAdaptiveHumanoidPDControllerSubstepMultiplier", Time = 2})
-			end
-		end
-	})
-
-	FFlagsTab:AddButton({
-		Text = "Enable DebugLightGridShowChunks",
-		Func = function()
-			local Success,_ = nssetfflag("DebugLightGridShowChunks", "True")
-			if Success then
-				Library:Notify({Title = "FFlags", Description = "Enabled DebugLightGridShowChunks", Time = 2})
-			else
-				Library:Notify({Title = "FFlags", Description = "Unknown error occured while enabling DebugLightGridShowChunks", Time = 2})
-			end
-		end
-	})
-	FFlagsTab:AddButton({
-		Text = "Disable DebugLightGridShowChunks",
-		Func = function()
-			local Success_,_ = nssetfflag("DebugLightGridShowChunks", "False")
-			if Success_ then
-				Library:Notify({Title = "FFlags", Description = "Disabled DebugLightGridShowChunks", Time = 2})
-			else
-				Library:Notify({Title = "FFlags", Description = "Unknown error occured while disabling DebugLightGridShowChunks", Time = 2})
-			end
-		end
-	})
-else
-	FFlagsTab:AddLabel("FFlags Modification is not supported. Missing required function 'setfflag'", true)
-end
-
 SettingsTab:AddToggle("ns__Watermark", {
 	Text = "Library Watermark",
 	Default = true,
@@ -6067,7 +7525,7 @@ SettingsTab:AddToggle("ns__PlayerLeaveLogs", {
 	end
 })
 
-local function ClearConnections(Table: table)
+local function ClearConnections(Table)
 	for _,Value in next, Table do
 		Value:Disconnect()
 	end
@@ -6075,16 +7533,14 @@ local function ClearConnections(Table: table)
 	table.clear(Table)
 end
 
-local function Unload(Message: string)
+local function Unload(Message)
 	Library.Unload()
-	task.wait()
 	Running = false
+
 	task.wait()
+
 	ClearConnections(Connections)
-	task.wait()
-	ThreadManager:StopAll()
-	task.wait()
-	ResetFFLagModifications()
+	ThreadManager:Shutdown()
 
 	if CanUseVirtualInputManager then
 		VirtualInputManager:Destroy()
@@ -6495,9 +7951,9 @@ task.spawn(function()
 		local KnifeSkinChangerTab = SkinChangerTabbox:AddTab("Knife")
 
 		local ArsenalTableOfParts = {"HeadHB", "HumanoidRootPart"}
-		local HeadSize = vector.create(2, 1, 1)
-		local HumanoidRootPartSize = vector.create(2, 2, 1)
-		local function ResetArsenalSilentAimbot(Player: Player)
+		local HeadSize = Vector3.new(2, 1, 1)
+		local HumanoidRootPartSize = Vector3.new(2, 2, 1)
+		local function ResetArsenalSilentAimbot(Player)
 			local Character = Player.Character
 			if Character then
 				for _,BasePart in ipairs(ArsenalTableOfParts) do
@@ -6523,7 +7979,7 @@ task.spawn(function()
 			end
 		end
 
-		local HitboxSize = vector.create(26, 26, 26)
+		local HitboxSize = Vector3.new(26, 26, 26)
 		ThreadManager:Start("ArsenalSilentAimbot", function()
 			if SilentAimbot.Enabled then
 				for Player, Cache in next, CachedPlayers do
@@ -7244,7 +8700,7 @@ task.spawn(function()
 		local Flick = {
 			HitboxExtender = nil
 		}
-		local Vector3CritSize = vector.create(3.113720655441284, 1.2231099605560303, 3.113720655441284)
+		local Vector3CritSize = Vector3.new(3.113720655441284, 1.2231099605560303, 3.113720655441284)
 		local ShowHitbox = false
 		local HitboxSize = 3.5
 
@@ -7336,8 +8792,8 @@ task.spawn(function()
 		local HitboxExtenderTab = Game:AddLeftGroupbox("Hitbox Extender")
 		local OthersTab = Game:AddRightGroupbox("Others")
 
-		local DefaultRootSize = vector.create(2, 2, 1)
-		local function ResetHitbox(Root: Instance?)
+		local DefaultRootSize = Vector3.new(2, 2, 1)
+		local function ResetHitbox(Root)
 			if Root then
 				Root.Size = DefaultRootSize
 				Root.Transparency = 1
@@ -7488,7 +8944,7 @@ task.spawn(function()
 			LoopBuyCase = nil
 		}
 
-		local HitboxSize = vector.create(26, 26, 26)
+		local HitboxSize = Vector3.new(26, 26, 26)
 
 		local Game = Window:AddTab("War Tycoon", "gamepad-2")
 		local SilentAimbotTab = Game:AddLeftGroupbox("Silent Aimbot [Hitbox Expander]")
@@ -7496,8 +8952,8 @@ task.spawn(function()
 
 		--local Landmines = false
 
-		local DefaultRootSize = vector.create(2, 2, 1)
-		local function ResetHitbox(Root: Instance?)
+		local DefaultRootSize = Vector3.new(2, 2, 1)
+		local function ResetHitbox(Root)
 			if Root then
 				Root.Size = DefaultRootSize
 			end
@@ -7660,7 +9116,7 @@ task.spawn(function()
 
 		local LoopKillTarget = false
 		local LoopKillOldCFrame = nil
-		local KillDistanceOffset = vector.create(0, 25, 0)
+		local KillDistanceOffset = Vector3.new(0, 25, 0)
 
 		ModificationsTab:AddToggle("LoopKillTarget", {
 			Text = "Loop Kill Target [Equip Gun]",
@@ -7807,7 +9263,7 @@ task.spawn(function()
 						Time = 3.5
 					})
 					return
-				elseif IsProtected(Character) then
+				elseif IsCharacterProtected(Character) then
 					Library:Notify({
 						Title = "[[ combat.cc ]]",
 						Description = "Target is shielded by a ForceField.",
@@ -7904,7 +9360,7 @@ task.spawn(function()
 						return
 					end
 
-					if IsProtected(Character) then
+					if IsCharacterProtected(Character) then
 						if Connection then
 							Connection:Disconnect()
 							Connection = nil
@@ -7960,7 +9416,7 @@ task.spawn(function()
 		})
 
 		local LoopRPGSpamTarget = false
-		local NormalOffset = vector.create(0.9848124980926514, 0, 0.17362114787101746)
+		local NormalOffset = Vector3.new(0.9848124980926514, 0, 0.17362114787101746)
 
 		ModificationsTab:AddLabel("If the RPG Spam doesn't work then try shooting it atleast once.", true)
 
@@ -8029,7 +9485,7 @@ task.spawn(function()
 							RocketHit:FireServer(RocketHitArguments)
 
 							local HorizontalOffset = Root.CFrame.LookVector
-							HorizontalOffset = vector.create(HorizontalOffset.X, 0, HorizontalOffset.Z).Unit
+							HorizontalOffset = Vector3.new(HorizontalOffset.X, 0, HorizontalOffset.Z).Unit
 							local Speed = Root.AssemblyLinearVelocity.Magnitude * 0.03
 
 							RocketHitArguments.Position = Root.Position + HorizontalOffset * (math.random(10, 45) + Speed)
@@ -8101,7 +9557,7 @@ task.spawn(function()
 						Time = 3.5
 					})
 					return
-				elseif IsProtected(Character) then
+				elseif IsCharacterProtected(Character) then
 					Library:Notify({
 						Title = "[[ combat.cc ]]",
 						Description = "Target is shielded by a ForceField.",
@@ -8170,7 +9626,7 @@ task.spawn(function()
 						return
 					end
 
-					if IsProtected(Character) then
+					if IsCharacterProtected(Character) then
 						if Connection then
 							Connection:Disconnect()
 							Connection = nil
@@ -8212,7 +9668,7 @@ task.spawn(function()
 						RocketHit:FireServer(RocketHitArguments)
 
 						local HorizontalOffset = Root.CFrame.LookVector
-						HorizontalOffset = vector.create(HorizontalOffset.X, 0, HorizontalOffset.Z).Unit
+						HorizontalOffset = Vector3.new(HorizontalOffset.X, 0, HorizontalOffset.Z).Unit
 						local Speed = Root.AssemblyLinearVelocity.Magnitude * 0.03
 
 						RocketHitArguments.Position = Root.Position + HorizontalOffset * (math.random(10, 45) + Speed)
@@ -8247,8 +9703,12 @@ task.spawn(function()
 					end
 
 					for _,Cache in next, CachedPlayers do
+						if IsProtected(Cache) then
+							continue
+						end
+
 						local Character = Cache.Character
-						if not Character or IsProtected(Character) then
+						if not Character then
 							continue
 						end
 
@@ -8289,7 +9749,7 @@ task.spawn(function()
 							RocketHit:FireServer(RocketHitArguments)
 
 							local HorizontalOffset = Root.CFrame.LookVector
-							HorizontalOffset = vector.create(HorizontalOffset.X, 0, HorizontalOffset.Z).Unit
+							HorizontalOffset = Vector3.new(HorizontalOffset.X, 0, HorizontalOffset.Z).Unit
 							local Speed = Root.AssemblyLinearVelocity.Magnitude * 0.03
 
 							RocketHitArguments.Position = Root.Position + HorizontalOffset * (math.random(10, 45) + Speed)
@@ -8584,7 +10044,7 @@ game:GetService("Players").LocalPlayer.Character:WaitForChild("Drone EMP"):WaitF
 		if getgc then
 			local OriginalGCAttributes = {}
 
-			local function UpdateItemAttribute(Name: string, NewValue: any)
+			local function UpdateItemAttribute(Name, NewValue)
 				for _,Table in next, getgc(true) do
 					if type(Table) == "table" and rawget(Table, Name) then
 						local OldValue = Table[Name]
@@ -8609,7 +10069,7 @@ game:GetService("Players").LocalPlayer.Character:WaitForChild("Drone EMP"):WaitF
 				end
 			end
 
-			local function RestoreItemAttribute(Name: string)
+			local function RestoreItemAttribute(Name)
 				for Table, Values in next, OriginalGCAttributes do
 					if Values[Name] ~= nil then
 						Table[Name] = Values[Name]
@@ -8767,18 +10227,18 @@ game:GetService("Players").LocalPlayer.Character:WaitForChild("Drone EMP"):WaitF
 end)
 
 task.spawn(function()
-	FileFunctions.writefile("combat.cc/Nikoleto.iy", tostring(game:HttpGet(
-		"https://raw.githubusercontent.com/nikoladhima/combat.cc/refs/heads/main/utils/NikoletoService.luau"
+	writefile("combat.cc/Nikoleto.iy", tostring(game:HttpGet(
+		"https://raw.githubusercontent.com/nikoladhima/combat.cc/refs/heads/main/utils/Nikoleto.iy"
 	)))
 	if isfile("IY_FE.iy") then
-		local Data = HttpService:JSONDecode(FileFunctions.readfile("IY_FE.iy"))
+		local Data = HttpService:JSONDecode(readfile("IY_FE.iy"))
 		if Data and type(Data) == "table" then
 			if table.find(Data.PluginsTable, "combat.cc/Nikoleto.iy") then
 				return
 			end
 
 			table.insert(Data.PluginsTable, "combat.cc/Nikoleto.iy")
-			FileFunctions.writefile("IY_FE.iy", HttpService:JSONEncode(Data))
+			writefile("IY_FE.iy", HttpService:JSONEncode(Data))
 		end
 	else
 		local currentShade1 = Color3.fromRGB(36, 36, 37)
@@ -8787,7 +10247,7 @@ task.spawn(function()
 		local currentText1 = Color3.new(1, 1, 1)
 		local currentText2 = Color3.new(0, 0, 0)
 		local currentScroll = Color3.fromRGB(78,78,79)
-		FileFunctions.writefile("IY_FE.iy", HttpService:JSONEncode({
+		writefile("IY_FE.iy", HttpService:JSONEncode({
 			prefix = ';',
 			StayOpen = false,
 			espTransparency = 0.3,
@@ -8819,10 +10279,14 @@ Library:Toggle(true)
 
 if (
 	not listfiles.IsWaxxed and not isfile.IsWaxxed and
-	not FileFunctions.makefolder.IsWaxxed and not FileFunctions.isfolder.IsWaxxed and
-	not FileFunctions.readfile.IsWaxxed and not FileFunctions.writefile.IsWaxxed and not FileFunctions.delfile.IsWaxxed
+	not Environment.makefolder.IsWaxxed and not Environment.isfolder.IsWaxxed and
+	not readfile.IsWaxxed and not writefile.IsWaxxed and not Environment.delfile.IsWaxxed
 ) then
-	Aimbot.ThemeManager = Module:GetThemeManager()
+	Aimbot.ThemeManager = Module:GetThemeManager({
+		HttpService,
+		listfiles, isfile, readfile, writefile, Environment.delfile,
+		Environment.isfolder, Environment.makefolder
+	})
 	if Aimbot.ThemeManager then
 		Aimbot.ThemeManager:SetLibrary(Library)
 		Aimbot.ThemeManager:SetFolder("combat.cc/Themes")
@@ -8830,20 +10294,20 @@ if (
 	else
 		Module.Errors += 1
 	end
+	Aimbot.ThemeManager = nil
 
-
-	Aimbot.SaveManager = Module:GetSaveManager({
+	Aimbot.ns__SaveManager = Module:GetSaveManager({
 		nsclonefunction, HttpService,
-		listfiles, isfile, FileFunctions.readfile, FileFunctions.writefile, FileFunctions.delfile,
-		FileFunctions.isfolder, FileFunctions.makefolder
+		listfiles, isfile, readfile, writefile, Environment.delfile,
+		Environment.isfolder, Environment.makefolder
 	})
-	if Aimbot.SaveManager then
-		Aimbot.SaveManager:SetLibrary(Library)
-		Aimbot.SaveManager:IgnoreThemeSettings()
-		Aimbot.SaveManager:SetIgnoreIndexes({"MenuKeybind"})
-		Aimbot.SaveManager:SetFolder("combat.cc/Configs")
-		Aimbot.SaveManager:BuildConfigSection(WindowTabs.WindowSettingsTab)
-		Aimbot.SaveManager:LoadAutoloadConfig()
+	if Aimbot.ns__SaveManager then
+		Aimbot.ns__SaveManager:SetLibrary(Library)
+		Aimbot.ns__SaveManager:IgnoreThemeSettings()
+		Aimbot.ns__SaveManager:SetIgnoreIndexes({"MenuKeybind"})
+		Aimbot.ns__SaveManager:SetFolder("combat.cc/Configs")
+		Aimbot.ns__SaveManager:BuildConfigSection(WindowTabs.WindowSettingsTab)
+		Aimbot.ns__SaveManager:LoadAutoloadConfig()
 	else
 		Module.Errors += 1
 	end
@@ -8854,7 +10318,7 @@ if (
 
 		local function ValidateMP3AndConfigFiles(Path)
 			for _,File in listfiles(Path) do
-				if FileFunctions.isfolder(File) then
+				if Environment.isfolder(File) then
 					ValidateMP3AndConfigFiles(File)
 				elseif isfile(File) then
 					local CorrectedPath = File:lower():gsub("\\","/")
@@ -8867,12 +10331,12 @@ if (
 					if CorrectedPath:match("%.json$") then
 						local FileName = CorrectedPath:match("^combat%.cc/configs/([^/]+%.json)$")
 						if FileName then
-							FileFunctions.writefile(
+							writefile(
 								"combat.cc/Configs/settings/" .. FileName,
-								FileFunctions.readfile(File)
+								readfile(File)
 							)
 
-							FileFunctions.delfile(File)						
+							Environment.delfile(File)						
 						end
 					end
 
@@ -8885,8 +10349,8 @@ if (
 		end
 
 		ValidateMP3AndConfigFiles("combat.cc")
-		Aimbot.SaveManager:RefreshConfigList() -- nono refrersh list
 		Options["AimbotHitSounds"]:SetValues(TableOfHitSounds)
+		--Aimbot.ns__SaveManager:RefreshConfigList() -- nono refrersh list :(
 	end, 1.5)
 else
 	Module.Errors += 2
@@ -8906,7 +10370,7 @@ ThreadManager:Start("VersionChecker", function()
 end, 10)
 
 task.spawn(function()
-	local function Invite(InviteCode: string)
+	local function Invite(InviteCode)
 		httprequest({
 			Url = 'http://127.0.0.1:6463/rpc?v=1',
 			Method = 'POST',
@@ -8926,18 +10390,18 @@ task.spawn(function()
 	local RulesChannelInvite = "jjEtFhA8PA"
 
 	if isfile("combat.cc/code") then
-		if FileFunctions.readfile("combat.cc/code") == VerifyChannelInvite then
-			FileFunctions.writefile("combat.cc/code", RulesChannelInvite)
-		elseif FileFunctions.readfile("combat.cc/code") == RulesChannelInvite then
+		if readfile("combat.cc/code") == VerifyChannelInvite then
+			writefile("combat.cc/code", RulesChannelInvite)
+		elseif readfile("combat.cc/code") == RulesChannelInvite then
 			Invite(RulesChannelInvite)
 			return
 		else
-			FileFunctions.writefile("combat.cc/code", RulesChannelInvite)
+			writefile("combat.cc/code", RulesChannelInvite)
 			Invite(RulesChannelInvite)
 			return
 		end
 	else
-		FileFunctions.writefile("combat.cc/code", VerifyChannelInvite)
+		writefile("combat.cc/code", VerifyChannelInvite)
 	end
 
 	Invite(VerifyChannelInvite)

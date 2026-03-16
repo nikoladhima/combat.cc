@@ -1,40 +1,45 @@
-local cloneref = (cloneref or clonereference or function(instance: any)
-    return instance
+local Helper = (...)
+if not Helper or type(Helper) ~= "table" then
+    return nil
+end
+
+local clonefunction = Helper[1]
+local HttpService = Helper[2]
+local listfiles, isfile, readfile, writefile, delfile = Helper[3], Helper[4], Helper[5], Helper[6], Helper[7]
+local isfolder, makefolder = Helper[6], Helper[9]
+
+-- Fix is_____ functions for shitsploits, those functions should never error, only return a boolean.
+local listfiles2, isfile2, isfolder2 = clonefunction(listfiles), clonefunction(isfile), clonefunction(isfolder)
+local is_____Success, is_____Result = pcall(function()
+    return isfolder2("test" .. tostring(math.random(1000000, 9999999)))
 end)
-local clonefunction = (clonefunction or copyfunction or function(func) 
-    return func 
-end)
 
-local HttpService: HttpService = cloneref(game:GetService("HttpService"))
-local isfolder, isfile, listfiles = isfolder, isfile, listfiles
+if not is_____Success or typeof(is_____Result) ~= "boolean" then
+    isfolder = function(Folder)
+        local Success, Data = pcall(isfolder2, Folder)
+        return (
+            if Success then
+                Data
+            else false
+        )
+    end
 
-if typeof(clonefunction) == "function" then
-    -- Fix is_____ functions for shitsploits, those functions should never error, only return a boolean.
+    isfile = function(File)
+        local Success, Data = pcall(isfile2, File)
+        return (
+            if Success then
+                Data
+            else false
+        )
+    end
 
-    local
-        isfolder_copy,
-        isfile_copy,
-        listfiles_copy = clonefunction(isfolder), clonefunction(isfile), clonefunction(listfiles)
-
-    local isfolder_success, isfolder_error = pcall(function()
-        return isfolder_copy("test" .. tostring(math.random(1000000, 9999999)))
-    end)
-
-    if isfolder_success == false or typeof(isfolder_error) ~= "boolean" then
-        isfolder = function(folder)
-            local success, data = pcall(isfolder_copy, folder)
-            return (if success then data else false)
-        end
-
-        isfile = function(file)
-            local success, data = pcall(isfile_copy, file)
-            return (if success then data else false)
-        end
-
-        listfiles = function(folder)
-            local success, data = pcall(listfiles_copy, folder)
-            return (if success then data else {})
-        end
+    listfiles = function(Folder)
+        local Success, Data = pcall(listfiles2, Folder)
+        return (
+            if Success then
+                Data
+            else {}
+        )
     end
 end
 

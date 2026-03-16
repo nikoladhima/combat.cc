@@ -1194,9 +1194,9 @@ local ThreadManager = loadstring([===[
 ]===])()
 local DrawingManager = loadstring([===[
 	--!optimize 2
-    --!native
+	--!native
 
-    local DrawingNew = (...)
+	local DrawingNew = (...)
 
 	if not DrawingNew or type(DrawingNew) ~= "function" then
 		return "Failed to get Drawing function."
@@ -1228,25 +1228,11 @@ local DrawingManager = loadstring([===[
 	end
 
 	DrawingManager.__index = function(self, Key)
-		return DrawingManager[Key] or self.DrawingObject[Key]
+		return self.DrawingObject[Key] or DrawingManager[Key]
 	end
 
 	DrawingManager.__newindex = function(self, Key, Value)
 		self.DrawingObject[Key] = Value
-	end
-
-	for _,Property in ipairs({
-		"Visible", "Center", "Size", "Color",
-		"Filled", "Thickness", "Transparency",
-		"Radius", "Text", "Position", "From",
-        "To", "PointA", "PointB", "PointC"
-	}) do
-		DrawingManager[Property] = function(self, Value)
-			if self.DrawingObject[Property] ~= Value then
-				self.DrawingObject[Property] = Value
-			end
-			return self
-		end
 	end
 
 	function DrawingManager:Nil()
@@ -1510,6 +1496,7 @@ local ScriptVersion = "2.9.4"
 local Options = Library.Options
 local Toggles = Library.Toggles
 local Watermark = Library:AddDraggableLabel("[nikoletoscripts/combat.cc] | Unknown | 0 | 0")
+local WatermarkIsVisible = true
 
 local CachedRobloxGui = nil
 local CachedClippingShield = nil
@@ -1797,8 +1784,8 @@ local HeadDotESP = {
 local HeadTagESP, TagBuffer = {
 	Enabled = false,
 	Color = Color3.fromRGB(255, 255, 255),
-	Dropdown = "Name",
-	Transparency = 1
+	Transparency = 1,
+	Position = "Top"
 }, table.create(7)
 
 local TracerESP = {
@@ -2511,7 +2498,7 @@ local function ClearCache(Player)
 	CachedPlayers[Player] = nil
 	for Index = 1, #CachedPlayersList do
 		if CachedPlayersList[Index] == Cache then
-			table.remove(CachedPlayersList, i)
+			table.remove(CachedPlayersList, Index)
 			break
 		end
 	end
@@ -2574,7 +2561,7 @@ local function CachePlayer(Player)
 			Text = "",
 			Color = HeadTagESP.Color,
 			Size = 16,
-			Center = true,
+			Center = false,
 			Outline = true,
 			Visible = false
 		})
@@ -2824,7 +2811,9 @@ local CurrentFPS = nsloadstring(true, "utils/FPS.luau", {RunService, GetService(
 local CurrentPing = 0
 
 RenderStepped(function()
-	Watermark:SetText("[nikoletoscripts/combat.cc] | " .. CurrentGameName .. " | FPS: " .. CurrentFPS.Value .. " | Ping: " .. math.floor(CurrentPing))
+	if WatermarkIsVisible then
+		Watermark:SetText("[nikoletoscripts/combat.cc] | " .. CurrentGameName .. " | FPS: " .. CurrentFPS.Value .. " | Ping: " .. math.floor(CurrentPing))
+	end
 end, true)
 
 task.spawn(function()
@@ -2933,7 +2922,7 @@ local function GetDistanceSquared(Point1, Point2)
     return DeltaX * DeltaX + DeltaY * DeltaY + DeltaZ * DeltaZ
 end
 
-local function CanRenderVisually(CanBeOptimized, Cache, Player, Character, Head, Root)
+ function CanRenderVisually(CanBeOptimized, Cache, Player, Character, Head, Root)
 	if not Character or not Head or not Root then
 		return false, 0, Vector3.zero, Vector3.zero, nil
 	end
@@ -3021,12 +3010,13 @@ RenderStepped(function(DeltaTime)
 	end
 
 	local HeadTagEnabled = HeadTagESP.Enabled
-	local HeadTagColor, HeadTagTransparency, HeadTagDropdown
+	local HeadTagColor, HeadTagTransparency, HeadTagDropdown, HeadTagPosition
 
 	if HeadTagEnabled then
 		HeadTagColor = HeadTagESP.Color
 		HeadTagTransparency = HeadTagESP.Transparency
-		HeadTagDropdown = HeadTagESP.Dropdown
+		HeadTagDropdown = Options["HeadTagOptions"]
+		HeadTagPosition = HeadTagESP.Position
 	end
 
 	local TracerEnabled = TracerESP.Enabled
@@ -3226,6 +3216,14 @@ RenderStepped(function(DeltaTime)
 			RigTypeIsR15 = true
 		end
 
+		local FootScreen, FootOnScreen = nil, false
+		local FootScreenY = 0
+
+		if (HeadTagEnabled and HeadTagPosition == "Bottom") or Box2DEnabled or HealthBarEnabled then
+			FootScreen, FootOnScreen = WorldToViewportPoint(RootPosition - Vector3.new(0, Humanoid.HipHeight + 2, 0))
+			FootScreenY = FootScreen.Y
+		end
+
 		local HeadTagObject = ESP.HeadTag
 		if HeadTagEnabled and HeadTagObject and TopOnScreen then
 			local HeadTagString = ""
@@ -3299,8 +3297,14 @@ RenderStepped(function(DeltaTime)
 				HeadTagObject.Transparency = HeadTagTransparency
 			end
 
-			if HeadTagObject.Position ~= TopScreen then
-				HeadTagObject.Position = TopScreen
+			if HeadTagPosition == "Top" then
+				if HeadTagObject.Position ~= TopScreen then
+					HeadTagObject.Position = TopScreen
+				end
+			else
+				if HeadTagObject.Position ~= FootScreen then
+					HeadTagObject.Position = FootScreen
+				end
 			end
 
 			if HeadTagObject.Text ~= HeadTagString then
@@ -3318,14 +3322,6 @@ RenderStepped(function(DeltaTime)
 			if HeadTagObject.Visible ~= false then
 				HeadTagObject.Visible = false
 			end
-		end
-
-		local FootScreen, FootOnScreen = nil, false
-		local FootScreenY = 0
-
-		if Box2DEnabled or HealthBarEnabled then
-			FootScreen, FootOnScreen = WorldToViewportPoint(RootPosition - Vector3.new(0, Humanoid.HipHeight + 2, 0))
-			FootScreenY = FootScreen.Y
 		end
 
 		local TracerObject = ESP.Tracer
@@ -6947,13 +6943,21 @@ VisualsESPTab:AddToggle("HeadTagESP", {
 		HeadTagESP.Transparency = 1 - Options["HeadTagColor"].Transparency
 	end
 })
-HeadTagESP.Dropdown = VisualsESPTab:AddDropdown("HeadTagOptions", {
+VisualsESPTab:AddDropdown("HeadTagOptions", {
 	Text = "Tag Options",
 	Values = {"Name", "DisplayName", "EquippedTool", "Health", "Distance", "RigType", "Femboy Meter"},
 	Multi = true,
 	Default = 1,
 	Callback = function(...)
 		return (...)
+	end
+})
+VisualsESPTab:AddDropdown("HeadTagPosition", {
+	Text = "Position",
+	Values = {"Top", "Bottom"},
+	Default = 1,
+	Callback = function(Position)
+		HeadTagESP.Position = Position
 	end
 })
 
@@ -7493,6 +7497,7 @@ SettingsTab:AddToggle("ns__Watermark", {
 	Default = true,
 	Callback = function(State)
 		Watermark:SetVisible(State)
+		WatermarkIsVisible = State
 	end
 })
 

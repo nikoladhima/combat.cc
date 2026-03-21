@@ -1108,14 +1108,9 @@ local Module = loadstring([=====[
 			Press = {"mouse1press", "mouse_1press", "mouse1_press", "mouse_1_press"},
 			Release = {"mouse1release", "mouse_1release", "mouse1_release", "mouse_1_release"},
 			MoveRel = {
-				{
-					"mousemoverel", "mouse_moverel", "mousemove_rel", "mouse_move_rel",
-					"MouseMoveRel", "Mouse_MoveRel", "MouseMove_Rel", "Mouse_Move_Rel",
-					"setmousepos", "set_mousepos", "setmouse_pos", "set_mouse_pos"
-				},
-				function(X, Y)
-					return X, Y
-				end
+				"mousemoverel", "mouse_moverel", "mousemove_rel", "mouse_move_rel",
+				"MouseMoveRel", "Mouse_MoveRel", "MouseMove_Rel", "Mouse_Move_Rel",
+				"setmousepos", "set_mousepos", "setmouse_pos", "set_mouse_pos"
 			}
 		},
 
@@ -1151,17 +1146,10 @@ end
 
 local ThreadManager = loadstring([===[
 	--!optimize 2
-    --!native
+	--!native
 
 	local ThreadManager = {}
 	ThreadManager.__index = ThreadManager
-
-	function ThreadManager.new()
-		return setmetatable({
-			Threads = {},
-			Running = false
-		}, ThreadManager)
-	end
 
 	function ThreadManager:Start(Name, Function, Interval)
 		if self.Threads[Name] then
@@ -1169,80 +1157,45 @@ local ThreadManager = loadstring([===[
 		end
 
 		self.Running = true
-		self.Threads[Name] = true
+		local ThreadRunning = true
 
-		local Thread = task.spawn(function()
-			while self.Running and self.Threads[Name] do
-				Function()
-				task.wait(Interval)
+		self.Threads[Name] = {
+			Thread = task.spawn(function()
+				while self.Running and ThreadRunning do
+					Function()
+					task.wait(Interval)
+				end
+			end),
+
+			Stop = function()
+				ThreadRunning = false
 			end
-		end)
-
-		self.Threads[Name] = Thread
+		}
 	end
 
 	function ThreadManager:Stop(Name)
-		self.Threads[Name] = nil
+		local Thread = self.Threads[Name]
+		if Thread then
+			Thread.Stop()
+			self.Threads[Name] = nil
+		end
 	end
 
 	function ThreadManager:Shutdown()
 		self.Running = false
+
+		for _,Thread in pairs(self.Threads) do
+			Thread.Stop()
+		end
+
 		table.clear(self.Threads)
 	end
 
-	return ThreadManager.new()
+	return setmetatable({
+		Threads = {},
+		Running = false
+	}, ThreadManager)
 ]===])()
-local DrawingManager = loadstring([===[
-	--!optimize 2
-	--!native
-
-	local DrawingNew = (...)
-
-	if not DrawingNew or type(DrawingNew) ~= "function" then
-		return "Failed to get Drawing function."
-	end
-
-	local DrawingManager = {}
-	DrawingManager.__index = DrawingManager
-
-	function DrawingManager.new(Type, Properties)
-		local DrawingObject = DrawingNew(Type)
-
-		if Properties then
-			for Property, Value in next, Properties do
-				local Success, Error = pcall(function()
-					if DrawingObject[Property] then
-						DrawingObject[Property] = Value
-					end
-				end)
-
-				if not Success then
-					print("[DEBUG] Error setting", Property, "on", Type .. ":", Error)
-				end
-			end
-		end
-
-		return setmetatable({
-			DrawingObject = DrawingObject
-		}, DrawingManager)
-	end
-
-	DrawingManager.__index = function(self, Key)
-		return self.DrawingObject[Key] or DrawingManager[Key]
-	end
-
-	DrawingManager.__newindex = function(self, Key, Value)
-		self.DrawingObject[Key] = Value
-	end
-
-	function DrawingManager:Nil()
-		return pcall(function()
-			self.DrawingObject:Remove()
-		end)
-	end
-
-	return DrawingManager
-]===])(DrawingNew)
 local FunctionValidator = loadstring([===[
 	--!optimize 2
 	--!native
@@ -1263,7 +1216,7 @@ local FunctionValidator = loadstring([===[
 
 	local FunctionValidator = {}
 
-	function FunctionValidator.Validate(Name, UNCName, Fallback, IsSolara): any
+	function FunctionValidator.Validate(Name, UNCName, Fallback, IsSolara)
 		if UNCName and Environment.ns__FunctionValidatorCache[UNCName] then
 			return Environment.ns__FunctionValidatorCache[UNCName]
 		end
@@ -1315,26 +1268,24 @@ local FunctionValidator = loadstring([===[
 	return FunctionValidator
 ]===])()
 
-if not ThreadManager or not DrawingManager or not FunctionValidator then
+if not ThreadManager or not FunctionValidator then
 	return "skill issue fr"
 end
 
-local Environment = FunctionValidator:GetEnvironment()
-
-Environment.isfolder = FunctionValidator.Validate(Module.Tables.Workspace.IsFolder, "isfolder", Module.Tables.False)
-Environment.makefolder = FunctionValidator.Validate(Module.Tables.Workspace.MakeFolder, "makefolder", Module.Tables.Blank)
+local isfolder = FunctionValidator.Validate(Module.Tables.Workspace.IsFolder, "isfolder", Module.Tables.False)
+local makefolder = FunctionValidator.Validate(Module.Tables.Workspace.MakeFolder, "makefolder", Module.Tables.Blank)
 local listfiles = FunctionValidator.Validate(Module.Tables.Workspace.ListFiles, "listfiles", Module.Tables.Table)
 local isfile = FunctionValidator.Validate(Module.Tables.Workspace.IsFile, "isfile", Module.Tables.False)
 local readfile = FunctionValidator.Validate(Module.Tables.Workspace.ReadFile, "readfile", Module.Tables.Table)
 local writefile = FunctionValidator.Validate(Module.Tables.Workspace.WriteFile, "writefile", Module.Tables.Blank)
-Environment.delfile = FunctionValidator.Validate(Module.Tables.Workspace.DelFile, "delfile", Module.Tables.Blank)
+local delfile = FunctionValidator.Validate(Module.Tables.Workspace.DelFile, "delfile", Module.Tables.Blank)
 
-if not Environment.isfolder("combat.cc") then
-	Environment.makefolder("combat.cc")
+if not isfolder("combat.cc") then
+	makefolder("combat.cc")
 end
 
-if not Environment.isfolder("combat.cc/Sounds") then
-	Environment.makefolder("combat.cc/Sounds")
+if not isfolder("combat.cc/Sounds") then
+	makefolder("combat.cc/Sounds")
 end
 
 local ExecutorName = FunctionValidator.Validate(Module.Tables.IdentifyExecutor, "identifyexecutor", Module.Tables.String)()
@@ -1345,7 +1296,7 @@ local httprequest = FunctionValidator.Validate(Module.Tables.HttpRequest, nil, n
 
 local mouse1press = FunctionValidator.Validate(Module.Tables.Mouse.Press, "mouse1press", Module.Tables.True)
 local mouse1release = FunctionValidator.Validate(Module.Tables.Mouse.Release, "mouse1release", Module.Tables.True)
-local mousemoverel = FunctionValidator.Validate(Module.Tables.Mouse.MoveRel[1], "mousemoverel", Module.Tables.Mouse.MoveRel[2])
+local mousemoverel = FunctionValidator.Validate(Module.Tables.Mouse.MoveRel, "mousemoverel", Module.Tables.Blank)
 
 local newcclosure = FunctionValidator.Validate(Module.Tables.NewCClosure[1], "newcclosure", Module.Tables.NewCClosure[2])
 
@@ -1429,6 +1380,24 @@ local function Create(Type, Properties)
     return Object
 end
 
+local function CreateDrawing(Type, Properties)
+    local DrawingObject = DrawingNew(Type)
+
+    if Properties then
+        for Property, Value in next, Properties do
+			DrawingObject[Property] = Value
+        end
+    end
+
+    return DrawingObject
+end
+
+local function RemoveDrawing(DrawingObject)
+	pcall(function()
+		DrawingObject:Remove()
+	end)
+end
+
 local GetServiceFunction = nsclonefunction(game.GetService)
 local function GetService(ServiceName)
 	return nscloneref(GetServiceFunction(game, ServiceName))
@@ -1481,18 +1450,19 @@ local LocalHead = nil
 local LocalRoot = nil
 
 local Library = Module:GetLibrary({
-	Create, nscloneref, GetService, CoreGui, Players, RunService, UserInputService, Teams, Environment,
+	Create, nscloneref, GetService, CoreGui, Players, RunService, UserInputService, Teams, FunctionValidator:GetEnvironment(),
 	FunctionValidator.Validate({"gethui", "get_hui", "gethiddenui", "get_hiddenui", "get_hidden_ui"}, "gethui", function()
 		return CoreGui
 	end), getcustomassetFunction, FunctionValidator.Validate({"setclipboard", "set_clipboard", "writeclipboard", "write_clipboard"}, "setclipboard", nil),
-	LocalPlayer, Mouse, Environment.isfolder, Environment.makefolder, isfile, writefile
+	LocalPlayer, Mouse, isfolder, makefolder, isfile, writefile
 })
 
 if not Library then
 	return "skill issue fr"
 end
 
-local ScriptVersion = "2.9.4"
+local IsXeno = ExecutorName:lower():find("xeno")
+local ScriptVersion = "2.9.5"
 local Options = Library.Options
 local Toggles = Library.Toggles
 local Watermark = Library:AddDraggableLabel("[nikoletoscripts/combat.cc] | Unknown | 0 | 0")
@@ -1644,8 +1614,21 @@ local TriggerBot = {
 }
 
 local AimbotFOVCircles = {
-	FOVCircle = nil,
-	S_FOVCircle = nil
+	Target = CreateDrawing("Circle", {
+		["Color"] = Aimbot.FOVCircle.Color,
+		["Filled"] = Aimbot.FOVCircle.Filled,
+		["Thickness"] = Aimbot.FOVCircle.Thickness,
+		["Radius"] = Aimbot.FOVCircle.Radius,
+		["Visible"] = false
+	}),
+
+	Silent = CreateDrawing("Circle", {
+		["Color"] = SilentAimbot.FOVCircle.Color,
+		["Filled"] = SilentAimbot.FOVCircle.Filled,
+		["Thickness"] = SilentAimbot.FOVCircle.Thickness,
+		["Radius"] = SilentAimbot.FOVCircle.Radius,
+		["Visible"] = false
+	})
 }
 
 local PredictionSettings = {
@@ -1705,9 +1688,9 @@ local Movement = {
 	SpinBotSpeed = 1,
 	InfiniteJump = false,
 	NoJumpCooldown = false,
-	AutoJump = false
+	AutoJump = false,
+	OldCameraMaxZoomDistance = 0
 }
-local OldCameraMaxZoomDistance = 0
 
 local AntiAim = {
 	Toggled = false,
@@ -1962,11 +1945,6 @@ local IsCounterBloxBaseGame = Games.IsCounterBlox or Games.IsCounterBloxReImagin
 
 local CoolEmptyTable = {}
 
-local TableOfStringNumbers = table.create(101)
-for Index = 0, 100 do
-	TableOfStringNumbers[Index] = tostring(Index)
-end
-
 for _,Connection in nsgetconnections(GetService("ScriptContext").Error) do
 	local Function = Connection.Function
 	if Function then
@@ -2066,22 +2044,6 @@ local function GetSettingsShield()
     CachedSettingsShield = CachedClippingShield:FindFirstChild("SettingsShield")
     return CachedSettingsShield
 end
-
-AimbotFOVCircles.FOVCircle = DrawingManager.new("Circle", {
-	Color = Aimbot.FOVCircle.Color,
-	Filled = Aimbot.FOVCircle.Filled,
-	Thickness = Aimbot.FOVCircle.Thickness,
-	Radius = Aimbot.FOVCircle.Radius,
-	Visible = false
-})
-
-AimbotFOVCircles.S_FOVCircle = DrawingManager.new("Circle", {
-	Color = SilentAimbot.FOVCircle.Color,
-	Filled = SilentAimbot.FOVCircle.Filled,
-	Thickness = SilentAimbot.FOVCircle.Thickness,
-	Radius = SilentAimbot.FOVCircle.Radius,
-	Visible = false
-})
 
 local IsEnemy = nil
 if Games.IsAimblox then
@@ -2471,7 +2433,6 @@ end
 
 local function ClearCache(Player)
 	local Cache = CachedPlayers[Player]
-
 	if not Cache then
 		return
 	end
@@ -2486,12 +2447,12 @@ local function ClearCache(Player)
 
 			if Index == "Box3D" or Index == "Skeleton" then
 				for _,DrawingObject in next, Object do
-					DrawingObject:Nil()
+					RemoveDrawing(DrawingObject)
 				end
 				continue
 			end
 
-			Object:Nil()
+			RemoveDrawing(Object)
 		end
 	end
 
@@ -2519,7 +2480,7 @@ local function CachePlayer(Player)
 	Cache.Name = Name
 	Cache.DisplayName = Player.DisplayName
 
-	Cache.FemboyMeter = TableOfStringNumbers[math.random(0, 100)]
+	Cache.FemboyMeter = tostring(math.random(0, 100))
 
 	if IsArsenalBaseGame then
 		local NRPBS = Player:FindFirstChild("NRPBS")
@@ -2531,7 +2492,10 @@ local function CachePlayer(Player)
 	Cache.ForceField = Character:FindFirstChildOfClass("ForceField")
 	Cache.Humanoid = Character:FindFirstChildOfClass("Humanoid")
 
-	for _,Child in ipairs(Character:GetChildren()) do
+	local Children = Character:GetChildren()
+
+	for Index = 1, #Children do
+		local Child = Children[Index]
 		if Child:IsA("BasePart") then
 			Cache[Child.Name] = Child
 		end
@@ -2546,74 +2510,91 @@ local function CachePlayer(Player)
 		ESP.Cham = Create("Highlight", {
 			Enabled = false,
 			Name = "Cham_" .. Name,
+			FillColor = ChamESP.FillColor,
+			OutlineColor = ChamESP.OutlineColor,
+			FillTransparency = ChamESP.FillTransparency,
+			OutlineTransparency = ChamESP.OutlineTransparency,
 			Adornee = Character,
 			Parent = CoreGui
 		})
 
-		ESP.HeadDot = DrawingManager.new("Circle", {
-			Color = HeadDotESP.Color,
-			Radius = 4,
-			Filled = true,
-			Visible = false
+		ESP.HeadDot = CreateDrawing("Circle", {
+			["Color"] = HeadDotESP.Color,
+			["Transparency"] = HeadDotESP.Transparency,
+			["Radius"] = 4,
+			["Filled"] = HeadDotESP.Filled,
+			["Visible"] = false
 		})
 
-		ESP.HeadTag = DrawingManager.new("Text", {
-			Text = "",
-			Color = HeadTagESP.Color,
-			Size = 16,
-			Center = false,
-			Outline = true,
-			Visible = false
+		ESP.HeadTag = CreateDrawing("Text", {
+			["Text"] = "",
+			["Color"] = HeadTagESP.Color,
+			["Transparency"] = HeadTagESP.Transparency,
+			["Size"] = 16,
+			["Center"] = true,
+			["Outline"] = true,
+			["Visible"] = false
 		})
 
-		ESP.Tracer = DrawingManager.new("Line", {
-			Color = TracerESP.Color,
-			Thickness = 2,
-			Visible = false
+		ESP.Tracer = CreateDrawing("Line", {
+			["Color"] = TracerESP.Color,
+			["Transparency"] = TracerESP.Transparency,
+			["Thickness"] = 2,
+			["Visible"] = false
 		})
 
-		ESP.Arrow = DrawingManager.new("Triangle", {
-			Color = ArrowESP.Color,
-			Thickness = 2,
-			Visible = false
-		})
+		if not IsXeno then
+			ESP.Arrow = CreateDrawing("Triangle", {
+				["PointA"] = FixedBottomCenter,
+				["PointB"] = FixedBottomCenter,
+				["PointC"] = FixedBottomCenter,
+				["Transparency"] = ArrowESP.Transparency,
+				["Thickness"] = 2,
+				["Filled"] = ArrowESP.Filled,
+				["Color"] = ArrowESP.Color,
+				["Visible"] = false
+			})
+		end
 
-		ESP.Box2D = DrawingManager.new("Square", {
-			Thickness = 2,
-			Size = Vector2.one * 50,
-			Color = BoxESP.Box2D.Color,
-			Visible = false
+		ESP.Box2D = CreateDrawing("Square", {
+			["Transparency"] = BoxESP.Box2D.Transparency,
+			["Thickness"] = 2,
+			["Size"] = Vector2.one * 50,
+			["Color"] = BoxESP.Box2D.Color,
+			["Visible"] = false
 		})
 
 		ESP.Box3D = table.create(12)
 		for Index = 1, 12 do
-			ESP.Box3D[Index] = DrawingManager.new("Line", {
-				Color = BoxESP.Box3D.Color,
-				Thickness = 2,
-				Visible = false
+			ESP.Box3D[Index] = CreateDrawing("Line", {
+				["Color"] = BoxESP.Box3D.Color,
+				["Transparency"] = BoxESP.Box3D.Transparency,
+				["Thickness"] = 2,
+				["Visible"] = false
 			})
 		end
 
-		ESP.HealthBarOutline = DrawingManager.new("Square", {
-			Filled = true,
-			Color = HealthBarESP.Color,
-			Transparency = 1,
-			Visible = false
+		ESP.HealthBarOutline = CreateDrawing("Square", {
+			["Filled"] = true,
+			["Color"] = HealthBarESP.Color,
+			["Transparency"] = HealthBarESP.Transparency,
+			["Visible"] = false
 		})
 
-		ESP.HealthBarFill = DrawingManager.new("Line", {
-			Color = GreenRGBColor,
-			Transparency = 1,
-			Visible = false
+		ESP.HealthBarFill = CreateDrawing("Line", {
+			["Color"] = GreenRGBColor,
+			["Transparency"] = HealthBarESP.Transparency,
+			["Thickness"] = HealthBarESP.Thickness,
+			["Visible"] = false
 		})
 
 		ESP.Skeleton = table.create(16)
 		for Index = 1, 16 do
-			ESP.Skeleton[Index] = DrawingManager.new("Line", {
-				Thickness = 1,
-				Color = SkeletonESP.Color,
-				Transparency = 1,
-				Visible = false
+			ESP.Skeleton[Index] = CreateDrawing("Line", {
+				["Thickness"] = SkeletonESP.Thickness,
+				["Color"] = SkeletonESP.Color,
+				["Transparency"] = SkeletonESP.Transparency,
+				["Visible"] = false
 			})
 		end
 
@@ -2623,7 +2604,11 @@ local function CachePlayer(Player)
 					table.insert(ESPObjects, DrawingObject)
 				end
 			else
-				table.insert(ESPObjects, Object)
+				if Index == "Cham" then
+					table.insert(ESPObjects, Object)
+				else
+					table.insert(ESPObjects, Object)
+				end
 			end
 		end
 
@@ -2646,13 +2631,16 @@ local function AddCache(Player)
 	local ChamName = "Cham_" .. Player.Name
 
 	if Character and ChamESP.Enabled then
-		for _,Child in ipairs(Character:GetChildren()) do
+		local Children = Character:GetChildren()
+
+		for Index = 1, #Children do
+			local Child = Children[Index]
 			if Child:IsA("Highlight") and Child.Name ~= ChamName then
 				SetEnabled(Child, false)
 			end
 		end
 
-		Cache.FemboyMeter = TableOfStringNumbers[math.random(0, 100)]
+		Cache.FemboyMeter = tostring(math.random(0, 100))
 	end
 
 	InsertToConnections(Player.CharacterAdded:Connect(function()
@@ -2673,7 +2661,7 @@ local function AddCache(Player)
 			end
 		end))
 
-		Cache2.FemboyMeter = TableOfStringNumbers[math.random(0, 100)]
+		Cache2.FemboyMeter = tostring(math.random(0, 100))
 	end))
 
 	InsertToConnections(Player.CharacterRemoving:Connect(function()
@@ -2810,7 +2798,16 @@ end
 local CurrentFPS = nsloadstring(true, "utils/FPS.luau", {RunService, GetService("Stats")})
 local CurrentPing = 0
 
-RenderStepped(function()
+local WatermarkAccumulator = 0
+RenderStepped(function(DeltaTime)
+    WatermarkAccumulator += DeltaTime
+
+    if WatermarkAccumulator < 0.1 then 
+		return
+	end
+
+    WatermarkAccumulator = 0
+
 	if WatermarkIsVisible then
 		Watermark:SetText("[nikoletoscripts/combat.cc] | " .. CurrentGameName .. " | FPS: " .. CurrentFPS.Value .. " | Ping: " .. math.floor(CurrentPing))
 	end
@@ -2823,96 +2820,114 @@ task.spawn(function()
 	end, 0.1)
 end)
 
-local function SetSize(DrawingObject, Size)
-	if DrawingObject.Size ~= Size then
-		DrawingObject.Size = Size
-	end
-end
-
-local function SetTransparency(DrawingObject, Transparency)
-	if DrawingObject.Transparency ~= Transparency then
-		DrawingObject.Transparency = Transparency
-	end
-end
-
-local function UpdateFOVCircle(FOVCircle, FOVCircleTable, AimbotTable)
-	if not isrenderobj(FOVCircle) then
-		return
-	end
-
-	if not FOVCircleTable.Enabled and FOVCircle.Visible ~= false then
-		FOVCircle.Visible = false
-	end
-
-	local Color = FOVCircleTable.Color
-	if FOVCircle.Color ~= Color then
-		FOVCircle.Color = Color
-	end
-
-	local Filled = FOVCircleTable.Filled
-	if FOVCircle.Filled ~= Filled then
-		FOVCircle.Filled = Filled
-	end
-
-	local Thickness = FOVCircleTable.Thickness
-	if FOVCircle.Thickness ~= Thickness then
-		FOVCircle.Thickness = Thickness
-	end
-
-	local Radius = FOVCircleTable.Radius
-	if FOVCircle.Radius ~= Radius then
-		FOVCircle.Radius = Radius
-	end
-
-	local Transparency = FOVCircleTable.Transparency
-	if FOVCircle.Transparency ~= Transparency then
-		FOVCircle.Transparency = Transparency
-	end
-
-	local Position = FOVCircleTable.Position == "Center" and ScreenCenter or MouseLocation
-	if FOVCircle.Position ~= Position then
-		FOVCircle.Position = Position
-	end
-
-	local Visible = AimbotTable.Toggled and FOVCircleTable.Enabled
-	if FOVCircle.Visible ~= Visible then
-		FOVCircle.Visible = Visible
-	end
-end
-
-local function HideESP(Cache, ESPTable)
-	if not Cache or not Cache.IsVisible then
-		return
-	end
-
-	local ESP = ESPTable or Cache.ESP
-	if not ESP then
-		return
-	end
-
-    for Index, Object in next, ESP do
-        if Index == "Cham" then
-            if Object.Enabled ~= false then
-                Object.Enabled = false
-            end
-            continue
-        end
-
-        if Index == "Box3D" or Index == "Skeleton" then
-            for _, Line in next, Object do
-				if Line.Visible ~= false then
-					Line.Visible = false
-				end
-            end
-            continue
-        end
-
-		if Object.Visible ~= false then
-			Object.Visible = false
+if IsArsenalBaseGame or Games.IsWarTycoon or Games.IsRivals or (hookmetamethod and Games.IsDaHood) then
+	local function UpdateFOVCircle(FOVCircle, FOVCircleTable, AimbotTable)
+		if not isrenderobj(FOVCircle) then
+			return
 		end
-    end
 
-	Cache.IsVisible = false
+		if not AimbotTable.Toggled or not FOVCircleTable.Enabled then
+			if FOVCircle.Visible ~= false then
+				FOVCircle.Visible = false
+			end
+			return
+		end
+
+		local Color = FOVCircleTable.Color
+		if FOVCircle.Color ~= Color then
+			FOVCircle.Color = Color
+		end
+
+		local Filled = FOVCircleTable.Filled
+		if FOVCircle.Filled ~= Filled then
+			FOVCircle.Filled = Filled
+		end
+
+		local Thickness = FOVCircleTable.Thickness
+		if FOVCircle.Thickness ~= Thickness then
+			FOVCircle.Thickness = Thickness
+		end
+
+		local Radius = FOVCircleTable.Radius
+		if FOVCircle.Radius ~= Radius then
+			FOVCircle.Radius = Radius
+		end
+
+		local Transparency = FOVCircleTable.Transparency
+		if FOVCircle.Transparency ~= Transparency then
+			FOVCircle.Transparency = Transparency
+		end
+
+		local Position = FOVCircleTable.Position == "Center" and ScreenCenter or MouseLocation
+		if FOVCircle.Position ~= Position then
+			FOVCircle.Position = Position
+		end
+
+		if FOVCircle.Visible ~= true then
+			FOVCircle.Visible = true
+		end
+	end
+
+	RenderStepped(function()
+		UpdateFOVCircle(AimbotFOVCircles.Target, Aimbot.FOVCircle, Aimbot)
+		UpdateFOVCircle(AimbotFOVCircles.Silent, SilentAimbot.FOVCircle, SilentAimbot)
+	end, true)
+else
+	RenderStepped(function()
+		local FOVCircle = AimbotFOVCircles.Target
+		if not isrenderobj(FOVCircle) then
+			return
+		end
+
+		if not Aimbot.Toggled then
+			if FOVCircle.Visible ~= false then
+				FOVCircle.Visible = false
+			end
+			return
+		end
+
+		local FOVCircleTable = Aimbot.FOVCircle
+		if not FOVCircleTable.Enabled then
+			if FOVCircle.Visible ~= false then
+				FOVCircle.Visible = false
+			end
+			return
+		end
+
+		local Color = FOVCircleTable.Color
+		if FOVCircle.Color ~= Color then
+			FOVCircle.Color = Color
+		end
+
+		local Filled = FOVCircleTable.Filled
+		if FOVCircle.Filled ~= Filled then
+			FOVCircle.Filled = Filled
+		end
+
+		local Thickness = FOVCircleTable.Thickness
+		if FOVCircle.Thickness ~= Thickness then
+			FOVCircle.Thickness = Thickness
+		end
+
+		local Radius = FOVCircleTable.Radius
+		if FOVCircle.Radius ~= Radius then
+			FOVCircle.Radius = Radius
+		end
+
+		local Transparency = FOVCircleTable.Transparency
+		if FOVCircle.Transparency ~= Transparency then
+			FOVCircle.Transparency = Transparency
+		end
+
+		local Position = FOVCircleTable.Position == "Center" and ScreenCenter or MouseLocation
+		if FOVCircle.Position ~= Position then
+			FOVCircle.Position = Position
+		end
+
+		if FOVCircle.Visible ~= true then
+			FOVCircle.Visible = true
+		end
+	end, true)
 end
 
 local function GetDistanceSquared(Point1, Point2)
@@ -2922,46 +2937,52 @@ local function GetDistanceSquared(Point1, Point2)
     return DeltaX * DeltaX + DeltaY * DeltaY + DeltaZ * DeltaZ
 end
 
- function CanRenderVisually(CanBeOptimized, Cache, Player, Character, Head, Root)
-	if not Character or not Head or not Root then
-		return false, 0, Vector3.zero, Vector3.zero, nil
-	end
-
-	if ESPTeamCheck and not IsEnemy(Player) then
-		return false, 0, Vector3.zero, Vector3.zero, nil
-	end
-
+local function CanRenderVisually(CanBeOptimized, Cache, Character, Head, RootPosition)
 	local DeadState, CustomGameHealth = IsDead(Character, "Universal", 0)
 	if DeadState then
-		return false, CustomGameHealth, Vector3.zero, Vector3.zero, nil
+		return false, CustomGameHealth, Vector3.zero, nil
 	end
 
-	if ESPForceFieldCheck and IsProtected(Cache) then
-		return false, CustomGameHealth, Vector3.zero, Vector3.zero, nil
-	end
-
-	local RootPosition = Root.Position
 	local LocalRootPosition
 	if LocalRoot then
 		LocalRootPosition = LocalRoot.Position
 
 		local Distance = GetDistanceSquared(LocalRootPosition, RootPosition)
 		if Distance > ESPDistanceCheck then
-			return false, CustomGameHealth, RootPosition, LocalRootPosition, Distance
+			return false, CustomGameHealth, LocalRootPosition, Distance
 		end
 
 		if ESPWallCheck and not CanBeOptimized and IsBehindWall(LocalRootPosition, RootPosition, Character) then
-			return false, CustomGameHealth, RootPosition, LocalRootPosition, nil
+			return false, CustomGameHealth, LocalRootPosition, nil
 		end
 	end
 
-	return true, CustomGameHealth, RootPosition, LocalRootPosition, nil
+	return true, CustomGameHealth, LocalRootPosition, nil
 end
 
-RenderStepped(function()
-	UpdateFOVCircle(AimbotFOVCircles.FOVCircle, Aimbot.FOVCircle, Aimbot)
-	UpdateFOVCircle(AimbotFOVCircles.S_FOVCircle, SilentAimbot.FOVCircle, SilentAimbot)
-end, true)
+local function HideESP(ESP)
+    for Index, Object in next, ESP do
+        if Index == "Cham" then
+            if Object.Enabled ~= false then
+                Object.Enabled = false
+            end
+            continue
+        end
+
+        if Index == "Box3D" or Index == "Skeleton" then
+            for _,Line in next, Object do
+                if Line.Visible ~= false then
+                    Line.Visible = false
+                end
+            end
+            continue
+        end
+
+        if Object.Visible ~= false then
+            Object.Visible = false
+        end
+    end
+end
 
 RenderStepped(function(DeltaTime)
 	if ESPPerformanceMode then -- Interval = 1 / 30
@@ -2984,105 +3005,74 @@ RenderStepped(function(DeltaTime)
 		ESPAccumulator -= Interval
 	end
 
+	local PlayerCount = #CachedPlayersList
+
 	if not ESPToggled or not Camera or ESPDistanceCheck <= 0 then
-		for _,Cache in next, CachedPlayers do
-			HideESP(Cache)
+		for Index = 1, PlayerCount do
+			local Cache = CachedPlayersList[Index]
+			if not Cache.IsVisible then
+				continue
+			end
+
+			HideESP(Cache.ESP)
+			Cache.IsVisible = false
 		end
 		return
 	end
 
     local ChamEnabled = ChamESP.Enabled
-	local ChamFillColor, ChamOutlineColor, ChamFillTransparency, ChamOutlineTransparency
-
-	if ChamEnabled then
-		ChamFillColor = ChamESP.FillColor
-		ChamOutlineColor = ChamESP.OutlineColor
-		ChamFillTransparency = ChamESP.FillTransparency
-		ChamOutlineTransparency = ChamESP.OutlineTransparency
-	end
 
 	local HeadDotEnabled = HeadDotESP.Enabled
-	local HeadDotColor, HeadDotTransparency
-
-	if HeadDotEnabled then
-		HeadDotColor = HeadDotESP.Color
-		HeadDotTransparency = HeadDotESP.Transparency
-	end
 
 	local HeadTagEnabled = HeadTagESP.Enabled
-	local HeadTagColor, HeadTagTransparency, HeadTagDropdown, HeadTagPosition
+	local HeadTagDropdown, HeadTagPosition
 
 	if HeadTagEnabled then
-		HeadTagColor = HeadTagESP.Color
-		HeadTagTransparency = HeadTagESP.Transparency
 		HeadTagDropdown = Options["HeadTagOptions"]
 		HeadTagPosition = HeadTagESP.Position
 	end
 
 	local TracerEnabled = TracerESP.Enabled
-	local TracerColor, TracerTransparency
 	local TracerTypeIsLocked, TracerPartIsHead
 
 	if TracerEnabled then
-		TracerColor = TracerESP.Color
-		TracerTransparency = TracerESP.Transparency
 		TracerTypeIsLocked = TracerESP.Type == "Locked"
 		TracerPartIsHead = TracerESP.Part == "Head"
 	end
 
-	local ArrowEnabled = ArrowESP.Enabled
-	local ArrowColor, ArrowFilled, ArrowRadius, ArrowTransparency
+	local ArrowEnabled = not IsXeno and ArrowESP.Enabled
+	local ArrowRadius
 
 	if ArrowEnabled then
-		ArrowColor = ArrowESP.Color
-		ArrowFilled = ArrowESP.Filled
 		ArrowRadius = ArrowESP.Radius
-		ArrowTransparency = ArrowESP.Transparency
 	end
 
-	local Box2D = BoxESP.Box2D
-	local Box2DEnabled = Box2D.Enabled
-	local Box2DColor, Box2DTransparency
+	local Box2DEnabled = BoxESP.Box2D.Enabled
 
-	if Box2DEnabled then
-		Box2DColor = Box2D.Color
-		Box2DTransparency = Box2D.Transparency
-	end
-
-	local Box3D = BoxESP.Box3D
-	local Box3DEnabled = Box3D.Enabled
-	local Box3DColor, Box3DTransparency
-
-	if Box3DEnabled then
-		Box3DColor = Box3D.Color
-		Box3DTransparency = Box3D.Transparency
-	end
+	local Box3DEnabled = BoxESP.Box3D.Enabled
 
 	local HealthBarEnabled = HealthBarESP.Enabled
-	local HealthBarColor, HealthBarThickness, HealthBarTransparency
+	local HealthBarThickness
 
 	if HealthBarEnabled then
-		HealthBarColor = HealthBarESP.Color
 		HealthBarThickness = HealthBarESP.Thickness
-		HealthBarTransparency = HealthBarESP.Transparency
 	end
 
 	local SkeletonEnabled = SkeletonESP.Enabled
-	local SkeletonColor, SkeletonThickness, SkeletonTransparency
-
-	if SkeletonEnabled then
-		SkeletonColor = SkeletonESP.Color
-		SkeletonThickness = SkeletonESP.Thickness
-		SkeletonTransparency = SkeletonESP.Transparency
-	end
 
 	local ShouldContinue = ChamEnabled or HeadDotEnabled or HeadTagEnabled
-	or TracerEnabled or ArrowEnabled or Box2DEnabled
+	or TracerEnabled or (not IsXeno and ArrowEnabled) or Box2DEnabled
 	or Box3DEnabled or HealthBarEnabled or SkeletonEnabled
 
 	if not ShouldContinue then
-		for _,Cache in next, CachedPlayers do
-			HideESP(Cache)
+		for Index = 1, PlayerCount do
+			local Cache = CachedPlayersList[Index]
+			if not Cache.IsVisible then
+				continue
+			end
+
+			HideESP(Cache.ESP)
+			Cache.IsVisible = false
 		end
 		return
 	end
@@ -3096,40 +3086,87 @@ RenderStepped(function(DeltaTime)
 	local CameraPosition = CameraCFrame.Position
 	local CameraLookVector = CameraCFrame.LookVector
 
-	for Index = 1, #CachedPlayersList do
-		local Cache = CachedPlayersList[Index]
+	local CanBeOptimized = ChamEnabled
+	and not HeadDotEnabled and not HeadTagEnabled
+	and not TracerEnabled and (not IsXeno and not ArrowEnabled)
+	and not Box2DEnabled and not Box3DEnabled
+	and not HealthBarEnabled and not SkeletonEnabled
 
-		if not Cache then
-			continue
-		end
-
+	for RandomPlayer = 1, PlayerCount do
+		local Cache = CachedPlayersList[RandomPlayer]
 		local ESP = Cache.ESP
-		if not ESP then
+
+		local Character = Cache.Character
+		if not Character then
+			if Cache.IsVisible then
+				HideESP(ESP)
+				Cache.IsVisible = false
+			end
 			continue
 		end
 
 		local Humanoid = Cache.Humanoid
 		if not Humanoid then
-			HideESP(Cache, ESP)
+			if Cache.IsVisible then
+				HideESP(ESP)
+				Cache.IsVisible = false
+			end
+			continue
+		end
+
+		local Head = Cache.Head
+		if not Head then
+			if Cache.IsVisible then
+				HideESP(ESP)
+				Cache.IsVisible = false
+			end
+			continue
+		end
+
+		local Root = Cache.Torso or Cache.Root
+		if not Root then
+			if Cache.IsVisible then
+				HideESP(ESP)
+				Cache.IsVisible = false
+			end
+			continue
+		end
+
+		if ESPForceFieldCheck and IsProtected(Cache) then
+			if Cache.IsVisible then
+				HideESP(ESP)
+				Cache.IsVisible = false
+			end
+			continue
+		end
+
+		local RootPosition = Root.Position
+		if CameraLookVector:Dot(RootPosition - CameraPosition) <= 0 then
+			if Cache.IsVisible then
+				HideESP(ESP)
+				Cache.IsVisible = false
+			end
 			continue
 		end
 
 		local Player = Cache.Player
-		local Character = Cache.Character
-		local Head = Cache.Head
-		local Root = Cache.Torso or Cache.Root
+		if ESPTeamCheck and not IsEnemy(Player) then
+			if Cache.IsVisible then
+				HideESP(ESP)
+				Cache.IsVisible = false
+			end
+			continue
+		end
 
-		local CanRenderState, CustomGameHealth, RootPosition, LocalRootPosition, Distance = CanRenderVisually(
-			ChamEnabled
-			and not HeadDotEnabled and not HeadTagEnabled
-			and not TracerEnabled and not ArrowEnabled
-			and not Box2DEnabled and not Box3DEnabled
-			and not HealthBarEnabled and not SkeletonEnabled,
-			Cache, Player, Character, Head, Root
+		local CanRenderState, CustomGameHealth, LocalRootPosition, Distance = CanRenderVisually(
+			CanBeOptimized, Cache, Character, Head, RootPosition
 		)
 
-		if not CanRenderState or CameraLookVector:Dot(RootPosition - CameraPosition) <= 0 then
-			HideESP(Cache, ESP)
+		if not CanRenderState then
+			if Cache.IsVisible then
+				HideESP(ESP)
+				Cache.IsVisible = false
+			end
 			continue
 		end
 
@@ -3137,14 +3174,20 @@ RenderStepped(function(DeltaTime)
 		local HeadScreen, HeadOnScreen = WorldToViewportPoint(HeadPosition)
 
 		if not HeadOnScreen then
-			HideESP(Cache, ESP)
+			if Cache.IsVisible then
+				HideESP(ESP)
+				Cache.IsVisible = false
+			end
 			continue
 		end
 
 		local RootScreen, RootOnScreen = WorldToViewportPoint(RootPosition)
 
 		if not RootOnScreen then
-			HideESP(Cache, ESP)
+			if Cache.IsVisible then
+				HideESP(ESP)
+				Cache.IsVisible = false
+			end
 			continue
 		end
 
@@ -3163,22 +3206,6 @@ RenderStepped(function(DeltaTime)
 				ChamObject.DepthMode = Depth
 			end
 
-			if ChamObject.FillColor ~= ChamFillColor then
-				ChamObject.FillColor = ChamFillColor
-			end
-
-			if ChamObject.OutlineColor ~= ChamOutlineColor then
-				ChamObject.OutlineColor = ChamOutlineColor
-			end
-
-			if ChamObject.FillTransparency ~= ChamFillTransparency then
-				ChamObject.FillTransparency = ChamFillTransparency
-			end
-
-			if ChamObject.OutlineTransparency ~= ChamOutlineTransparency then
-				ChamObject.OutlineTransparency = ChamOutlineTransparency
-			end
-
 			if ChamObject.Enabled ~= true then
 				ChamObject.Enabled = true
 			end
@@ -3190,14 +3217,6 @@ RenderStepped(function(DeltaTime)
 
 		local HeadDotObject = ESP.HeadDot
 		if HeadDotEnabled and HeadDotObject then
-			if HeadDotObject.Color ~= HeadDotColor then
-				HeadDotObject.Color = HeadDotColor
-			end
-
-			if HeadDotObject.Transparency ~= HeadDotTransparency then
-				HeadDotObject.Transparency = HeadDotTransparency
-			end
-
 			if HeadDotObject.Position ~= HeadScreen then
 				HeadDotObject.Position = HeadScreen
 			end
@@ -3289,14 +3308,6 @@ RenderStepped(function(DeltaTime)
 				end
 			end
 
-			if HeadTagObject.Color ~= HeadTagColor then
-				HeadTagObject.Color = HeadTagColor
-			end
-
-			if HeadTagObject.Transparency ~= HeadTagTransparency then
-				HeadTagObject.Transparency = HeadTagTransparency
-			end
-
 			if HeadTagPosition == "Top" then
 				if HeadTagObject.Position ~= TopScreen then
 					HeadTagObject.Position = TopScreen
@@ -3311,10 +3322,6 @@ RenderStepped(function(DeltaTime)
 				HeadTagObject.Text = HeadTagString
 			end
 
-			if HeadTagObject.Center ~= true then
-				HeadTagObject.Center = true
-			end
-
 			if HeadTagObject.Visible ~= true then
 				HeadTagObject.Visible = true
 			end
@@ -3326,14 +3333,6 @@ RenderStepped(function(DeltaTime)
 
 		local TracerObject = ESP.Tracer
 		if TracerEnabled and TracerObject then
-			if TracerObject.Color ~= TracerColor then
-				TracerObject.Color = TracerColor
-			end
-
-			if TracerObject.Transparency ~= TracerTransparency then
-				TracerObject.Transparency = TracerTransparency
-			end
-
 			local FromScreen = TracerTypeIsLocked and FixedBottomCenter or MouseLocation
 			if TracerObject.From ~= FromScreen then
 				TracerObject.From = FromScreen
@@ -3359,18 +3358,6 @@ RenderStepped(function(DeltaTime)
 
 			if Direction ~= Direction then
 				Direction = Vector2.zero
-			end
-
-			if ArrowObject.Color ~= ArrowColor then
-				ArrowObject.Color = ArrowColor
-			end
-
-			if ArrowObject.Filled ~= ArrowFilled then
-				ArrowObject.Filled = ArrowFilled
-			end
-
-			if ArrowObject.Transparency ~= ArrowTransparency then
-				ArrowObject.Transparency = ArrowTransparency
 			end
 
 			local Offset = Vector2.new(-Direction.Y, Direction.X) * 7.5
@@ -3415,14 +3402,6 @@ RenderStepped(function(DeltaTime)
 				TopScreenXBoxHealthBarWidthOffset = TopScreenX - BoxHealthBarWidth * 0.5
 
 				if ShouldBox2D then
-					if Box2DObject.Color ~= Box2DColor then
-						Box2DObject.Color = Box2DColor
-					end
-
-					if Box2DObject.Transparency ~= Box2DTransparency then
-						Box2DObject.Transparency = Box2DTransparency
-					end
-
 					local Size = Vector2.new(BoxHealthBarWidth, BoxHealthBarHeight)
 					if Box2DObject.Size ~= Size then
 						Box2DObject.Size = Size
@@ -3453,30 +3432,14 @@ RenderStepped(function(DeltaTime)
 						HealthPercentage = math.clamp(Humanoid.Health / Humanoid.MaxHealth, 0, 1)
 					end
 
-					if HBOutline.Color ~= HealthBarColor then
-						HBOutline.Color = HealthBarColor
-					end
-
                     local Color = Color3.fromHSV(HealthPercentage * 0.3, 1, 1)
 					if HBFill.Color ~= Color then
 						HBFill.Color = Color
 					end
 
-					if HBOutline.Transparency ~= HealthBarTransparency then
-						HBOutline.Transparency = HealthBarTransparency
-					end
-
-					if HBFill.Transparency ~= HealthBarTransparency then
-						HBFill.Transparency = HealthBarTransparency
-					end
-
 					local Size = Vector2.new(HealthBarThickness + 2, BoxHealthBarHeight + 2)
 					if HBOutline.Size ~= Size then
 						HBOutline.Size = Size
-					end
-
-					if HBFill.Thickness ~= HealthBarThickness then
-						HBFill.Thickness = HealthBarThickness
 					end
 
 					local Position = Vector2.new(BarX - 1, TopScreenY - 1)
@@ -3511,6 +3474,20 @@ RenderStepped(function(DeltaTime)
 					end
 				end
 			end
+		else
+			if Box2DObject and Box2DObject.Visible ~= false then
+				Box2DObject.Visible = false
+			end
+
+			if HBOutline and HBFill then
+				if HBOutline.Visible ~= false then
+					HBOutline.Visible = false
+				end
+
+				if HBFill.Visible ~= false then
+					HBFill.Visible = false
+				end
+			end
 		end
 
 		local Box3DLines = ESP.Box3D
@@ -3529,14 +3506,6 @@ RenderStepped(function(DeltaTime)
                 local P1, P2 = Edge[1], Edge[2]
 
                 if BoxPointOnScreen[P1] and BoxPointOnScreen[P2] then
-					if Line.Color ~= Box3DColor then
-						Line.Color = Box3DColor
-					end
-
-					if Line.Transparency ~= Box3DTransparency then
-						Line.Transparency = Box3DTransparency
-					end
-
 					local From = BoxPointScreen[P1]
 					if Line.From ~= From then
 						Line.From = From
@@ -3597,18 +3566,6 @@ RenderStepped(function(DeltaTime)
 						end
 
 						if Visible1 and Visible2 then
-							if Line.Color ~= SkeletonColor then
-								Line.Color = SkeletonColor
-							end
-							
-							if Line.Thickness ~= SkeletonThickness then
-								Line.Thickness = SkeletonThickness
-							end
-
-							if Line.Transparency ~= SkeletonTransparency then
-								Line.Transparency = SkeletonTransparency
-							end
-
 							local From = Position1
 							if Line.From ~= From then
 								Line.From = From
@@ -3651,18 +3608,6 @@ RenderStepped(function(DeltaTime)
 
 					local SpineLine = SkeletonLines[1]
 					if NeckVisible and WaistVisible then
-						if SpineLine.Color ~= SkeletonColor then
-							SpineLine.Color = SkeletonColor
-						end
-						
-						if SpineLine.Thickness ~= SkeletonThickness then
-							SpineLine.Thickness = SkeletonThickness
-						end
-
-						if SpineLine.Transparency ~= SkeletonTransparency then
-							SpineLine.Transparency = SkeletonTransparency
-						end
-
 						local From = NeckPosition
 						if SpineLine.From ~= From then
 							SpineLine.From = From
@@ -3684,18 +3629,6 @@ RenderStepped(function(DeltaTime)
 
 					local NeckLine = SkeletonLines[2]
 					if NeckVisible and HeadOnScreen then
-						if NeckLine.Color ~= SkeletonColor then
-							NeckLine.Color = SkeletonColor
-						end
-						
-						if NeckLine.Thickness ~= SkeletonThickness then
-							NeckLine.Thickness = SkeletonThickness
-						end
-
-						if NeckLine.Transparency ~= SkeletonTransparency then
-							NeckLine.Transparency = SkeletonTransparency
-						end
-
 						local From = NeckPosition
 						if NeckLine.From ~= From then
 							NeckLine.From = From
@@ -3724,18 +3657,6 @@ RenderStepped(function(DeltaTime)
 						local Position2, Visible2 = WorldToViewportPoint(LeftArmCFrame:PointToWorldSpace(LeftArmSize * R6Bottom))
 
 						if NeckVisible and Visible1 then
-							if LeftShoulderLine.Color ~= SkeletonColor then
-								LeftShoulderLine.Color = SkeletonColor
-							end
-							
-							if LeftShoulderLine.Thickness ~= SkeletonThickness then
-								LeftShoulderLine.Thickness = SkeletonThickness
-							end
-
-							if LeftShoulderLine.Transparency ~= SkeletonTransparency then
-								LeftShoulderLine.Transparency = SkeletonTransparency
-							end
-
 							local From = NeckPosition
 							if LeftShoulderLine.From ~= From then
 								LeftShoulderLine.From = From
@@ -3756,18 +3677,6 @@ RenderStepped(function(DeltaTime)
 						end
 
 						if Visible1 and Visible2 then
-							if LeftArmLine.Color ~= SkeletonColor then
-								LeftArmLine.Color = SkeletonColor
-							end
-							
-							if LeftArmLine.Thickness ~= SkeletonThickness then
-								LeftArmLine.Thickness = SkeletonThickness
-							end
-
-							if LeftArmLine.Transparency ~= SkeletonTransparency then
-								LeftArmLine.Transparency = SkeletonTransparency
-							end
-
 							local From = Position1
 							if LeftArmLine.From ~= From then
 								LeftArmLine.From = From
@@ -3805,18 +3714,6 @@ RenderStepped(function(DeltaTime)
 						local Position2, Visible2 = WorldToViewportPoint(RightArmCFrame:PointToWorldSpace(RightArmSize * R6Bottom))
 
 						if NeckVisible and Visible1 then
-							if RightShoulderLine.Color ~= SkeletonColor then
-								RightShoulderLine.Color = SkeletonColor
-							end
-							
-							if RightShoulderLine.Thickness ~= SkeletonThickness then
-								RightShoulderLine.Thickness = SkeletonThickness
-							end
-
-							if RightShoulderLine.Transparency ~= SkeletonTransparency then
-								RightShoulderLine.Transparency = SkeletonTransparency
-							end
-
 							local From = NeckPosition
 							if RightShoulderLine.From ~= From then
 								RightShoulderLine.From = From
@@ -3837,18 +3734,6 @@ RenderStepped(function(DeltaTime)
 						end
 
 						if Visible1 and Visible2 then
-							if RightArmLine.Color ~= SkeletonColor then
-								RightArmLine.Color = SkeletonColor
-							end
-							
-							if RightArmLine.Thickness ~= SkeletonThickness then
-								RightArmLine.Thickness = SkeletonThickness
-							end
-
-							if RightArmLine.Transparency ~= SkeletonTransparency then
-								RightArmLine.Transparency = SkeletonTransparency
-							end
-
 							local From = Position1
 							if RightArmLine.From ~= From then
 								RightArmLine.From = From
@@ -3886,18 +3771,6 @@ RenderStepped(function(DeltaTime)
 						local Position2, Visible2 = WorldToViewportPoint(LeftLegCFrame:PointToWorldSpace(LeftLegSize * R6Bottom))
 
 						if WaistVisible and Visible1 then
-							if LeftHipLine.Color ~= SkeletonColor then
-								LeftHipLine.Color = SkeletonColor
-							end
-							
-							if LeftHipLine.Thickness ~= SkeletonThickness then
-								LeftHipLine.Thickness = SkeletonThickness
-							end
-
-							if LeftHipLine.Transparency ~= SkeletonTransparency then
-								LeftHipLine.Transparency = SkeletonTransparency
-							end
-
 							local From = WaistPosition
 							if LeftHipLine.From ~= From then
 								LeftHipLine.From = From
@@ -3918,18 +3791,6 @@ RenderStepped(function(DeltaTime)
 						end
 
 						if Visible1 and Visible2 then
-							if LeftLegLine.Color ~= SkeletonColor then
-								LeftLegLine.Color = SkeletonColor
-							end
-							
-							if LeftLegLine.Thickness ~= SkeletonThickness then
-								LeftLegLine.Thickness = SkeletonThickness
-							end
-
-							if LeftLegLine.Transparency ~= SkeletonTransparency then
-								LeftLegLine.Transparency = SkeletonTransparency
-							end
-
 							local From = Position1
 							if LeftLegLine.From ~= From then
 								LeftLegLine.From = From
@@ -3967,24 +3828,12 @@ RenderStepped(function(DeltaTime)
 						local Position2, Visible2 = WorldToViewportPoint(RightLegCFrame:PointToWorldSpace(RightLegSize * R6Bottom))
 
 						if WaistVisible and Visible1 then
-							if RightHipLine.Color ~= SkeletonColor then
-								RightHipLine.Color = SkeletonColor
-							end
-							
-							if RightHipLine.Thickness ~= SkeletonThickness then
-								RightHipLine.Thickness = SkeletonThickness
-							end
-
-							if RightHipLine.Transparency ~= SkeletonTransparency then
-								RightHipLine.Transparency = SkeletonTransparency
-							end
-
 							local From = WaistPosition
 							if RightHipLine.From ~= From then
 								RightHipLine.From = From
 							end
 
-							local To = Position2
+							local To = Position1
 							if RightHipLine.To ~= To then
 								RightHipLine.To = To
 							end
@@ -3999,18 +3848,6 @@ RenderStepped(function(DeltaTime)
 						end
 
 						if Visible1 and Visible2 then
-							if RightLegLine.Color ~= SkeletonColor then
-								RightLegLine.Color = SkeletonColor
-							end
-							
-							if RightLegLine.Thickness ~= SkeletonThickness then
-								RightLegLine.Thickness = SkeletonThickness
-							end
-
-							if RightLegLine.Transparency ~= SkeletonTransparency then
-								RightLegLine.Transparency = SkeletonTransparency
-							end
-
 							local From = Position1
 							if RightLegLine.From ~= From then
 								RightLegLine.From = From
@@ -4061,9 +3898,8 @@ RenderStepped(function(DeltaTime)
 end, true)
 
 local function RotatePoint(Point, Angle)
-    local Rad = math.rad(Angle)
-    local Cos = math.cos(Rad)
-    local Sin = math.sin(Rad)
+    local Cos = math.cos(Angle)
+    local Sin = math.sin(Angle)
 
 	local MouseLocationX = MouseLocation.X
 	local MouseLocationY = MouseLocation.Y
@@ -4089,17 +3925,17 @@ RenderStepped(function(DeltaTime)
         table.clear(DrawingLines)
 
         for _ = 1, 4 do
-            table.insert(DrawingLines, DrawingManager.new("Line", {
-                Visible = false,
-                Thickness = 1,
-                Color = CrosshairOverlay.Color,
-                Transparency = CrosshairOverlay.Transparency
+            table.insert(DrawingLines, CreateDrawing("Line", {
+                ["Visible"] = false,
+                ["Thickness"] = 1,
+                ["Color"] = CrosshairOverlay.Color,
+                ["Transparency"] = CrosshairOverlay.Transparency
             }))
         end
 
 		local Dot = Drawings.Dot
         if Dot then
-			Dot:Nil()
+			RemoveDrawing(Dot)
         end
     end
 
@@ -4107,11 +3943,11 @@ RenderStepped(function(DeltaTime)
 	local Dot = Drawings.Dot
     if not Dot or CrosshairOverlay.DotLastStyle ~= DotStyle then
         CrosshairOverlay.DotLastStyle = DotStyle
-        Drawings.Dot = DrawingManager.new(DotStyle, {
-            Visible = false,
-            Filled = true,
-            Color = CrosshairOverlay.DotColor,
-            Transparency = CrosshairOverlay.Transparency
+        Drawings.Dot = CreateDrawing(DotStyle, {
+            ["Visible"] = false,
+            ["Filled"] = true,
+            ["Color"] = CrosshairOverlay.DotColor,
+            ["Transparency"] = CrosshairOverlay.Transparency
         })
     end
 
@@ -4160,8 +3996,9 @@ RenderStepped(function(DeltaTime)
     end
 
     if CrosshairOverlayEnabled then
-        local CrosshairOverlayGap = CrosshairOverlay.Gap
-        local CrosshairOverlayLength = CrosshairOverlay.Length
+		local CrosshairOverlayGap = CrosshairOverlay.Gap
+		local CrosshairOverlayLength = CrosshairOverlay.Length
+		local CurrentRotationRad = math.rad(CurrentRotation)
 
         for Index = 1, 4 do
             local MainLine = DrawingLines[Index]
@@ -4172,7 +4009,7 @@ RenderStepped(function(DeltaTime)
 				end
                 continue
             end
-			
+
 			local Direction = CrosshairOverlay.BaseOffsets[Index]
 
 			local Color = CrosshairOverlay.Color
@@ -4190,12 +4027,12 @@ RenderStepped(function(DeltaTime)
 				MainLine.Transparency = Transparency
 			end
 
-			local From = RotatePoint(MouseLocation + (Direction * CrosshairOverlayGap), CurrentRotation)
+			local From = RotatePoint(MouseLocation + (Direction * CrosshairOverlayGap), CurrentRotationRad)
 			if MainLine.From ~= From then
 				MainLine.From = From
 			end
 
-			local To = RotatePoint(MouseLocation + (Direction * (CrosshairOverlayGap + CrosshairOverlayLength)), CurrentRotation)
+			local To = RotatePoint(MouseLocation + (Direction * (CrosshairOverlayGap + CrosshairOverlayLength)), CurrentRotationRad)
 			if MainLine.To ~= To then
 				MainLine.To = To
 			end
@@ -4283,34 +4120,34 @@ local function TriggerHitFunctions(PreviousHealth, Health, WorldPosition)
 		local Dot = nil
 
 		if Marker.CenterDot then
-			Dot = DrawingManager.new("Circle", {
-				NumSides = 24,
-				Filled = true,
-				Thickness = 2,
-				Color = Color,
-				Transparency = 1,
-				Visible = false
+			Dot = CreateDrawing("Circle", {
+				["NumSides"] = 24,
+				["Filled"] = true,
+				["Thickness"] = 2,
+				["Color"] = Color,
+				["Transparency"] = 1,
+				["Visible"] = false
 			})
 			Dot.Radius = 2 * Scale
 		end
 
 		if IsClassicX or IsBrokenX or IsPlus then
 			for _ = 1, 4 do
-				Lines[#Lines + 1] = DrawingManager.new("Line", {
-					Thickness = 2,
-					Color = Color,
-					Transparency = 1,
-					Visible = false
+				Lines[#Lines + 1] = CreateDrawing("Line", {
+					["Thickness"] = 2,
+					["Color"] = Color,
+					["Transparency"] = 1,
+					["Visible"] = false
 				})
 			end
 		elseif IsCircle then
-			Circle = DrawingManager.new("Circle", {
-				NumSides = 24,
-				Filled = false,
-				Thickness = 2,
-				Color = Color,
-				Transparency = 1,
-				Visible = false
+			Circle = CreateDrawing("Circle", {
+				["NumSides"] = 24,
+				["Filled"] = false,
+				["Thickness"] = 2,
+				["Color"] = Color,
+				["Transparency"] = 1,
+				["Visible"] = false
 			})
 			Circle.Radius = Size
 		end
@@ -4332,15 +4169,15 @@ local function TriggerHitFunctions(PreviousHealth, Health, WorldPosition)
 			local ElapsedTime = tick() - StartTime
 			if ElapsedTime >= Lifetime then
 				for _,Line in ipairs(Lines) do
-					Line:Nil()
+					RemoveDrawing(Line)
 				end
 
 				if Circle then
-					Circle:Nil()
+					RemoveDrawing(Circle)
 				end
 
 				if Dot then
-					Dot:Nil()
+					RemoveDrawing(Dot)
 				end
 
 				Connection:Disconnect()
@@ -6509,11 +6346,11 @@ Tabs.Movement:AddToggle("ForceThirdPerson", {
 				Connections.ForceThirdPerson:Disconnect()
 				Connections.ForceThirdPerson = nil
 			end
-			LocalPlayer.CameraMaxZoomDistance = OldCameraMaxZoomDistance
+			LocalPlayer.CameraMaxZoomDistance = Movement.OldCameraMaxZoomDistance
 			return
 		end
 
-		OldCameraMaxZoomDistance = LocalPlayer.CameraMaxZoomDistance
+		Movement.OldCameraMaxZoomDistance = LocalPlayer.CameraMaxZoomDistance
 		Connections.ForceThirdPerson = RenderStepped(function()
 			LocalPlayer.CameraMode = CameraModeClassic
 			LocalPlayer.CameraMaxZoomDistance = 9999
@@ -6848,22 +6685,16 @@ VisualsESPTab:AddButton({
 	Text = "Reset Cache",
 	Tooltip = "Click this if ESP is freezing/glitching.",
 	Func = function()
-		if cleardrawcache then
-			pcall(cleardrawcache)
-		end
-
-		local ClearFunction = Drawing.clear
-		if ClearFunction then
-			pcall(ClearFunction)
-		end
-
 		for _,DrawingObject in next, ESPObjects do
-			if typeof(DrawingObject) == "Instance" then
-				DrawingObject:Destroy()
-			else
-				DrawingObject:Nil()
-			end
+			pcall(function()
+				if typeof(DrawingObject) == "Instance" then
+					DrawingObject:Destroy()
+				else
+					DrawingObject:Remove()
+				end
+			end)
 		end
+		table.clear(ESPObjects)
 
 		for _,Player in ipairs(Players:GetPlayers()) do
 			if Player == LocalPlayer then
@@ -6894,6 +6725,12 @@ VisualsESPTab:AddLabel("Fill Color"):AddColorPicker("ChamFillColor", {
 	Callback = function(Color)
 		ChamESP.FillColor = Color
 		ChamESP.FillTransparency = Options["ChamFillColor"].Transparency
+
+        for Index = 1, #CachedPlayersList do
+            local Cham = CachedPlayersList[Index].ESP.Cham
+			Cham.FillColor = Color
+			Cham.FillTransparency = ChamESP.FillTransparency
+        end
 	end
 })
 VisualsESPTab:AddLabel("Outline Color"):AddColorPicker("ChamOutlineColor", {
@@ -6902,6 +6739,12 @@ VisualsESPTab:AddLabel("Outline Color"):AddColorPicker("ChamOutlineColor", {
 	Callback = function(Color)
 		ChamESP.OutlineColor = Color
 		ChamESP.OutlineTransparency = Options["ChamOutlineColor"].Transparency
+
+        for Index = 1, #CachedPlayersList do
+            local Cham = CachedPlayersList[Index].ESP.Cham
+			Cham.OutlineColor = Color
+			Cham.OutlineTransparency = ChamESP.OutlineTransparency
+        end
 	end
 })
 
@@ -6918,6 +6761,12 @@ VisualsESPTab:AddToggle("HeadDotESP", {
 	Callback = function(Color)
 		HeadDotESP.Color = Color
 		HeadDotESP.Transparency = 1 - Options["HeadDotColor"].Transparency
+
+        for Index = 1, #CachedPlayersList do
+            local HeadDot = CachedPlayersList[Index].ESP.HeadDot
+			HeadDot.Color = Color
+			HeadDot.Transparency = HeadDotESP.Transparency
+        end
 	end
 })
 VisualsESPTab:AddToggle("HeadDotFilled", {
@@ -6925,6 +6774,9 @@ VisualsESPTab:AddToggle("HeadDotFilled", {
 	Default = HeadDotESP.Filled,
 	Callback = function(State)
 		HeadDotESP.Filled = State
+        for Index = 1, #CachedPlayersList do
+			CachedPlayersList[Index].ESP.HeadDot.Filled = State
+        end
 	end
 })
 
@@ -6941,6 +6793,12 @@ VisualsESPTab:AddToggle("HeadTagESP", {
 	Callback = function(Color)
 		HeadTagESP.Color = Color
 		HeadTagESP.Transparency = 1 - Options["HeadTagColor"].Transparency
+
+        for Index = 1, #CachedPlayersList do
+            local HeadTag = CachedPlayersList[Index].ESP.HeadTag
+			HeadTag.Color = Color
+			HeadTag.Transparency = HeadTagESP.Transparency
+        end
 	end
 })
 VisualsESPTab:AddDropdown("HeadTagOptions", {
@@ -6974,6 +6832,12 @@ VisualsESPTab:AddToggle("TracerESP", {
 	Callback = function(Color)
 		TracerESP.Color = Color
 		TracerESP.Transparency = 1 - Options["TracerColor"].Transparency
+
+        for Index = 1, #CachedPlayersList do
+            local Tracer = CachedPlayersList[Index].ESP.Tracer
+			Tracer.Color = Color
+			Tracer.Transparency = TracerESP.Transparency
+        end
 	end
 })
 VisualsESPTab:AddDropdown("TracerType", {
@@ -6993,39 +6857,50 @@ VisualsESPTab:AddDropdown("TracerPart", {
 	end
 })
 
-VisualsESPTab:AddDivider("Arrow ESP")
-VisualsESPTab:AddToggle("ArrowESP", {
-	Text = "Enabled",
-	Default = ArrowESP.Enabled,
-	Callback = function(State)
-		ArrowESP.Enabled = State
-	end
-}):AddColorPicker("ArrowColor", {
-	Default = ArrowESP.Color,
-	Transparency = 0,
-	Callback = function(Color)
-		ArrowESP.Color = Color
-		ArrowESP.Transparency = 1 - Options["ArrowColor"].Transparency
-	end
-})
-VisualsESPTab:AddSlider("ArrowRadius", {
-	Text = "Radius",
-	Default = ArrowESP.Radius,
-	Min = 0,
-	Max = 360,
-	Rounding = 0,
-	Compact = false,
-	Callback = function(Value)
-		ArrowESP.Radius = Value
-	end
-})
-VisualsESPTab:AddToggle("ArrowFilled", {
-	Text = "Filled",
-	Default = ArrowESP.Filled,
-	Callback = function(Value)
-		ArrowESP.Filled = Value
-	end
-})
+if not IsXeno then
+	VisualsESPTab:AddDivider("Arrow ESP")
+	VisualsESPTab:AddToggle("ArrowESP", {
+		Text = "Enabled",
+		Default = ArrowESP.Enabled,
+		Callback = function(State)
+			ArrowESP.Enabled = State
+		end
+	}):AddColorPicker("ArrowColor", {
+		Default = ArrowESP.Color,
+		Transparency = 0,
+		Callback = function(Color)
+			ArrowESP.Color = Color
+			ArrowESP.Transparency = 1 - Options["ArrowColor"].Transparency
+
+			for Index = 1, #CachedPlayersList do
+				local Arrow = CachedPlayersList[Index].ESP.Arrow
+				Arrow.Color = Color
+				Arrow.Transparency = ArrowESP.Transparency
+			end
+		end
+	})
+	VisualsESPTab:AddSlider("ArrowRadius", {
+		Text = "Radius",
+		Default = ArrowESP.Radius,
+		Min = 0,
+		Max = 360,
+		Rounding = 0,
+		Compact = false,
+		Callback = function(Value)
+			ArrowESP.Radius = Value
+		end
+	})
+	VisualsESPTab:AddToggle("ArrowFilled", {
+		Text = "Filled",
+		Default = ArrowESP.Filled,
+		Callback = function(State)
+			ArrowESP.Filled = State
+			for Index = 1, #CachedPlayersList do
+				CachedPlayersList[Index].ESP.Arrow.Filled = State
+			end
+		end
+	})
+end
 
 VisualsESPTab:AddDivider("2D Box ESP")
 VisualsESPTab:AddToggle("2DBoxESP", {
@@ -7040,6 +6915,12 @@ VisualsESPTab:AddToggle("2DBoxESP", {
 	Callback = function(Color)
 		BoxESP.Box2D.Color = Color
 		BoxESP.Box2D.Transparency = 1 - Options["2DBoxColor"].Transparency
+
+        for Index = 1, #CachedPlayersList do
+            local Box2D = CachedPlayersList[Index].ESP.Box2D
+			Box2D.Color = Color
+			Box2D.Transparency = BoxESP.Box2D.Transparency
+        end
 	end
 })
 VisualsESPTab:AddToggle("2DBoxFilled", {
@@ -7047,6 +6928,9 @@ VisualsESPTab:AddToggle("2DBoxFilled", {
 	Default = BoxESP.Box2D.Filled,
 	Callback = function(State)
 		BoxESP.Box2D.Filled = State
+        for Index = 1, #CachedPlayersList do
+			CachedPlayersList[Index].ESP.Box2D.Filled = State
+        end
 	end
 })
 
@@ -7063,6 +6947,14 @@ VisualsESPTab:AddToggle("3DBoxESP", {
 	Callback = function(Color)
 		BoxESP.Box3D.Color = Color
 		BoxESP.Box3D.Transparency = 1 - Options["3DBoxColor"].Transparency
+
+		for Index = 1, #CachedPlayersList do
+			local Box3DLines = CachedPlayersList[Index].ESP.Box3D
+			for Index2 = 1, #Box3DLines do
+				Box3DLines[Index2].Color = Color
+				Box3DLines[Index2].Transparency = BoxESP.Box3D.Transparency
+			end
+		end
 	end
 })
 
@@ -7079,6 +6971,16 @@ VisualsESPTab:AddToggle("HealthBarESP", {
 	Callback = function(Color)
 		HealthBarESP.Color = Color
 		HealthBarESP.Transparency = 1 - Options["HealthBarColor"].Transparency
+
+        for Index = 1, #CachedPlayersList do
+            local ESP = CachedPlayersList[Index].ESP
+
+			local HealthBarOutline = ESP.HealthBarOutline
+			HealthBarOutline.Color = Color
+			HealthBarOutline.Transparency = HealthBarESP.Transparency
+
+			ESP.HealthBarFill.Transparency = HealthBarESP.Transparency
+        end
 	end
 })
 VisualsESPTab:AddSlider("HealthBarThickness", {
@@ -7090,6 +6992,11 @@ VisualsESPTab:AddSlider("HealthBarThickness", {
 	Compact = false,
 	Callback = function(Value)
 		HealthBarESP.Thickness = Value
+        for Index = 1, #CachedPlayersList do
+            local ESP = CachedPlayersList[Index].ESP
+			ESP.HealthBarOutline.Thickness = Value
+			ESP.HealthBarFill.Thickness = Value
+        end
 	end
 })
 
@@ -7106,6 +7013,31 @@ VisualsESPTab:AddToggle("SkeletonESP", {
 	Callback = function(Color)
 		SkeletonESP.Color = Color
 		SkeletonESP.Transparency = 1 - Options["SkeletonColor"].Transparency
+
+		for Index = 1, #CachedPlayersList do
+			local SkeletonLines = CachedPlayersList[Index].ESP.Skeleton
+			for Index2 = 1, #SkeletonLines do
+				SkeletonLines[Index2].Color = Color
+				SkeletonLines[Index2].Transparency = SkeletonESP.Transparency
+			end
+		end
+	end
+})
+VisualsESPTab:AddSlider("SkeletonThickness", {
+	Text = "Outline Thickness",
+	Default = SkeletonESP.Thickness,
+	Min = 1,
+	Max = 10,
+	Rounding = 0,
+	Compact = false,
+	Callback = function(Value)
+		SkeletonESP.Thickness = Value
+		for Index = 1, #CachedPlayersList do
+			local SkeletonLines = CachedPlayersList[Index].ESP.Skeleton
+			for Index2 = 1, #SkeletonLines do
+				SkeletonLines[Index2].Thickness = Value
+			end
+		end
 	end
 })
 
@@ -7121,7 +7053,7 @@ VisualsESPTab:AddSlider("ESPConfigurationDistanceCheck", {
 		ESPDistanceCheck = Value * Value
 	end
 })
-VisualsESPTab:AddToggle("ESPConfigurati onForceField", {
+VisualsESPTab:AddToggle("ESPConfigurationForceField", {
 	Text = "ForceField Check",
 	Default = ESPForceFieldCheck,
 	Callback = function(State)
@@ -7538,92 +7470,147 @@ local function ClearConnections(Table)
 	table.clear(Table)
 end
 
-local function Unload(Message)
-	Library.Unload()
-	Running = false
-
-	task.wait()
-
-	ClearConnections(Connections)
-	ThreadManager:Shutdown()
-
-	if CanUseVirtualInputManager then
-		VirtualInputManager:Destroy()
-	end
-
-	local AnimateInstance = LocalCharacter and LocalCharacter:FindFirstChild("Animate")
-	if AnimateInstance then
-		AnimateInstance.Disabled = false
-	end
-
-	Lighting.ExposureCompensation = World.OldExposureCompensation
-	Lighting.Ambient = World.OldAmbient
-
-	local LocalHighlight = CoreGui:FindFirstChild("ns__LocalHighlight")
-	if LocalHighlight then
-		LocalHighlight:Destroy()
-	end
-
-	if LocalCharacter and World.HasAppliedCharacterTransparency then
-		for _,Object in ipairs(LocalCharacter:GetDescendants()) do
-			if Object:IsA("BasePart") then
-				Object.Transparency = (Object.Name == "HumanoidRootPart") and 1 or 0
-			end
-		end
-	end
-
-	if CurrentFPS.Value ~= "Unknown" then
-		CurrentFPS:Disconnect()
-	end
-
-	if HitSounds.Folder and HitSounds.Folder.Parent then
-		HitSounds.Folder:Destroy()
-	end
-
-	if ChinaHat.ChinaHatTrail then
-		ChinaHat.ChinaHatTrail:Destroy()
-		ChinaHat.ChinaHatTrail = nil
-	end
-
-	if cleardrawcache then
-		pcall(cleardrawcache)
-	end
-
-	local ClearFunction = Drawing.clear
-	if ClearFunction then
-		pcall(ClearFunction)
-	end
-
-	for _,FOVCircle in next, AimbotFOVCircles do
-		FOVCircle:Nil()
-	end
-
-	for _,DrawingObject in next, ESPObjects do
-		if typeof(DrawingObject) == "Instance" then
-			DrawingObject:Destroy()
-		else
-			DrawingObject:Nil()
-		end
-	end
-
-	for _,Player in ipairs(Players:GetPlayers()) do
-		ClearCache(Player)
-	end
-
-	print(Message)
-end
-
 SettingsTab:AddButton({
 	Text = "Reload Script",
 	Func = function()
-		Unload([[ // Reloading combat.cc || Made by nikoleto scripts - github.com/nikoladhima \\ --]])
+		Library.Unload()
+		Running = false
+
+		task.wait()
+
+		ClearConnections(Connections)
+		ThreadManager:Shutdown()
+
+		if CanUseVirtualInputManager then
+			VirtualInputManager:Destroy()
+		end
+
+		local AnimateInstance = LocalCharacter and LocalCharacter:FindFirstChild("Animate")
+		if AnimateInstance then
+			AnimateInstance.Disabled = false
+		end
+
+		Lighting.ExposureCompensation = World.OldExposureCompensation
+		Lighting.Ambient = World.OldAmbient
+
+		local LocalHighlight = CoreGui:FindFirstChild("ns__LocalHighlight")
+		if LocalHighlight then
+			LocalHighlight:Destroy()
+		end
+
+		if LocalCharacter and World.HasAppliedCharacterTransparency then
+			for _,Object in ipairs(LocalCharacter:GetDescendants()) do
+				if Object:IsA("BasePart") then
+					Object.Transparency = (Object.Name == "HumanoidRootPart") and 1 or 0
+				end
+			end
+		end
+
+		if CurrentFPS.Value ~= "Unknown" then
+			CurrentFPS:Disconnect()
+		end
+
+		if HitSounds.Folder and HitSounds.Folder.Parent then
+			HitSounds.Folder:Destroy()
+		end
+
+		if ChinaHat.ChinaHatTrail then
+			ChinaHat.ChinaHatTrail:Destroy()
+			ChinaHat.ChinaHatTrail = nil
+		end
+
+		for _,FOVCircle in next, AimbotFOVCircles do
+			FOVCircle:Remove()
+		end
+
+		for _,DrawingObject in next, ESPObjects do
+			pcall(function()
+				if typeof(DrawingObject) == "Instance" then
+					DrawingObject:Destroy()
+				else
+					DrawingObject:Remove()
+				end
+			end)
+		end
+		table.clear(ESPObjects)
+
+		for _,Player in ipairs(Players:GetPlayers()) do
+			ClearCache(Player)
+		end
+
+		print([[ // Reloading combat.cc || Made by nikoleto scripts - github.com/nikoladhima \\ --]])
 		nsloadstring(true, "combat.cc.lua")
 	end
 })
 SettingsTab:AddButton({
 	Text = "Unload Script",
 	Func = function()
-		Unload([[ // Unloaded combat.cc || Made by nikoleto scripts - github.com/nikoladhima \\ --]])
+		Library.Unload()
+		Running = false
+
+		task.wait()
+
+		ClearConnections(Connections)
+		ThreadManager:Shutdown()
+
+		if CanUseVirtualInputManager then
+			VirtualInputManager:Destroy()
+		end
+
+		local AnimateInstance = LocalCharacter and LocalCharacter:FindFirstChild("Animate")
+		if AnimateInstance then
+			AnimateInstance.Disabled = false
+		end
+
+		Lighting.ExposureCompensation = World.OldExposureCompensation
+		Lighting.Ambient = World.OldAmbient
+
+		local LocalHighlight = CoreGui:FindFirstChild("ns__LocalHighlight")
+		if LocalHighlight then
+			LocalHighlight:Destroy()
+		end
+
+		if LocalCharacter and World.HasAppliedCharacterTransparency then
+			for _,Object in ipairs(LocalCharacter:GetDescendants()) do
+				if Object:IsA("BasePart") then
+					Object.Transparency = (Object.Name == "HumanoidRootPart") and 1 or 0
+				end
+			end
+		end
+
+		if CurrentFPS.Value ~= "Unknown" then
+			CurrentFPS:Disconnect()
+		end
+
+		if HitSounds.Folder and HitSounds.Folder.Parent then
+			HitSounds.Folder:Destroy()
+		end
+
+		if ChinaHat.ChinaHatTrail then
+			ChinaHat.ChinaHatTrail:Destroy()
+			ChinaHat.ChinaHatTrail = nil
+		end
+
+		for _,FOVCircle in next, AimbotFOVCircles do
+			FOVCircle:Remove()
+		end
+
+		for _,DrawingObject in next, ESPObjects do
+			pcall(function()
+				if typeof(DrawingObject) == "Instance" then
+					DrawingObject:Destroy()
+				else
+					DrawingObject:Remove()
+				end
+			end)
+		end
+		table.clear(ESPObjects)
+
+		for _,Player in ipairs(Players:GetPlayers()) do
+			ClearCache(Player)
+		end
+
+		print([[ // Unloaded combat.cc || Made by nikoleto scripts - github.com/nikoladhima \\ --]])
 	end
 })
 
@@ -8722,9 +8709,13 @@ task.spawn(function()
 						Flick.HitboxExtender = nil
 					end
 
-					for _,Cache in next, CachedPlayers do
-						local Character = Cache.Character
-						local Part = Character and Character:FindFirstChild("Crit")
+					for Index = 1, #CachedPlayersList do
+						local Character = CachedPlayersList[Index].Character
+						if not Character then
+							return
+						end
+
+						local Part = Character:FindFirstChild("Crit")
 						if Part then
 							Part.Size = Vector3CritSize
 						end
@@ -8734,17 +8725,23 @@ task.spawn(function()
 				end
 
 				Flick.HitboxExtender = Heartbeat(function()
-					for _,Cache in next, CachedPlayers do
-						local Character = Cache.Character
-
+					for Index = 1, #CachedPlayersList do
+						local Character = CachedPlayersList[Index].Character
 						if not Character then
 							return
 						end
 
 						local Part = Character:FindFirstChild("Crit")
 						if Part then
-							SetTransparency(Part, ShowHitbox and 0.5 or 1)
-							SetSize(Part, Vector3.one * HitboxSize)
+							local Transparency = ShowHitbox and 0.5 or 1
+							if Part.Transparency ~= Transparency then
+								Part.Transparency = Transparency
+							end
+  
+							local Size = Vector3.one * HitboxSize
+							if Part.Size ~= Size then
+								Part.Size = Size
+							end
 						end
 					end
 				end, false)
@@ -8773,10 +8770,13 @@ task.spawn(function()
 			repeat task.wait() until Running == false
 			ClearConnections(Flick)
 
-			for _,Cache in next, CachedPlayers do
-				local Character = Cache.Character
-				local Part = Character and Character:FindFirstChild("Crit")
+			for Index = 1, #CachedPlayersList do
+				local Character = CachedPlayersList[Index].Character
+				if not Character then
+					return
+				end
 
+				local Part = Character:FindFirstChild("Crit")
 				if Part then
 					Part.Size = Vector3CritSize
 					Part.Transparency = 1
@@ -8811,10 +8811,18 @@ task.spawn(function()
 					if IsEnemy(Player) then
 						local Root = Cache.Root
 						if Root then
-							SetSize(Root, Vector3.one * HitboxSize)
-							SetTransparency(Root, ShowHitbox and 0.5 or 1)
+							local Transparency = ShowHitbox and 0.5 or 1
+							if Root.Transparency ~= Transparency then
+								Root.Transparency = Transparency
+							end
+
 							if Root.CanCollide ~= false then
 								Root.CanCollide = false
+							end
+
+							local Size = Vector3.one * HitboxSize
+							if Root.Size ~= Size then
+								Root.Size = Size
 							end
 						end
 					else
@@ -8829,8 +8837,8 @@ task.spawn(function()
 			Default = false,
 			Callback = function(State)
 				if not State then
-					for _,Cache in next, CachedPlayers do
-						ResetHitbox(Cache.Root)
+					for Index = 1, #CachedPlayersList do
+						ResetHitbox(CachedPlayersList[Index].Root)
 					end
 					return
 				end
@@ -8932,8 +8940,8 @@ task.spawn(function()
 			repeat task.wait() until Running == false
 			ClearConnections(QuickShot)
 
-			for _,Cache in next, CachedPlayers do
-				ResetHitbox(Cache.Root)
+			for Index = 1, #CachedPlayersList do
+				ResetHitbox(CachedPlayersList[Index].Root)
 			end
 		end)
 	elseif Games.IsWarTycoon then
@@ -8995,8 +9003,8 @@ task.spawn(function()
 				SilentAimbot.Toggled = Value
 				if not Value and SilentAimbot.Enabled then
 					SilentAimbotLabel:SetText("Silent Aimbot: Disabled")
-					for _,Cache in next, CachedPlayers do
-						ResetHitbox(Cache.Root)
+					for Index = 1, #CachedPlayersList do
+						ResetHitbox(CachedPlayersList[Index].Root)
 					end
 				end
 			end
@@ -9012,8 +9020,8 @@ task.spawn(function()
 
 				if not State then
 					SilentAimbotLabel:SetText("Silent Aimbot: Disabled")
-					for _,Cache in next, CachedPlayers do
-						ResetHitbox(Cache.Root)
+					for Index = 1, #CachedPlayersList do
+						ResetHitbox(CachedPlayersList[Index].Root)
 					end
 					return
 				end
@@ -9707,7 +9715,9 @@ task.spawn(function()
 						return
 					end
 
-					for _,Cache in next, CachedPlayers do
+					for Index = 1, #CachedPlayersList do
+						local Cache = CachedPlayersList[Index]
+
 						if IsProtected(Cache) then
 							continue
 						end
@@ -9922,8 +9932,8 @@ game:GetService("Players").LocalPlayer.Character:WaitForChild("Drone EMP"):WaitF
 				LocalRoot.CFrame = LoopKillOldCFrame
 			end
 
-			for _,Cache in next, CachedPlayers do
-				ResetHitbox(Cache.Root)
+			for Index = 1, #CachedPlayersList do
+				ResetHitbox(CachedPlayersList[Index].Root)
 			end
 		end)
 	elseif Games.IsAimblox then
@@ -10284,13 +10294,13 @@ Library:Toggle(true)
 
 if (
 	not listfiles.IsWaxxed and not isfile.IsWaxxed and
-	not Environment.makefolder.IsWaxxed and not Environment.isfolder.IsWaxxed and
-	not readfile.IsWaxxed and not writefile.IsWaxxed and not Environment.delfile.IsWaxxed
+	not makefolder.IsWaxxed and not isfolder.IsWaxxed and
+	not readfile.IsWaxxed and not writefile.IsWaxxed and not delfile.IsWaxxed
 ) then
 	Aimbot.ThemeManager = Module:GetThemeManager({
 		HttpService,
-		listfiles, isfile, readfile, writefile, Environment.delfile,
-		Environment.isfolder, Environment.makefolder
+		listfiles, isfile, readfile, writefile, delfile,
+		isfolder, makefolder
 	})
 	if Aimbot.ThemeManager then
 		Aimbot.ThemeManager:SetLibrary(Library)
@@ -10303,8 +10313,8 @@ if (
 
 	Aimbot.ns__SaveManager = Module:GetSaveManager({
 		nsclonefunction, HttpService,
-		listfiles, isfile, readfile, writefile, Environment.delfile,
-		Environment.isfolder, Environment.makefolder
+		listfiles, isfile, readfile, writefile, delfile,
+		isfolder, makefolder
 	})
 	if Aimbot.ns__SaveManager then
 		Aimbot.ns__SaveManager:SetLibrary(Library)
@@ -10323,7 +10333,7 @@ if (
 
 		local function ValidateMP3AndConfigFiles(Path)
 			for _,File in listfiles(Path) do
-				if Environment.isfolder(File) then
+				if isfolder(File) then
 					ValidateMP3AndConfigFiles(File)
 				elseif isfile(File) then
 					local CorrectedPath = File:lower():gsub("\\","/")
@@ -10341,7 +10351,7 @@ if (
 								readfile(File)
 							)
 
-							Environment.delfile(File)						
+							delfile(File)						
 						end
 					end
 

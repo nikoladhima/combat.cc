@@ -176,7 +176,8 @@ local Library = {
     Notifications = {},
 
     ToggleKeybind = Enum.KeyCode.RightShift,
-    TweenInfo = TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+    TabTweenInfo = TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+    TweenInfo = TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
     NotifyTweenInfo = TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
 
     Toggled = false,
@@ -6804,11 +6805,11 @@ function Library:CreateWindow(WindowInfo)
                 return
             end
 
-            TweenService:Create(TabLabel, Library.TweenInfo, {
+            TweenService:Create(TabLabel, Library.TabTweenInfo, {
                 TextTransparency = Hovering and 0.25 or 0.5,
             }):Play()
             if TabIcon then
-                TweenService:Create(TabIcon, Library.TweenInfo, {
+                TweenService:Create(TabIcon, Library.TabTweenInfo, {
                     ImageTransparency = Hovering and 0.25 or 0.5,
                 }):Play()
             end
@@ -6819,14 +6820,14 @@ function Library:CreateWindow(WindowInfo)
                 Library.ActiveTab:Hide()
             end
 
-            TweenService:Create(TabButton, Library.TweenInfo, {
+            TweenService:Create(TabButton, Library.TabTweenInfo, {
                 BackgroundTransparency = 0,
             }):Play()
-            TweenService:Create(TabLabel, Library.TweenInfo, {
+            TweenService:Create(TabLabel, Library.TabTweenInfo, {
                 TextTransparency = 0,
             }):Play()
             if TabIcon then
-                TweenService:Create(TabIcon, Library.TweenInfo, {
+                TweenService:Create(TabIcon, Library.TabTweenInfo, {
                     ImageTransparency = 0,
                 }):Play()
             end
@@ -6846,14 +6847,14 @@ function Library:CreateWindow(WindowInfo)
         end
 
         function Tab:Hide()
-            TweenService:Create(TabButton, Library.TweenInfo, {
+            TweenService:Create(TabButton, Library.TabTweenInfo, {
                 BackgroundTransparency = 1,
             }):Play()
-            TweenService:Create(TabLabel, Library.TweenInfo, {
+            TweenService:Create(TabLabel, Library.TabTweenInfo, {
                 TextTransparency = 0.5,
             }):Play()
             if TabIcon then
-                TweenService:Create(TabIcon, Library.TweenInfo, {
+                TweenService:Create(TabIcon, Library.TabTweenInfo, {
                     ImageTransparency = 0.5,
                 }):Play()
             end
@@ -7041,11 +7042,11 @@ function Library:CreateWindow(WindowInfo)
                 return
             end
 
-            TweenService:Create(TabLabel, Library.TweenInfo, {
+            TweenService:Create(TabLabel, Library.TabTweenInfo, {
                 TextTransparency = Hovering and 0.25 or 0.5,
             }):Play()
             if TabIcon then
-                TweenService:Create(TabIcon, Library.TweenInfo, {
+                TweenService:Create(TabIcon, Library.TabTweenInfo, {
                     ImageTransparency = Hovering and 0.25 or 0.5,
                 }):Play()
             end
@@ -7056,14 +7057,14 @@ function Library:CreateWindow(WindowInfo)
                 Library.ActiveTab:Hide()
             end
 
-            TweenService:Create(TabButton, Library.TweenInfo, {
+            TweenService:Create(TabButton, Library.TabTweenInfo, {
                 BackgroundTransparency = 0,
             }):Play()
-            TweenService:Create(TabLabel, Library.TweenInfo, {
+            TweenService:Create(TabLabel, Library.TabTweenInfo, {
                 TextTransparency = 0,
             }):Play()
             if TabIcon then
-                TweenService:Create(TabIcon, Library.TweenInfo, {
+                TweenService:Create(TabIcon, Library.TabTweenInfo, {
                     ImageTransparency = 0,
                 }):Play()
             end
@@ -7083,14 +7084,14 @@ function Library:CreateWindow(WindowInfo)
         end
 
         function Tab:Hide()
-            TweenService:Create(TabButton, Library.TweenInfo, {
+            TweenService:Create(TabButton, Library.TabTweenInfo, {
                 BackgroundTransparency = 1,
             }):Play()
-            TweenService:Create(TabLabel, Library.TweenInfo, {
+            TweenService:Create(TabLabel, Library.TabTweenInfo, {
                 TextTransparency = 0.5,
             }):Play()
             if TabIcon then
-                TweenService:Create(TabIcon, Library.TweenInfo, {
+                TweenService:Create(TabIcon, Library.TabTweenInfo, {
                     ImageTransparency = 0.5,
                 }):Play()
             end

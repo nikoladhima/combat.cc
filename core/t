@@ -2744,16 +2744,16 @@ do
                 TransparencyColor.BackgroundColor3 = ColorPicker.Value
             end
 
-            TweenService:Create(SatVibCursor, Library.SliderTweenInfo, {
+            TweenService:Create(SatVibCursor, Library.BaseTweenInfo, {
                 Position = UDim2.fromScale(ColorPicker.Sat, 1 - ColorPicker.Vib)
             }):Play()
 
-            TweenService:Create(HueCursor, Library.SliderTweenInfo, {
+            TweenService:Create(HueCursor, Library.BaseTweenInfo, {
                 Position = UDim2.fromScale(0.5, ColorPicker.Hue)
             }):Play()
 
             if TransparencyCursor then
-                TweenService:Create(TransparencyCursor, Library.SliderTweenInfo, {
+                TweenService:Create(TransparencyCursor, Library.BaseTweenInfo, {
                     Position = UDim2.fromScale(0.5, ColorPicker.Transparency)
                 }):Play()
             end

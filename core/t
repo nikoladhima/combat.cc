@@ -176,8 +176,10 @@ local Library = {
     Notifications = {},
 
     ToggleKeybind = Enum.KeyCode.RightShift,
+
+    BaseTweenInfo = TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
     TabTweenInfo = TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-    TweenInfo = TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+    SliderTweenInfo = TweenInfo.new(0.05, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
     NotifyTweenInfo = TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
 
     Toggled = false,
@@ -3158,7 +3160,7 @@ do
                     return
                 end
 
-                Button.Tween = TweenService:Create(Button.Base, Library.TweenInfo, {
+                Button.Tween = TweenService:Create(Button.Base, Library.TabTweenInfo, {
                     TextTransparency = 0,
                 })
                 Button.Tween:Play()
@@ -3168,7 +3170,7 @@ do
                     return
                 end
 
-                Button.Tween = TweenService:Create(Button.Base, Library.TweenInfo, {
+                Button.Tween = TweenService:Create(Button.Base, Library.TabTweenInfo, {
                     TextTransparency = 0.4,
                 })
                 Button.Tween:Play()
@@ -3456,10 +3458,10 @@ do
                 return
             end
 
-            TweenService:Create(Label, Library.TweenInfo, {
+            TweenService:Create(Label, Library.BaseTweenInfo, {
                 TextTransparency = Toggle.Value and 0 or 0.4,
             }):Play()
-            TweenService:Create(CheckImage, Library.TweenInfo, {
+            TweenService:Create(CheckImage, Library.BaseTweenInfo, {
                 ImageTransparency = Toggle.Value and 0 or 1,
             }):Play()
 
@@ -3677,10 +3679,10 @@ do
                 return
             end
 
-            TweenService:Create(Label, Library.TweenInfo, {
+            TweenService:Create(Label, Library.BaseTweenInfo, {
                 TextTransparency = Toggle.Value and 0 or 0.4,
             }):Play()
-            TweenService:Create(Ball, Library.TweenInfo, {
+            TweenService:Create(Ball, Library.BaseTweenInfo, {
                 AnchorPoint = Vector2.new(Offset, 0),
                 Position = UDim2.fromScale(Offset, 0),
             }):Play()
@@ -4072,7 +4074,7 @@ do
             end
 
             local X = (Slider.Value - Slider.Min) / (Slider.Max - Slider.Min)
-            TweenService:Create(Fill, Library.TweenInfo, {
+            TweenService:Create(Fill, Library.SliderTweenInfo, {
                 Size = UDim2.fromScale(X, 1)
             }):Play()
         end

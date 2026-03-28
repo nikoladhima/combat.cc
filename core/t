@@ -5871,7 +5871,7 @@ function Library:CreateWindow(WindowInfo)
         )
         WindowTitle = New("TextLabel", {
             BackgroundTransparency = 1,
-            Size = UDim2.new(0, Xq, 1, 0),
+            Size = UDim2.new(0, X, 1, 0),
             Text = WindowInfo.Title,
             TextSize = 20,
             Parent = TitleHolder,

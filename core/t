@@ -18,7 +18,7 @@ local Environment = Helper[10]
 
 local setclipboard = Helper[11]
 
-local gethui = Helper[12]
+local gethui = Helper[12]()
 
 local nsgetcustomasset = Helper[13]
 
@@ -179,7 +179,7 @@ local Library = {
 
     BaseTweenInfo = TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
     TabTweenInfo = TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-    SliderTweenInfo = TweenInfo.new(0.05, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+    SliderTweenInfo = TweenInfo.new(0.025, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
     NotifyTweenInfo = TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
 
     Toggled = false,
@@ -1087,7 +1087,7 @@ end
 local ScreenGui = New("ScreenGui", {
     Name = "Obsidian",
     DisplayOrder = 999,
-    ResetOnSpawn = false,
+    ResetOnSpawn = false
 })
 ParentUI(ScreenGui)
 Library.ScreenGui = ScreenGui

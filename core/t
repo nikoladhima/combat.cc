@@ -3,36 +3,32 @@ if not Helper or type(Helper) ~= "table" then
     return nil
 end
 
-local GetService: ServiceProvider = Helper[3]
+local GetService = Helper[1]
 
-local CoreGui: CoreGui = Helper[4]
-local Players: Players = Helper[5]
-local RunService: RunService = Helper[6]
-local SoundService: SoundService = GetService("SoundService")
-local UserInputService: UserInputService = Helper[7]
-local TextService: TextService = GetService("TextService")
-local Teams: Teams = Helper[8]
-local TweenService: TweenService = GetService("TweenService")
+local CoreGui = Helper[2]
+local Players = Helper[3]
+local RunService = Helper[4]
+local SoundService = Helper[5]
+local UserInputService = Helper[6]
+local TextService = Helper[7]
+local Teams = Helper[8]
+local TweenService = Helper[9]
 
-local Environment = Helper[9] or shared
+local Environment = Helper[10]
 
-local setclipboard = Helper[12]
+local setclipboard = Helper[11]
 
-local gethui = Helper[10]
+local gethui = Helper[12]
 
-local getcustomassetFunction = Helper[11]
-local function nsgetcustomasset(File: string): string?
-	local Success, Result = pcall(getcustomassetFunction, File)
-	return Success and Result or nil
-end
+local nsgetcustomasset = Helper[13]
 
-local Create = Helper[1]
+local Create = Helper[14]
 
-local LocalPlayer = Helper[13]
-local Mouse = Helper[14]
+local LocalPlayer = Helper[15]
+local Mouse = Helper[16]
 
-local isfolder, makefolder = Helper[15], Helper[16]
-local isfile, writefile = Helper[17], Helper[18]
+local isfolder, makefolder = Helper[17], Helper[18]
+local isfile, writefile = Helper[19], Helper[20]
 
 local Labels = {}
 local Buttons = {}
@@ -299,7 +295,7 @@ local Templates = {
         Center = true,
         Resizable = true,
         SearchbarSize = UDim2.fromScale(1, 1),
-        GlobalSearch = false,
+        GlobalSearch = true,
         CornerRadius = 4,
         NotifySide = "Right",
         Font = Enum.Font.Code,
@@ -309,7 +305,7 @@ local Templates = {
         EnableSidebarResize = false,
         EnableCompacting = true,
         DisableCompactingSnap = false,
-        SidebarCompacted = false,
+        SidebarCompacted = true,
         MinContainerWidth = 256,
 
         --// Snapping \\--
@@ -5760,12 +5756,6 @@ end
 function Library:CreateWindow(WindowInfo)
     WindowInfo = Library:Validate(WindowInfo, Templates.Window)
     local ViewportSize: Vector2 = workspace.CurrentCamera.ViewportSize
-    if RunService:IsStudio() and ViewportSize.X <= 5 and ViewportSize.Y <= 5 then
-        repeat
-            ViewportSize = workspace.CurrentCamera.ViewportSize
-            task.wait()
-        until ViewportSize.X > 5 and ViewportSize.Y > 5
-    end
 
     local MaxX = ViewportSize.X - 64
     local MaxY = ViewportSize.Y - 64

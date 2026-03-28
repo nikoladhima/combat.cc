@@ -2744,10 +2744,18 @@ do
                 TransparencyColor.BackgroundColor3 = ColorPicker.Value
             end
 
-            SatVibCursor.Position = UDim2.fromScale(ColorPicker.Sat, 1 - ColorPicker.Vib)
-            HueCursor.Position = UDim2.fromScale(0.5, ColorPicker.Hue)
+            TweenService:Create(SatVibCursor, Library.SliderTweenInfo, {
+                Position = UDim2.fromScale(ColorPicker.Sat, 1 - ColorPicker.Vib)
+            }):Play()
+
+            TweenService:Create(HueCursor, Library.SliderTweenInfo, {
+                Position = UDim2.fromScale(0.5, ColorPicker.Hue)
+            }):Play()
+
             if TransparencyCursor then
-                TransparencyCursor.Position = UDim2.fromScale(0.5, ColorPicker.Transparency)
+                TweenService:Create(TransparencyCursor, Library.SliderTweenInfo, {
+                    Position = UDim2.fromScale(0.5, ColorPicker.Transparency)
+                }):Play()
             end
 
             HueBox.Text = "#" .. ColorPicker.Value:ToHex()

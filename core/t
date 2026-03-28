@@ -2167,7 +2167,9 @@ do
                 ToggleLabel.AbsoluteSize.X
             )
             Picker.Text = PickerText or KeyPicker.DisplayValue
-            Picker.Size = UDim2.fromOffset((X + 9), (Y + 4))
+            TweenService:Create(Picker, Library.BaseTweenInfo, {
+                Size = UDim2.fromOffset((X + 9), (Y + 4))
+            }):Play()
         end
 
         function KeyPicker:Update()

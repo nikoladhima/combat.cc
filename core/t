@@ -1,59 +1,38 @@
-local clonefunctionFunction = clonefunction or clone_function or copyfunction or copy_function
-local nsclonefunction = function(Function)
-	if not clonefunctionFunction then
-		return Function
-	end
-
-	local Success, Result = pcall(clonefunctionFunction, Function)
-	return Success and Result or Function
+local Helper = (...)
+if not Helper or type(Helper) ~= "table" then
+    return nil
 end
 
-local clonerefFunction = cloneref or clone_ref or clonereference or clone_reference
-local nscloneref = function(Object: Instance)
-	if not clonerefFunction then
-		return Object
-	end
+local GetService: ServiceProvider = Helper[3]
 
-	local Success, Result = pcall(clonerefFunction, Object)
-	return Success and Result or Object
-end
-
-local GetServiceFunction = nsclonefunction(game.GetService)
-local function GetService(ServiceName)
-	return nscloneref(GetServiceFunction(game, ServiceName))
-end
-
-local CoreGui: CoreGui = GetService("CoreGui")
-local Players: Players = GetService("Players")
-local RunService: RunService = GetService("RunService")
+local CoreGui: CoreGui = Helper[4]
+local Players: Players = Helper[5]
+local RunService: RunService = Helper[6]
 local SoundService: SoundService = GetService("SoundService")
-local UserInputService: UserInputService = GetService("UserInputService")
+local UserInputService: UserInputService = Helper[7]
 local TextService: TextService = GetService("TextService")
-local Teams: Teams = GetService("Teams")
+local Teams: Teams = Helper[8]
 local TweenService: TweenService = GetService("TweenService")
 
-local getgenv = getgenv or get_genv or function()
-    return shared
-end
-local setclipboard = setclipboard or set_clipboard or writeclipboard or write_clipboard
-local protectgui = protectgui or protect_gui or (syn and syn.protect_gui) or function() end
-local gethui = gethui or get_hui or gethiddenui or get_hiddenui or get_hidden_ui or function()
-    return CoreGui
-end
+local Environment = Helper[9] or shared
 
-local getcustomassetFunction = getcustomasset or get_custom_asset
-local function nsgetcustomasset(File)
+local setclipboard = Helper[12]
+
+local gethui = Helper[10]
+
+local getcustomassetFunction = Helper[11]
+local function nsgetcustomasset(File: string): string?
 	local Success, Result = pcall(getcustomassetFunction, File)
-	return Success and Result or ""
+	return Success and Result or nil
 end
 
-local CreateInstance = nsclonefunction(Instance.new)
-local function Create(Type)
-	return nscloneref(CreateInstance(Type))
-end
+local Create = Helper[1]
 
-local LocalPlayer = Players.LocalPlayer or Players.PlayerAdded:Wait()
-local Mouse = nscloneref(LocalPlayer:GetMouse())
+local LocalPlayer = Helper[13]
+local Mouse = Helper[14]
+
+local isfolder, makefolder = Helper[15], Helper[16]
+local isfile, writefile = Helper[17], Helper[18]
 
 local Labels = {}
 local Buttons = {}
@@ -140,9 +119,9 @@ do
         local AssetID = string.format("rbxassetid://%s", AssetData.RobloxId)
 
         if getcustomassetFunction then
-            local Success, NewID = pcall(nsgetcustomasset, AssetData.Path)
+            local NewID = nsgetcustomasset(AssetData.Path)
 
-            if Success and NewID then
+            if NewID then
                 AssetID = NewID
             end
         end
@@ -1136,7 +1115,6 @@ local function ParentUI(UI: Instance, SkipHiddenUI: boolean?)
         return
     end
 
-    pcall(protectgui, UI)
     SafeParentUI(UI, gethui)
 end
 
@@ -1215,12 +1193,13 @@ function Library:GetKeyString(KeyCode: Enum.KeyCode)
 end
 
 function Library:GetTextBounds(Text: string, Font: Font, Size: number, Width: number?): (number, number)
-    local Params = Create("GetTextBoundsParams")
-    Params.Text = Text
-    Params.RichText = true
-    Params.Font = Font
-    Params.Size = Size
-    Params.Width = Width or workspace.CurrentCamera.ViewportSize.X - 32
+    local Params = Create("GetTextBoundsParams", {
+        Text = Text,
+        RichText = true,
+        Font = Font,
+        Size = Size,
+        Width = Width or workspace.CurrentCamera.ViewportSize.X - 32
+    })
 
     local Bounds = TextService:GetTextBoundsAsync(Params)
     return Bounds.X, Bounds.Y
@@ -1861,7 +1840,7 @@ function Library:Unload()
     Library.Unloaded = true
     ScreenGui:Destroy()
 
-    getgenv().Library = nil
+    Environment.Library = nil
 end
 
 local CheckIcon = Library:GetIcon("check")
@@ -1874,7 +1853,6 @@ function Library:SetIconModule(module: IconModule)
     FetchIcons = true
     Icons = module
 
-    -- Top ten fixes 🚀
     CheckIcon = Library:GetIcon("check")
     ArrowIcon = Library:GetIcon("chevron-up")
     ResizeIcon = Library:GetIcon("move-diagonal-2")
@@ -2963,7 +2941,7 @@ do
                 Parent = Holder,
             })
 
-            local X, _ = Library:GetTextBounds(Text, TextLabel.FontFace, TextLabel.TextSize, TextLabel.AbsoluteSize.X)
+            local X,_ = Library:GetTextBounds(Text, TextLabel.FontFace, TextLabel.TextSize, TextLabel.AbsoluteSize.X)
             local SizeX = X // 2 + 10
 
             New("Frame", {
@@ -4725,7 +4703,9 @@ do
 
         local Viewport = {
             Object = ViewportObject,
-            Camera = if not Info.Camera then Create("Camera") else Info.Camera,
+            Camera = if not Info.Camera then
+                Create("Camera")
+            else Info.Camera,
             Interactive = Info.Interactive,
             AutoFocus = Info.AutoFocus,
             Visible = Info.Visible,
@@ -7432,5 +7412,5 @@ Library:GiveSignal(Players.PlayerRemoving:Connect(OnPlayerChange))
 Library:GiveSignal(Teams.ChildAdded:Connect(OnTeamChange))
 Library:GiveSignal(Teams.ChildRemoved:Connect(OnTeamChange))
 
-getgenv().Library = Library
+Environment.Library = Library
 return Library

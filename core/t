@@ -161,7 +161,7 @@ local Library = {
 
     SearchText = "",
     Searching = false,
-    GlobalSearch = false,
+    GlobalSearch = true,
     LastSearchTab = nil,
 
     ActiveTab = nil,
@@ -511,14 +511,12 @@ local function Round(Value, Rounding)
     return tonumber(string.format("%." .. Rounding .. "f", Value))
 end
 
-local function GetPlayers(ExcludeLocalPlayer: boolean?)
+local function GetPlayers()
     local PlayerList = Players:GetPlayers()
 
-    if ExcludeLocalPlayer then
-        local Idx = table.find(PlayerList, LocalPlayer)
-        if Idx then
-            table.remove(PlayerList, Idx)
-        end
+    local Idx = table.find(PlayerList, LocalPlayer)
+    if Idx then
+        table.remove(PlayerList, Idx)
     end
 
     table.sort(PlayerList, function(Player1, Player2)
@@ -4209,7 +4207,7 @@ do
         local Container = Groupbox.Container
 
         if Info.SpecialType == "Player" then
-            Info.Values = GetPlayers(Info.ExcludeLocalPlayer)
+            Info.Values = GetPlayers()
             Info.AllowNull = true
         elseif Info.SpecialType == "Team" then
             Info.Values = GetTeams()
@@ -5873,7 +5871,7 @@ function Library:CreateWindow(WindowInfo)
         )
         WindowTitle = New("TextLabel", {
             BackgroundTransparency = 1,
-            Size = UDim2.new(0, X, 1, 0),
+            Size = UDim2.new(0, Xq, 1, 0),
             Text = WindowInfo.Title,
             TextSize = 20,
             Parent = TitleHolder,
@@ -7185,10 +7183,9 @@ local function OnPlayerChange()
         return
     end
 
-    local PlayerList, ExcludedPlayerList = GetPlayers(), GetPlayers(true)
     for _, Dropdown in Options do
         if Dropdown.Type == "Dropdown" and Dropdown.SpecialType == "Player" then
-            Dropdown:SetValues(Dropdown.ExcludeLocalPlayer and ExcludedPlayerList or PlayerList)
+            Dropdown:SetValues(GetPlayers())
         end
     end
 end

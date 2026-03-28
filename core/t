@@ -287,12 +287,10 @@ local Templates = {
         MobileButtonsSide = "Left",
 
         EnableSidebarResize = false,
-        EnableCompacting = true,
-        DisableCompactingSnap = false,
         MinContainerWidth = 256,
 
         --// Snapping \\--
-        MinSidebarWidth = 128,
+        MinSidebarWidth = 64,
         SidebarCompactWidth = 48,
         SidebarCollapseThreshold = 0.5,
 
@@ -6135,30 +6133,6 @@ function Library:CreateWindow(WindowInfo)
         WindowInfo.Title = title
     end
 
-    local function ApplyCompact()
-        WindowTitle.Visible = true
-        if not WindowInfo.Icon then
-            WindowIcon.Visible = true
-        end
-
-        for _, Button in Library.TabButtons do
-            if not Button.Icon then
-                continue
-            end
-
-            Button.Label.Visible = true
-            Button.Padding.PaddingBottom = UDim.new(0, 11)
-            Button.Padding.PaddingLeft = UDim.new(0, 12)
-            Button.Padding.PaddingRight = UDim.new(0, 12)
-            Button.Padding.PaddingTop = UDim.new(0, 11)
-            Button.Icon.SizeConstraint = Enum.SizeConstraint.RelativeYY
-        end
-    end
-
-    function Window:SetCompact(State)
-        Window:SetSidebarWidth(State and WindowInfo.SidebarCompactWidth or LastExpandedWidth)
-    end
-
     function Window:GetSidebarWidth()
         return Tabs.Size.X.Offset
     end
@@ -6172,10 +6146,6 @@ function Library:CreateWindow(WindowInfo)
         RightWrapper.Size = UDim2.new(1, -Width - 57 - 1, 1, -16)
         Tabs.Size = UDim2.new(0, Width, 1, -70)
         Container.Size = UDim2.new(1, -Width - 1, 1, -70)
-
-        if WindowInfo.EnableCompacting then
-            ApplyCompact()
-        end
     end
 
     function Window:ShowTabInfo(Name, Description)
@@ -7258,19 +7228,7 @@ function Library:CreateWindow(WindowInfo)
             end
 
             if Dragging and IsHoverInput(Input) then
-                local Delta = Input.Position - StartPos
-                local Width = StartWidth + Delta.X
-
-                if WindowInfo.DisableCompactingSnap then
-                    Window:SetSidebarWidth(Width)
-                    return
-                end
-
-                if Width > Threshold then
-                    Window:SetSidebarWidth(math.max(Width, WindowInfo.MinSidebarWidth))
-                else
-                    Window:SetSidebarWidth(WindowInfo.SidebarCompactWidth)
-                end
+                Window:SetSidebarWidth(StartWidth + (Input.Position - StartPos).X)
             end
         end))
     end

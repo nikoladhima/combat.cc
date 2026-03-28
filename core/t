@@ -4116,7 +4116,7 @@ function Library:CreateWindow(WindowInfo)
             if typeof(Info.Text) == "string" then Tab.WarningBox.Text = Info.Text end
             WarningBoxHolder.Visible = Tab.WarningBox.Visible
             WarningTitle.Text = Tab.WarningBox.Title
-            WarningText.Text = Tab.Warning
+            WarningText.Text = Tab.WarningBox.Text
             Tab:Resize(true)
 
             WarningBox.BackgroundColor3 = Tab.WarningBox.IsNormal == true and Library.Scheme.BackgroundColor
@@ -4207,7 +4207,7 @@ function Library:CreateWindow(WindowInfo)
                 AutomaticSize = Enum.AutomaticSize.Y,
                 BackgroundTransparency = 1,
                 Size = UDim2.fromScale(1, 0),
-                Parent = Info.Side == 1 and TabLeft or TabRight,
+                Parent = TabScroll,
             })
             New("UIListLayout", {
                 Padding = UDim.new(0, 6),
@@ -4325,7 +4325,7 @@ function Library:CreateWindow(WindowInfo)
                 AutomaticSize = Enum.AutomaticSize.Y,
                 BackgroundTransparency = 1,
                 Size = UDim2.fromScale(1, 0),
-                Parent = Info.Side == 1 and TabLeft or TabRight,
+                Parent = TabScroll,
             })
             New("UIListLayout", {
                 Padding = UDim.new(0, 6),
@@ -4596,6 +4596,8 @@ function Library:CreateWindow(WindowInfo)
                 Text = "",
                 Parent = Tabs,
             })
+            local IsCompact = true
+
             local ButtonPadding = New("UIPadding", {
                 PaddingBottom = UDim.new(0, IsCompact and 6 or 11),
                 PaddingLeft = UDim.new(0, IsCompact and 6 or 12),

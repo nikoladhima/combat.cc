@@ -4072,7 +4072,9 @@ do
             end
 
             local X = (Slider.Value - Slider.Min) / (Slider.Max - Slider.Min)
-            Fill.Size = UDim2.fromScale(X, 1)
+            TweenService:Create(Fill, Library.TweenInfo, {
+                Size = UDim2.fromScale(X, 1)
+            }):Play()
         end
 
         function Slider:OnChanged(Func)

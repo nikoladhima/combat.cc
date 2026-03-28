@@ -1084,10 +1084,19 @@ local function ParentUI(UI: Instance, SkipHiddenUI: boolean?)
     SafeParentUI(UI, gethui)
 end
 
+local function GetRandomString()
+    local Output = ""
+    for _ = 2, 25 do
+        Output = Output .. string.char(math.random(1, 250))
+    end
+    
+    return Output
+end
+
 local ScreenGui = New("ScreenGui", {
-    Name = "Obsidian",
+    Name = "ns__Obsidian" .. GetRandomString(),
     DisplayOrder = 999,
-    ResetOnSpawn = false
+    ResetOnSpawn = false,
 })
 ParentUI(ScreenGui)
 Library.ScreenGui = ScreenGui

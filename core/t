@@ -289,7 +289,6 @@ local Templates = {
         EnableSidebarResize = false,
         EnableCompacting = true,
         DisableCompactingSnap = false,
-        SidebarCompacted = true,
         MinContainerWidth = 256,
 
         --// Snapping \\--
@@ -5758,9 +5757,6 @@ function Library:CreateWindow(WindowInfo)
     WindowInfo.CornerRadius = math.min(WindowInfo.CornerRadius, 20)
 
     --// Old Naming \\--
-    if WindowInfo.Compact ~= nil then
-        WindowInfo.SidebarCompacted = WindowInfo.Compact
-    end
     if WindowInfo.SidebarMinWidth ~= nil then
         WindowInfo.MinSidebarWidth = WindowInfo.SidebarMinWidth
     end
@@ -5791,7 +5787,6 @@ function Library:CreateWindow(WindowInfo)
     local Container
 
     local InitialLeftWidth = math.ceil(WindowInfo.Size.X.Offset * 0.3)
-    local IsCompact = WindowInfo.SidebarCompacted
     local LastExpandedWidth = InitialLeftWidth
 
     do
@@ -6141,14 +6136,9 @@ function Library:CreateWindow(WindowInfo)
     end
 
     local function ApplyCompact()
-        IsCompact = Window:GetSidebarWidth() == WindowInfo.SidebarCompactWidth
-        if WindowInfo.DisableCompactingSnap then
-            IsCompact = Window:GetSidebarWidth() <= WindowInfo.CompactWidthActivation
-        end
-
-        WindowTitle.Visible = not IsCompact
+        WindowTitle.Visible = true
         if not WindowInfo.Icon then
-            WindowIcon.Visible = IsCompact
+            WindowIcon.Visible = true
         end
 
         for _, Button in Library.TabButtons do
@@ -6156,17 +6146,13 @@ function Library:CreateWindow(WindowInfo)
                 continue
             end
 
-            Button.Label.Visible = not IsCompact
-            Button.Padding.PaddingBottom = UDim.new(0, IsCompact and 6 or 11)
-            Button.Padding.PaddingLeft = UDim.new(0, IsCompact and 6 or 12)
-            Button.Padding.PaddingRight = UDim.new(0, IsCompact and 6 or 12)
-            Button.Padding.PaddingTop = UDim.new(0, IsCompact and 6 or 11)
-            Button.Icon.SizeConstraint = IsCompact and Enum.SizeConstraint.RelativeXY or Enum.SizeConstraint.RelativeYY
+            Button.Label.Visible = true
+            Button.Padding.PaddingBottom = UDim.new(0, 11)
+            Button.Padding.PaddingLeft = UDim.new(0, 12)
+            Button.Padding.PaddingRight = UDim.new(0, 12)
+            Button.Padding.PaddingTop = UDim.new(0, 11)
+            Button.Icon.SizeConstraint = Enum.SizeConstraint.RelativeYY
         end
-    end
-
-    function Window:IsSidebarCompacted()
-        return IsCompact
     end
 
     function Window:SetCompact(State)
@@ -6189,9 +6175,6 @@ function Library:CreateWindow(WindowInfo)
 
         if WindowInfo.EnableCompacting then
             ApplyCompact()
-        end
-        if not IsCompact then
-            LastExpandedWidth = Width
         end
     end
 
@@ -6245,10 +6228,10 @@ function Library:CreateWindow(WindowInfo)
                 Parent = Tabs,
             })
             local ButtonPadding = New("UIPadding", {
-                PaddingBottom = UDim.new(0, IsCompact and 6 or 11),
-                PaddingLeft = UDim.new(0, IsCompact and 6 or 12),
-                PaddingRight = UDim.new(0, IsCompact and 6 or 12),
-                PaddingTop = UDim.new(0, IsCompact and 6 or 11),
+                PaddingBottom = UDim.new(0, 11),
+                PaddingLeft = UDim.new(0, 12),
+                PaddingRight = UDim.new(0, 12),
+                PaddingTop = UDim.new(0, 11),
                 Parent = TabButton,
             })
 
@@ -6260,7 +6243,7 @@ function Library:CreateWindow(WindowInfo)
                 TextSize = 16,
                 TextTransparency = 0.5,
                 TextXAlignment = Enum.TextXAlignment.Left,
-                Visible = not IsCompact,
+                Visible = true,
                 Parent = TabButton,
             })
 
@@ -6273,7 +6256,7 @@ function Library:CreateWindow(WindowInfo)
                     ImageTransparency = 0.5,
                     ScaleType = Enum.ScaleType.Fit,
                     Size = UDim2.fromScale(1, 1),
-                    SizeConstraint = IsCompact and Enum.SizeConstraint.RelativeXY or Enum.SizeConstraint.RelativeYY,
+                    SizeConstraint = Enum.SizeConstraint.RelativeYY,
                     Parent = TabButton,
                 })
             end
@@ -6963,10 +6946,10 @@ function Library:CreateWindow(WindowInfo)
                 Parent = Tabs,
             })
             local ButtonPadding = New("UIPadding", {
-                PaddingBottom = UDim.new(0, IsCompact and 6 or 11),
-                PaddingLeft = UDim.new(0, IsCompact and 6 or 12),
-                PaddingRight = UDim.new(0, IsCompact and 6 or 12),
-                PaddingTop = UDim.new(0, IsCompact and 6 or 11),
+                PaddingBottom = UDim.new(0, 11),
+                PaddingLeft = UDim.new(0, 12),
+                PaddingRight = UDim.new(0, 12),
+                PaddingTop = UDim.new(0, 11),
                 Parent = TabButton,
             })
 
@@ -6978,7 +6961,7 @@ function Library:CreateWindow(WindowInfo)
                 TextSize = 16,
                 TextTransparency = 0.5,
                 TextXAlignment = Enum.TextXAlignment.Left,
-                Visible = not IsCompact,
+                Visible = true,
                 Parent = TabButton,
             })
 
@@ -6990,7 +6973,7 @@ function Library:CreateWindow(WindowInfo)
                     ImageRectSize = Icon.ImageRectSize,
                     ImageTransparency = 0.5,
                     Size = UDim2.fromScale(1, 1),
-                    SizeConstraint = IsCompact and Enum.SizeConstraint.RelativeXY or Enum.SizeConstraint.RelativeYY,
+                    SizeConstraint = Enum.SizeConstraint.RelativeYY,
                     Parent = TabButton,
                 })
             end
@@ -7290,9 +7273,6 @@ function Library:CreateWindow(WindowInfo)
                 end
             end
         end))
-    end
-    if WindowInfo.EnableCompacting and WindowInfo.SidebarCompacted then
-        Window:SetSidebarWidth(WindowInfo.SidebarCompactWidth)
     end
     if WindowInfo.AutoShow then
         task.spawn(Library.Toggle)

@@ -1168,7 +1168,7 @@ function Library:GetKeyString(KeyCode: Enum.KeyCode)
 end
 
 function Library:GetTextBounds(Text: string, Font: Font, Size: number, Width: number?): (number, number)
-    local Params = Create("GetTextBoundsParams", {
+    local Params = Create("GetTextBoundsParams", nil, {
         Text = Text,
         RichText = true,
         Font = Font,

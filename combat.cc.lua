@@ -1174,7 +1174,7 @@ local Module = loadstring([=====[
     end
 
     function Module:GetLibrary(Table)
-        return Load("Library.luau", true, "core/t", Table)
+        return Load("Library.luau", true, "core/Library.luau", Table)
     end
 
     function Module:SendDataToWebhook(Table)

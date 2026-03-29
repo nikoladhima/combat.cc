@@ -13,7 +13,7 @@
 - Aimbot 🎮
 - TriggerBot 🎮
 - Client Manipulation 🌐
-- AND MANY MORE FEATURES, CHECK MY WEBSITE: https://combat-cc.vercel.app
+- AND MANY MORE FEATURES.
 
 ## 🔌Shortened Script
 ```lua

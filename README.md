@@ -1,3 +1,4 @@
+## SCRIPT IS DISCONTINUED.
 <img width="2030" height="1080" alt="combat cc" src="https://github.com/nikoladhima/combat.cc/blob/main/icons/combat.cc.png"/>
 
 ## COMBAT.CC [UNIVERSAL]

@@ -1,8 +1,8 @@
 --[=[
  ██████╗ ██████╗ ███╗   ███╗██████╗  █████╗ ████████╗    ██████╗ ██████╗
 ██╔════╝██╔═══██╗████╗ ████║██╔══██╗██╔══██╗╚══██╔══╝   ██╔════╝██╔════╝
-██║     ██║   ██║██╔████╔██║██████╔╝███████║   ██║      ██║     ██║     
-██║     ██║   ██║██║╚██╔╝██║██╔══██╗██╔══██║   ██║      ██║     ██║     
+██║     ██║   ██║██╔████╔██║██████╔╝███████║   ██║      ██║     ██║
+██║     ██║   ██║██║╚██╔╝██║██╔══██╗██╔══██║   ██║      ██║     ██║
 ╚██████╗╚██████╔╝██║ ╚═╝ ██║██████╔╝██║  ██║   ██║   ██╗╚██████╗╚██████╗
  ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝ ╚═════╝ ╚═════╝
     -- // Made by nikoleto scripts - github.com/nikoladhima \\ --
@@ -46,1095 +46,1218 @@ local function nsloadstring(UseDefaultPath, Path, ...)
 end
 
 local Module = loadstring([=====[
-	--!optimize 2
-	--!native
-
-	if not (...) or type(...) ~= "function" then
-		return nil
-	end
-
-	local Module = {...}
-
-	local function FailedCheck(Result, Name)
-		if type(Result) == "table" and Result.nsFailed then
-			warn(("Failed to load %s: %s"):format(Name, Result[3] or "Unknown"))
-			return true
-		end
-
-		if type(Result) == "string" then
-			warn(("Failed to load %s: %s"):format(Name, Result))
-			return true
-		end
-
-		return false
-	end
-
-	local loadstringFunction = Module[1]
-	local function Load(Name, ...)
-		local Item = loadstringFunction(...)
-
-		if FailedCheck(Item, Name) then
-			return nil
-		end
-
-		return Item
-	end
-
-	function Module:GetThemeManager(Table)
-		return loadstring([===[
-			local Helper = (...)
-			if not Helper or type(Helper) ~= "table" then
-				return nil
-			end
-
-			local HttpService = Helper[1]
-			local listfiles, isfile, readfile, writefile, delfile = Helper[2], Helper[3], Helper[4], Helper[5], Helper[6]
-			local isfolder, makefolder = Helper[7], Helper[8]
-
-			local ThemeManager = {}
-			do
-				local ThemeFields = { "FontColor", "MainColor", "AccentColor", "BackgroundColor", "OutlineColor" }
-				ThemeManager.Folder = "ObsidianLibSettings"
-				-- if not isfolder(ThemeManager.Folder) then makefolder(ThemeManager.Folder) end
-
-				ThemeManager.Library = nil
-				ThemeManager.AppliedToTab = false
-				ThemeManager.BuiltInThemes = {
-					["Default"] = {
-						1,
-						{ FontColor = "ffffff", MainColor = "191919", AccentColor = "7d55ff", BackgroundColor = "0f0f0f", OutlineColor = "282828" },
-					},
-					["BBot"] = {
-						2,
-						{ FontColor = "ffffff", MainColor = "1e1e1e", AccentColor = "7e48a3", BackgroundColor = "232323", OutlineColor = "141414" },
-					},
-					["Fatality"] = {
-						3,
-						{ FontColor = "ffffff", MainColor = "1e1842", AccentColor = "c50754", BackgroundColor = "191335", OutlineColor = "3c355d" },
-					},
-					["Jester"] = {
-						4,
-						{ FontColor = "ffffff", MainColor = "242424", AccentColor = "db4467", BackgroundColor = "1c1c1c", OutlineColor = "373737" },
-					},
-					["Mint"] = {
-						5,
-						{ FontColor = "ffffff", MainColor = "242424", AccentColor = "3db488", BackgroundColor = "1c1c1c", OutlineColor = "373737" },
-					},
-					["Tokyo Night"] = {
-						6,
-						{ FontColor = "ffffff", MainColor = "191925", AccentColor = "6759b3", BackgroundColor = "16161f", OutlineColor = "323232" },
-					},
-					["Ubuntu"] = {
-						7,
-						{ FontColor = "ffffff", MainColor = "3e3e3e", AccentColor = "e2581e", BackgroundColor = "323232", OutlineColor = "191919" },
-					},
-					["Quartz"] = {
-						8,
-						{ FontColor = "ffffff", MainColor = "232330", AccentColor = "426e87", BackgroundColor = "1d1b26", OutlineColor = "27232f" },
-					},
-					["Nord"] = {
-						9,
-						{ FontColor = "eceff4", MainColor = "3b4252", AccentColor = "88c0d0", BackgroundColor = "2e3440", OutlineColor = "4c566a" },
-					},
-					["Dracula"] = {
-						10,
-						{ FontColor = "f8f8f2", MainColor = "44475a", AccentColor = "ff79c6", BackgroundColor = "282a36", OutlineColor = "6272a4" },
-					},
-					["Monokai"] = {
-						11,
-						{ FontColor = "f8f8f2", MainColor = "272822", AccentColor = "f92672", BackgroundColor = "1e1f1c", OutlineColor = "49483e" },
-					},
-					["Gruvbox"] = {
-						12,
-						{ FontColor = "ebdbb2", MainColor = "3c3836", AccentColor = "fb4934", BackgroundColor = "282828", OutlineColor = "504945" },
-					},
-					["Solarized"] = {
-						13,
-						{ FontColor = "839496", MainColor = "073642", AccentColor = "cb4b16", BackgroundColor = "002b36", OutlineColor = "586e75" },
-					},
-					["Catppuccin"] = {
-						14,
-						{ FontColor = "d9e0ee", MainColor = "302d41", AccentColor = "f5c2e7", BackgroundColor = "1e1e2e", OutlineColor = "575268" },
-					},
-					["One Dark"] = {
-						15,
-						{ FontColor = "abb2bf", MainColor = "282c34", AccentColor = "c678dd", BackgroundColor = "21252b", OutlineColor = "5c6370" },
-					},
-					["Cyberpunk"] = {
-						16,
-						{ FontColor = "f9f9f9", MainColor = "262335", AccentColor = "00ff9f", BackgroundColor = "1a1a2e", OutlineColor = "413c5e" },
-					},
-					["Oceanic Next"] = {
-						17,
-						{ FontColor = "d8dee9", MainColor = "1b2b34", AccentColor = "6699cc", BackgroundColor = "16232a", OutlineColor = "343d46" },
-					},
-					["Material"] = {
-						18,
-						{ FontColor = "eeffff", MainColor = "212121", AccentColor = "82aaff", BackgroundColor = "151515", OutlineColor = "424242" },
-					}
-				}
-
-				function ThemeManager:SetLibrary(library)
-					self.Library = library
-				end
-
-				--// Folders \\--
-				function ThemeManager:GetPaths()
-					local paths = {}
-
-					local parts = self.Folder:split("/")
-					for idx = 1, #parts do
-						paths[#paths + 1] = table.concat(parts, "/", 1, idx)
-					end
-
-					paths[#paths + 1] = self.Folder .. "/themes"
-
-					return paths
-				end
-
-				function ThemeManager:BuildFolderTree()
-					local paths = self:GetPaths()
-
-					for i = 1, #paths do
-						local str = paths[i]
-						if isfolder(str) then
-							continue
-						end
-						makefolder(str)
-					end
-				end
-
-				function ThemeManager:CheckFolderTree()
-					if isfolder(self.Folder) then
-						return
-					end
-					self:BuildFolderTree()
-
-					task.wait(0.1)
-				end
-
-				function ThemeManager:SetFolder(folder)
-					self.Folder = folder
-					self:BuildFolderTree()
-				end
-
-				--// Apply, Update theme \\--
-				function ThemeManager:ApplyTheme(theme)
-					local customThemeData = self:GetCustomTheme(theme)
-					local data = customThemeData or self.BuiltInThemes[theme]
-
-					if not data then
-						return
-					end
-
-					local scheme = data[2]
-					for idx, val in pairs(customThemeData or scheme) do
-						if idx == "VideoLink" then
-							continue
-						elseif idx == "FontFace" then
-							self.Library:SetFont(Enum.Font[val])
-
-							if self.Library.Options[idx] then
-								self.Library.Options[idx]:SetValue(val)
-							end
-						else
-							self.Library.Scheme[idx] = Color3.fromHex(val)
-
-							if self.Library.Options[idx] then
-								self.Library.Options[idx]:SetValueRGB(Color3.fromHex(val))
-							end
-						end
-					end
-
-					self:ThemeUpdate()
-				end
-
-				function ThemeManager:ThemeUpdate()
-					for i, field in ThemeFields do
-						if self.Library.Options and self.Library.Options[field] then
-							self.Library.Scheme[field] = self.Library.Options[field].Value
-						end
-					end
-
-					self.Library:UpdateColorsUsingRegistry()
-				end
-
-				--// Get, Load, Save, Delete, Refresh \\--
-				function ThemeManager:GetCustomTheme(file)
-					local path = self.Folder .. "/themes/" .. file .. ".json"
-					if not isfile(path) then
-						return nil
-					end
-
-					local data = readfile(path)
-					local success, decoded = pcall(HttpService.JSONDecode, HttpService, data)
-
-					if not success then
-						return nil
-					end
-
-					return decoded
-				end
-
-				function ThemeManager:LoadDefault()
-					local theme = "Default"
-					local content = isfile(self.Folder .. "/themes/default.txt") and readfile(self.Folder .. "/themes/default.txt")
-
-					local isDefault = true
-					if content then
-						if self.BuiltInThemes[content] then
-							theme = content
-						elseif self:GetCustomTheme(content) then
-							theme = content
-							isDefault = false
-						end
-					elseif self.BuiltInThemes[self.DefaultTheme] then
-						theme = self.DefaultTheme
-					end
-
-					if isDefault then
-						self.Library.Options.ThemeManager_ThemeList:SetValue(theme)
-					else
-						self:ApplyTheme(theme)
-					end
-				end
-
-				function ThemeManager:SaveDefault(theme)
-					writefile(self.Folder .. "/themes/default.txt", theme)
-				end
-
-				function ThemeManager:SetDefaultTheme(theme)
-					assert(self.Library, "Must set ThemeManager.Library first!")
-					assert(not self.AppliedToTab, "Cannot set default theme after applying ThemeManager to a tab!")
-
-					local FinalTheme = {}
-					local LibraryScheme = {}
-					for _, field in ThemeFields do
-						if typeof(theme[field]) == "Color3" then
-							FinalTheme[field] = "#" .. theme[field]:ToHex()
-							LibraryScheme[field] = theme[field]
-
-						elseif typeof(theme[field]) == "string" then
-							FinalTheme[field] = if theme[field]:sub(1, 1) == "#" then theme[field] else ("#" .. theme[field])
-							LibraryScheme[field] = Color3.fromHex(theme[field])
-
-						else
-							FinalTheme[field] = ThemeManager.BuiltInThemes["Default"][2][field]
-							LibraryScheme[field] = Color3.fromHex(ThemeManager.BuiltInThemes["Default"][2][field])
-						end
-					end
-
-					if typeof(theme["FontFace"]) == "EnumItem" then
-						FinalTheme["FontFace"] = theme["FontFace"].Name
-						LibraryScheme["Font"] = Font.fromEnum(theme["FontFace"])
-
-					elseif typeof(theme["FontFace"]) == "string" then
-						FinalTheme["FontFace"] = theme["FontFace"]
-						LibraryScheme["Font"] = Font.fromEnum(Enum.Font[theme["FontFace"]])
-
-					else
-						FinalTheme["FontFace"] = "Code"
-						LibraryScheme["Font"] = Font.fromEnum(Enum.Font.Code)
-					end
-
-					for _, field in { "RedColor", "DarkColor", "WhiteColor" } do
-						LibraryScheme[field] = self.Library.Scheme[field]
-					end
-
-					self.Library.Scheme = LibraryScheme
-					self.BuiltInThemes["Default"] = { 1, FinalTheme }
-
-					self.Library:UpdateColorsUsingRegistry()
-				end
-
-				function ThemeManager:SaveCustomTheme(file)
-					if file:gsub(" ", "") == "" then
-						self.Library:Notify("Invalid file name for theme (empty)", 3)
-						return
-					end
-
-					local theme = {}
-					for _, field in ThemeFields do
-						theme[field] = self.Library.Options[field].Value:ToHex()
-					end
-					theme["FontFace"] = self.Library.Options["FontFace"].Value
-
-					writefile(self.Folder .. "/themes/" .. file .. ".json", HttpService:JSONEncode(theme))
-				end
-
-				function ThemeManager:Delete(name)
-					if not name then
-						return false, "no config file is selected"
-					end
-
-					local file = self.Folder .. "/themes/" .. name .. ".json"
-					if not isfile(file) then
-						return false, "invalid file"
-					end
-
-					local success = pcall(delfile, file)
-					if not success then
-						return false, "delete file error"
-					end
-
-					return true
-				end
-
-				function ThemeManager:ReloadCustomThemes()
-					local list = listfiles(self.Folder .. "/themes")
-
-					local out = {}
-					for i = 1, #list do
-						local file = list[i]
-						if file:sub(-5) == ".json" then
-							-- i hate this but it has to be done ...
-
-							local pos = file:find(".json", 1, true)
-							local start = pos
-
-							local char = file:sub(pos, pos)
-							while char ~= "/" and char ~= "\\" and char ~= "" do
-								pos = pos - 1
-								char = file:sub(pos, pos)
-							end
-
-							if char == "/" or char == "\\" then
-								table.insert(out, file:sub(pos + 1, start - 1))
-							end
-						end
-					end
-
-					return out
-				end
-
-				--// GUI \\--
-				function ThemeManager:CreateThemeManager(groupbox)
-					groupbox
-						:AddLabel("Background color")
-						:AddColorPicker("BackgroundColor", { Default = self.Library.Scheme.BackgroundColor })
-					groupbox:AddLabel("Main color"):AddColorPicker("MainColor", { Default = self.Library.Scheme.MainColor })
-					groupbox:AddLabel("Accent color"):AddColorPicker("AccentColor", { Default = self.Library.Scheme.AccentColor })
-					groupbox
-						:AddLabel("Outline color")
-						:AddColorPicker("OutlineColor", { Default = self.Library.Scheme.OutlineColor })
-					groupbox:AddLabel("Font color"):AddColorPicker("FontColor", { Default = self.Library.Scheme.FontColor })
-					groupbox:AddDropdown("FontFace", {
-						Text = "Font Face",
-						Default = "Code",
-						Values = { "BuilderSans", "Code", "Fantasy", "Gotham", "Jura", "Roboto", "RobotoMono", "SourceSans" },
-					})
-
-					local ThemesArray = {}
-					for Name, Theme in pairs(self.BuiltInThemes) do
-						table.insert(ThemesArray, Name)
-					end
-
-					table.sort(ThemesArray, function(a, b)
-						return self.BuiltInThemes[a][1] < self.BuiltInThemes[b][1]
-					end)
-
-					groupbox:AddDivider()
-
-					groupbox:AddDropdown("ThemeManager_ThemeList", { Text = "Theme list", Values = ThemesArray, Default = 1 })
-					groupbox:AddButton("Set as default", function()
-						self:SaveDefault(self.Library.Options.ThemeManager_ThemeList.Value)
-						self.Library:Notify(
-							string.format("Set default theme to %q", self.Library.Options.ThemeManager_ThemeList.Value)
-						)
-					end)
-
-					self.Library.Options.ThemeManager_ThemeList:OnChanged(function()
-						self:ApplyTheme(self.Library.Options.ThemeManager_ThemeList.Value)
-					end)
-
-					groupbox:AddDivider()
-
-					groupbox:AddInput("ThemeManager_CustomThemeName", { Text = "Custom theme name" })
-					groupbox:AddButton("Create theme", function()
-						local name = self.Library.Options.ThemeManager_CustomThemeName.Value
-
-						if name:gsub(" ", "") == "" then
-							self.Library:Notify("Invalid theme name (empty)", 2)
-							return
-						end
-
-						self:SaveCustomTheme(name)
-
-						self.Library:Notify(string.format("Created theme %q", name))
-						self.Library.Options.ThemeManager_CustomThemeList:SetValues(self:ReloadCustomThemes())
-						self.Library.Options.ThemeManager_CustomThemeList:SetValue(nil)
-					end)
-
-					groupbox:AddDivider()
-
-					groupbox:AddDropdown(
-						"ThemeManager_CustomThemeList",
-						{ Text = "Custom themes", Values = self:ReloadCustomThemes(), AllowNull = true, Default = 1 }
-					)
-					groupbox:AddButton("Load theme", function()
-						local name = self.Library.Options.ThemeManager_CustomThemeList.Value
-
-						self:ApplyTheme(name)
-						self.Library:Notify(string.format("Loaded theme %q", name))
-					end)
-					groupbox:AddButton("Overwrite theme", function()
-						local name = self.Library.Options.ThemeManager_CustomThemeList.Value
-
-						self:SaveCustomTheme(name)
-						self.Library:Notify(string.format("Overwrote config %q", name))
-					end)
-					groupbox:AddButton("Delete theme", function()
-						local name = self.Library.Options.ThemeManager_CustomThemeList.Value
-
-						local success, err = self:Delete(name)
-						if not success then
-							self.Library:Notify("Failed to delete theme: " .. err)
-							return
-						end
-
-						self.Library:Notify(string.format("Deleted theme %q", name))
-						self.Library.Options.ThemeManager_CustomThemeList:SetValues(self:ReloadCustomThemes())
-						self.Library.Options.ThemeManager_CustomThemeList:SetValue(nil)
-					end)
-					groupbox:AddButton("Refresh list", function()
-						self.Library.Options.ThemeManager_CustomThemeList:SetValues(self:ReloadCustomThemes())
-						self.Library.Options.ThemeManager_CustomThemeList:SetValue(nil)
-					end)
-					groupbox:AddButton("Set as default", function()
-						if
-							self.Library.Options.ThemeManager_CustomThemeList.Value ~= nil
-							and self.Library.Options.ThemeManager_CustomThemeList.Value ~= ""
-						then
-							self:SaveDefault(self.Library.Options.ThemeManager_CustomThemeList.Value)
-							self.Library:Notify(
-								string.format("Set default theme to %q", self.Library.Options.ThemeManager_CustomThemeList.Value)
-							)
-						end
-					end)
-					groupbox:AddButton("Reset default", function()
-						local success = pcall(delfile, self.Folder .. "/themes/default.txt")
-						if not success then
-							self.Library:Notify("Failed to reset default: delete file error")
-							return
-						end
-
-						self.Library:Notify("Set default theme to nothing")
-						self.Library.Options.ThemeManager_CustomThemeList:SetValues(self:ReloadCustomThemes())
-						self.Library.Options.ThemeManager_CustomThemeList:SetValue(nil)
-					end)
-
-					self:LoadDefault()
-					self.AppliedToTab = true
-
-					local function UpdateTheme()
-						self:ThemeUpdate()
-					end
-
-					self.Library.Options.BackgroundColor:OnChanged(UpdateTheme)
-					self.Library.Options.MainColor:OnChanged(UpdateTheme)
-					self.Library.Options.AccentColor:OnChanged(UpdateTheme)
-					self.Library.Options.OutlineColor:OnChanged(UpdateTheme)
-					self.Library.Options.FontColor:OnChanged(UpdateTheme)
-					self.Library.Options.FontFace:OnChanged(function(Value)
-						self.Library:SetFont(Enum.Font[Value])
-						self.Library:UpdateColorsUsingRegistry()
-					end)
-				end
-
-				function ThemeManager:CreateGroupBox(tab)
-					assert(self.Library, "Must set ThemeManager.Library first!")
-					return tab:AddLeftGroupbox("Themes", "paintbrush")
-				end
-
-				function ThemeManager:ApplyToTab(tab)
-					assert(self.Library, "Must set ThemeManager.Library first!")
-					local groupbox = self:CreateGroupBox(tab)
-					self:CreateThemeManager(groupbox)
-				end
-
-				function ThemeManager:ApplyToGroupbox(groupbox)
-					assert(self.Library, "Must set ThemeManager.Library first!")
-					self:CreateThemeManager(groupbox)
-				end
-
-				ThemeManager:BuildFolderTree()
-			end
-
-			getgenv().ObsidianThemeManager = ThemeManager
-			return ThemeManager
-		]===])(Table)
-	end
-
-	function Module:GetSaveManager(Table)
-		return loadstring([===[
-			local Helper = (...)
-			if not Helper or type(Helper) ~= "table" then
-				return nil
-			end
-
-			local clonefunction = Helper[1]
-			local HttpService = Helper[2]
-			local listfiles, isfile, readfile, writefile, delfile = Helper[3], Helper[4], Helper[5], Helper[6], Helper[7]
-			local isfolder, makefolder = Helper[8], Helper[9]
-
-			local SaveManager = {} do
-				SaveManager.Folder = "ObsidianLibSettings"
-				SaveManager.SubFolder = ""
-				SaveManager.Ignore = {}
-				SaveManager.Library = nil
-				SaveManager.Parser = {
-					Toggle = {
-						Save = function(Index, Object)
-							return { type = "Toggle", idx = Index, value = Object.Value }
-						end,
-						Load = function(Index, Data)
-							local Object = SaveManager.Library.Toggles[Index]
-							if Object and Object.Value ~= Data.value then
-								Object:SetValue(Data.value)
-							end
-						end,
-					},
-					Slider = {
-						Save = function(Index, Object)
-							return { type = "Slider", idx = Index, value = tostring(Object.Value) }
-						end,
-						Load = function(Index, Data)
-							local Object = SaveManager.Library.Options[Index]
-							if Object and Object.Value ~= Data.value then
-								Object:SetValue(Data.value)
-							end
-						end,
-					},
-					Dropdown = {
-						Save = function(Index, Object)
-							return { type = "Dropdown", idx = Index, value = Object.Value, multi = Object.Multi }
-						end,
-						Load = function(Index, Data)
-							local object = SaveManager.Library.Options[Index]
-							if object and object.Value ~= Data.value then
-								object:SetValue(Data.value)
-							end
-						end,
-					},
-					ColorPicker = {
-						Save = function(Index, Object)
-							return { type = "ColorPicker", idx = Index, value = Object.Value:ToHex(), transparency = Object.Transparency }
-						end,
-						Load = function(Index, Data)
-							if SaveManager.Library.Options[Index] then
-								SaveManager.Library.Options[Index]:SetValueRGB(Color3.fromHex(Data.value), Data.transparency)
-							end
-						end,
-					},
-					KeyPicker = {
-						Save = function(Index, Object)
-							return { type = "KeyPicker", idx = Index, mode = Object.Mode, key = Object.Value, modifiers = Object.Modifiers }
-						end,
-						Load = function(Index, Data)
-							if SaveManager.Library.Options[Index] then
-								SaveManager.Library.Options[Index]:SetValue({ Data.key, Data.mode, Data.modifiers })
-							end
-						end,
-					},
-					Input = {
-						Save = function(Index, Object)
-							return { type = "Input", idx = Index, text = Object.Value }
-						end,
-						Load = function(Index, Data)
-							local Object = SaveManager.Library.Options[Index]
-							if Object and Object.Value ~= Data.text and type(Data.text) == "string" then
-								SaveManager.Library.Options[Index]:SetValue(Data)
-							end
-						end,
-					},
-				}
-
-				function SaveManager:SetLibrary(library)
-					self.Library = library
-				end
-
-				function SaveManager:IgnoreThemeSettings()
-					self:SetIgnoreIndexes({
-						"BackgroundColor", "MainColor", "AccentColor", "OutlineColor", "FontColor", "FontFace", -- themes
-						"ThemeManager_ThemeList", "ThemeManager_CustomThemeList", "ThemeManager_CustomThemeName", -- themes
-					})
-				end
-
-				--// Folders \\--
-				function SaveManager:CheckSubFolder(createFolder)
-					if typeof(self.SubFolder) ~= "string" or self.SubFolder == "" then return false end
-
-					if createFolder == true then
-						if not isfolder(self.Folder .. "/settings/" .. self.SubFolder) then
-							makefolder(self.Folder .. "/settings/" .. self.SubFolder)
-						end
-					end
-
-					return true
-				end
-
-				function SaveManager:GetPaths()
-					local paths = {}
-
-					local parts = self.Folder:split("/")
-					for idx = 1, #parts do
-						local path = table.concat(parts, "/", 1, idx)
-						if not table.find(paths, path) then paths[#paths + 1] = path end
-					end
-
-					paths[#paths + 1] = self.Folder .. "/themes"
-					paths[#paths + 1] = self.Folder .. "/settings"
-
-					if self:CheckSubFolder(false) then
-						local subFolder = self.Folder .. "/settings/" .. self.SubFolder
-						parts = subFolder:split("/")
-
-						for idx = 1, #parts do
-							local path = table.concat(parts, "/", 1, idx)
-							if not table.find(paths, path) then paths[#paths + 1] = path end
-						end
-					end
-
-					return paths
-				end
-
-				function SaveManager:BuildFolderTree()
-					local paths = self:GetPaths()
-
-					for i = 1, #paths do
-						local str = paths[i]
-						if isfolder(str) then continue end
-
-						makefolder(str)
-					end
-				end
-
-				function SaveManager:CheckFolderTree()
-					if isfolder(self.Folder) then return end
-					SaveManager:BuildFolderTree()
-
-					task.wait(0.1)
-				end
-
-				function SaveManager:SetIgnoreIndexes(list)
-					for _, key in pairs(list) do
-						self.Ignore[key] = true
-					end
-				end
-
-				function SaveManager:SetFolder(folder)
-					self.Folder = folder
-					self:BuildFolderTree()
-				end
-
-				function SaveManager:SetSubFolder(folder)
-					self.SubFolder = folder
-					self:BuildFolderTree()
-				end
-
-				--// Save, Load, Delete, Refresh \\--
-				function SaveManager:Save(name)
-					if (not name) then
-						return false, "no config file is selected"
-					end
-					SaveManager:CheckFolderTree()
-
-					local fullPath = self.Folder .. "/settings/" .. name .. ".json"
-					if SaveManager:CheckSubFolder(true) then
-						fullPath = self.Folder .. "/settings/" .. self.SubFolder .. "/" .. name .. ".json"
-					end
-
-					local data = {
-						objects = {}
-					}
-
-					for idx, toggle in pairs(self.Library.Toggles) do
-						if not toggle.Type then continue end
-						if not self.Parser[toggle.Type] then continue end
-						if self.Ignore[idx] then continue end
-
-						table.insert(data.objects, self.Parser[toggle.Type].Save(idx, toggle))
-					end
-
-					for idx, option in pairs(self.Library.Options) do
-						if not option.Type then continue end
-						if not self.Parser[option.Type] then continue end
-						if self.Ignore[idx] then continue end
-
-						table.insert(data.objects, self.Parser[option.Type].Save(idx, option))
-					end
-
-					local success, encoded = pcall(HttpService.JSONEncode, HttpService, data)
-					if not success then
-						return false, "failed to encode data"
-					end
-
-					writefile(fullPath, encoded)
-					return true
-				end
-
-				function SaveManager:Load(name)
-					if (not name) then
-						return false, "no config file is selected"
-					end
-					SaveManager:CheckFolderTree()
-
-					local file = self.Folder .. "/settings/" .. name .. ".json"
-					if SaveManager:CheckSubFolder(true) then
-						file = self.Folder .. "/settings/" .. self.SubFolder .. "/" .. name .. ".json"
-					end
-
-					if not isfile(file) then return false, "invalid file" end
-
-					local success, decoded = pcall(HttpService.JSONDecode, HttpService, readfile(file))
-					if not success then return false, "decode error" end
-
-					for _, option in pairs(decoded.objects) do
-						if not option.type then continue end
-						if not self.Parser[option.type] then continue end
-						if self.Ignore[option.idx] then continue end
-
-						task.spawn(self.Parser[option.type].Load, option.idx, option) -- task.spawn() so the config loading wont get stuck.
-					end
-
-					return true
-				end
-
-				function SaveManager:Delete(name)
-					if (not name) then
-						return false, "no config file is selected"
-					end
-
-					local file = self.Folder .. "/settings/" .. name .. ".json"
-					if SaveManager:CheckSubFolder(true) then
-						file = self.Folder .. "/settings/" .. self.SubFolder .. "/" .. name .. ".json"
-					end
-
-					if not isfile(file) then return false, "invalid file" end
-
-					local success = pcall(delfile, file)
-					if not success then return false, "delete file error" end
-
-					return true
-				end
-
-				function SaveManager:RefreshConfigList()
-					local success, data = pcall(function()
-						SaveManager:CheckFolderTree()
-
-						local list = {}
-						local out = {}
-
-						if SaveManager:CheckSubFolder(true) then
-							list = listfiles(self.Folder .. "/settings/" .. self.SubFolder)
-						else
-							list = listfiles(self.Folder .. "/settings")
-						end
-						if typeof(list) ~= "table" then list = {} end
-
-						for i = 1, #list do
-							local file = list[i]
-							if file:sub(-5) == ".json" then
-								-- i hate this but it has to be done ...
-
-								local pos = file:find(".json", 1, true)
-								local start = pos
-
-								local char = file:sub(pos, pos)
-								while char ~= "/" and char ~= "\\" and char ~= "" do
-									pos = pos - 1
-									char = file:sub(pos, pos)
-								end
-
-								if char == "/" or char == "\\" then
-									table.insert(out, file:sub(pos + 1, start - 1))
-								end
-							end
-						end
-
-						return out
-					end)
-
-					if (not success) then
-						if self.Library then
-							self.Library:Notify("Failed to load config list: " .. tostring(data))
-						else
-							warn("Failed to load config list: " .. tostring(data))
-						end
-
-						return {}
-					end
-
-					return data
-				end
-
-				--// Auto Load \\--
-				function SaveManager:GetAutoloadConfig()
-					SaveManager:CheckFolderTree()
-
-					local autoLoadPath = self.Folder .. "/settings/autoload.txt"
-					if SaveManager:CheckSubFolder(true) then
-						autoLoadPath = self.Folder .. "/settings/" .. self.SubFolder .. "/autoload.txt"
-					end
-
-					if isfile(autoLoadPath) then
-						local successRead, name = pcall(readfile, autoLoadPath)
-						if not successRead then
-							return "none"
-						end
-
-						name = tostring(name)
-						return if name == "" then "none" else name
-					end
-
-					return "none"
-				end
-
-				function SaveManager:LoadAutoloadConfig()
-					SaveManager:CheckFolderTree()
-
-					local autoLoadPath = self.Folder .. "/settings/autoload.txt"
-					if SaveManager:CheckSubFolder(true) then
-						autoLoadPath = self.Folder .. "/settings/" .. self.SubFolder .. "/autoload.txt"
-					end
-
-					if isfile(autoLoadPath) then
-						local successRead, name = pcall(readfile, autoLoadPath)
-						if not successRead then
-							self.Library:Notify("Failed to load autoload config: write file error")
-							return
-						end
-
-						local success, err = self:Load(name)
-						if not success then
-							self.Library:Notify("Failed to load autoload config: " .. err)
-							return
-						end
-
-						self.Library:Notify(string.format("Auto loaded config %q", name))
-					end
-				end
-
-				function SaveManager:SaveAutoloadConfig(name)
-					SaveManager:CheckFolderTree()
-
-					local autoLoadPath = self.Folder .. "/settings/autoload.txt"
-					if SaveManager:CheckSubFolder(true) then
-						autoLoadPath = self.Folder .. "/settings/" .. self.SubFolder .. "/autoload.txt"
-					end
-
-					local success = pcall(writefile, autoLoadPath, name)
-					if not success then return false, "write file error" end
-
-					return true, ""
-				end
-
-				function SaveManager:DeleteAutoLoadConfig()
-					SaveManager:CheckFolderTree()
-
-					local autoLoadPath = self.Folder .. "/settings/autoload.txt"
-					if SaveManager:CheckSubFolder(true) then
-						autoLoadPath = self.Folder .. "/settings/" .. self.SubFolder .. "/autoload.txt"
-					end
-
-					local success = pcall(delfile, autoLoadPath)
-					if not success then return false, "delete file error" end
-
-					return true, ""
-				end
-
-				--// GUI \\--
-				function SaveManager:BuildConfigSection(tab)
-					assert(self.Library, "Must set SaveManager.Library")
-
-					local section = tab:AddRightGroupbox("Configuration", "folder-cog")
-
-					section:AddInput("SaveManager_ConfigName",    { Text = "Config name" })
-					section:AddButton("Create config", function()
-						local name = self.Library.Options.SaveManager_ConfigName.Value
-
-						if name:gsub(" ", "") == "" then
-							self.Library:Notify("Invalid config name (empty)", 2)
-							return
-						end
-
-						local success, err = self:Save(name)
-						if not success then
-							self.Library:Notify("Failed to create config: " .. err)
-							return
-						end
-
-						self.Library:Notify(string.format("Created config %q", name))
-						self.Library.Options.SaveManager_ConfigList:SetValues(self:RefreshConfigList())
-						self.Library.Options.SaveManager_ConfigList:SetValue(nil)
-					end)
-
-					section:AddDivider()
-
-					section:AddDropdown("SaveManager_ConfigList", { Text = "Config list", Values = self:RefreshConfigList(), AllowNull = true })
-					section:AddButton("Load config", function()
-						local name = self.Library.Options.SaveManager_ConfigList.Value
-
-						local success, err = self:Load(name)
-						if not success then
-							self.Library:Notify("Failed to load config: " .. err)
-							return
-						end
-
-						self.Library:Notify(string.format("Loaded config %q", name))
-					end)
-					section:AddButton("Overwrite config", function()
-						local name = self.Library.Options.SaveManager_ConfigList.Value
-
-						local success, err = self:Save(name)
-						if not success then
-							self.Library:Notify("Failed to overwrite config: " .. err)
-							return
-						end
-
-						self.Library:Notify(string.format("Overwrote config %q", name))
-					end)
-
-					section:AddButton("Delete config", function()
-						local name = self.Library.Options.SaveManager_ConfigList.Value
-
-						local success, err = self:Delete(name)
-						if not success then
-							self.Library:Notify("Failed to delete config: " .. err)
-							return
-						end
-
-						self.Library:Notify(string.format("Deleted config %q", name))
-						self.Library.Options.SaveManager_ConfigList:SetValues(self:RefreshConfigList())
-						self.Library.Options.SaveManager_ConfigList:SetValue(nil)
-					end)
-
-					section:AddButton("Refresh list", function()
-						self.Library.Options.SaveManager_ConfigList:SetValues(self:RefreshConfigList())
-						self.Library.Options.SaveManager_ConfigList:SetValue(nil)
-					end)
-
-					section:AddButton("Set as autoload", function()
-						local name = self.Library.Options.SaveManager_ConfigList.Value
-
-						local success, err = self:SaveAutoloadConfig(name)
-						if not success then
-							self.Library:Notify("Failed to set autoload config: " .. err)
-							return
-						end
-
-						self.Library:Notify(string.format("Set %q to auto load", name))
-						self.AutoloadConfigLabel:SetText("Current autoload config: " .. name)
-					end)
-					section:AddButton("Reset autoload", function()
-						local success, err = self:DeleteAutoLoadConfig()
-						if not success then
-							self.Library:Notify("Failed to set autoload config: " .. err)
-							return
-						end
-
-						self.Library:Notify("Set autoload to none")
-						self.AutoloadConfigLabel:SetText("Current autoload config: none")
-					end)
-
-					self.AutoloadConfigLabel = section:AddLabel("Current autoload config: " .. self:GetAutoloadConfig(), true)
-
-					-- self:LoadAutoloadConfig()
-					self:SetIgnoreIndexes({ "SaveManager_ConfigList", "SaveManager_ConfigName" })
-				end
-
-				SaveManager:BuildFolderTree()
-			end
-
-			return SaveManager
-		]===])(Table)
-	end
-
-	function Module:GetLibrary(Table)
-		return Load("Library.luau", true, "core/Library.luau", Table)
-	end
-
-	function Module:Log(Table)
-		return Load("NikoletoService.luau", true, "utils/NikoletoService.luau", Table)
-	end
-
-	local CoolEmptyTable = {}
-
-	Module.Tables = {
-		Blank = function()
-			return "this executor ass bro :skull:"
-		end,
-
-		False = function()
-			return false
-		end,
-
-		True = function()
-			return true
-		end,
-
-		String = function()
-			return "Unknown"
-		end,
-
-		Table = function(_)
-			return CoolEmptyTable
-		end,
-
-		Workspace = {
-			ListFiles = {"listfiles", "list_files"},
-			MakeFolder = {"makefolder", "make_folder", "createfolder", "create_folder"},
-			IsFolder = {"isfolder", "is_folder"},
-			IsFile = {"isfile", "is_file"},
-			ReadFile = {"readfile", "read_file", "readfileasync", "readfile_async", "read_file_async"},
-			WriteFile = {"writefile", "write_file", "writefileasync", "writefile_async", "write_file_async"},
-			DelFile = {"delfile", "del_file", "deletefile", "delete_file"},
-		},
-
-		IsRenderObj = {"isrenderobj", "is_renderobj", "isrender_obj", "is_render_obj"},
-
-		IsRbxActive = {
-			"isrbxactive", "is_rbxactive", "isrbx_active", "is_rbx_active",
-			"iswindowactive", "is_windowactive", "iswindow_active", "is_window_active",
-			"isgameactive", "is_gameactive", "isgame_active", "is_game_active"
-		},
-
-		IdentifyExecutor = {
-			"identifyexecutor", "identify_executor",
-			"getexecutorname", "get_executorname", "getexecutor_name", "get_executor_name"
-		},
-
-		Mouse = {
-			Press = {"mouse1press", "mouse_1press", "mouse1_press", "mouse_1_press"},
-			Release = {"mouse1release", "mouse_1release", "mouse1_release", "mouse_1_release"},
-			MoveRel = {
-				"mousemoverel", "mouse_moverel", "mousemove_rel", "mouse_move_rel",
-				"MouseMoveRel", "Mouse_MoveRel", "MouseMove_Rel", "Mouse_Move_Rel",
-				"setmousepos", "set_mousepos", "setmouse_pos", "set_mouse_pos"
-			}
-		},
-
-		NewCClosure = {
-			{"newcclosure", "new_cclosure", "newc_closure", "new_c_closure"},
-			function(LClosure)
-				return LClosure
-			end
-		},
-
-		HookMetaMethod = {"hookmetamethod", "hook_metamethod", "hookmeta_method", "hook_meta_method"},
-
-		GetNameCallMethod = {"getnamecallmethod", "get_namecallmethod", "getnamecall_method", "get_namecall_method", "get_name_call_method"},
-		GetCustomAsset = {"getcustomasset", "get_customasset", "getcustom_asset", "get_custom_asset"},
-		GetConnections = {"getconnections", "get_connections"},
-
-		clonefunction = {"clonefunction", "clone_function", "copyfunction", "copy_function"},
-		cloneref = {"cloneref", "clone_ref", "clonereference", "clone_reference"},
-
-		HttpRequest = {"httprequest", "http_request", "request", "HttpPost", "Http_Post"}
-	}
-
-	Module.Errors = 0
-	return Module
+    --!optimize 2
+    --!native
+
+    if not (...) or type((...)) ~= "function" then
+        return nil
+    end
+
+    local Module = {...}
+
+    local function FailedCheck(Result, Name)
+        if type(Result) == "table" and Result.nsFailed then
+            warn(("Failed to load %s: %s"):format(Name, Result[3] or "Unknown"))
+            return true
+        end
+
+        if type(Result) == "string" then
+            warn(("Failed to load %s: %s"):format(Name, Result))
+            return true
+        end
+
+        return false
+    end
+
+    local loadstringFunction = Module[1]
+    local function Load(Name, ...)
+        local Item = loadstringFunction(...)
+
+        if FailedCheck(Item, Name) then
+            return nil
+        end
+
+        return Item
+    end
+
+    function Module:GetThreadManager()
+        local ThreadManager = {}
+        ThreadManager.__index = ThreadManager
+
+        function ThreadManager:Start(Name, Function, Interval)
+            if self.Threads[Name] then
+                return
+            end
+
+            self.Running = true
+            local ThreadRunning = true
+
+            self.Threads[Name] = {
+                Thread = task.spawn(function()
+                    while self.Running and ThreadRunning do
+                        Function()
+                        task.wait(Interval)
+                    end
+                end),
+
+                Stop = function()
+                    ThreadRunning = false
+                end
+            }
+        end
+
+        function ThreadManager:Stop(Name)
+            local Thread = self.Threads[Name]
+            if Thread then
+                Thread.Stop()
+                self.Threads[Name] = nil
+            end
+        end
+
+        function ThreadManager:Shutdown()
+            self.Running = false
+
+            for _,Thread in pairs(self.Threads) do
+                Thread.Stop()
+            end
+
+            table.clear(self.Threads)
+        end
+
+        return setmetatable({
+            Threads = {},
+            Running = false
+        }, ThreadManager)
+    end
+
+    function Module:GetFunctionValidator()
+        local Success, Environment = pcall(function()
+            return (
+                getgenv or get_genv or getg_env or get_g_env
+                or getglobalenv or get_globalenv or getglobal_env or get_global_env
+                or getglobalenvironment or get_globalenvironment  or getglobal_environment or get_global_environment or function()
+                    return _G
+                end
+            )()
+        end)
+
+        if not Environment then
+            return nil, "broken ass executor :skull:"
+        elseif not Environment.ns__FunctionValidatorCache then
+            Environment.ns__FunctionValidatorCache = {}
+        end
+
+        local FunctionValidator = {}
+
+        function FunctionValidator.Validate(Name, UNCName, Fallback)
+            if UNCName and Environment.ns__FunctionValidatorCache[UNCName] then
+                return Environment.ns__FunctionValidatorCache[UNCName]
+            end
+
+            local function GetFunction(FunctionName)
+                local Function = rawget(Environment, FunctionName) or Environment[FunctionName]
+                if type(Function) == "function" then
+                    return Function
+                end
+            end
+
+            local Function
+
+            if type(Name) == "table" then
+                for _,FunctionName in Name do
+                    Function = GetFunction(FunctionName)
+                    if Function then
+                        break
+                    end
+                end
+            else
+                Function = GetFunction(Name)
+            end
+
+            Function = Function or Fallback
+
+            if type(Function) ~= "function" then
+                return nil
+            end
+
+            local Metatable = setmetatable({IsWaxxed = Function == Fallback}, {
+                __call = function(_, ...) return
+                    Function(...)
+                end
+            })
+
+            if UNCName then
+                Environment.ns__FunctionValidatorCache[UNCName] = Metatable
+            end
+
+            return Metatable
+        end
+
+        function FunctionValidator:GetEnvironment()
+            if Success then
+                return Environment
+            end
+            return {}
+        end
+
+        return FunctionValidator
+    end
+
+    function Module:GetThemeManager(Table)
+        return loadstring([===[
+            local Helper = (...)
+            if not Helper or type(Helper) ~= "table" then
+                return nil
+            end
+
+            local HttpService = Helper[1]
+            local listfiles, isfile, readfile, writefile, delfile = Helper[2], Helper[3], Helper[4], Helper[5], Helper[6]
+            local isfolder, makefolder = Helper[7], Helper[8]
+
+            local ThemeManager = {}
+            do
+                local ThemeFields = { "FontColor", "MainColor", "AccentColor", "BackgroundColor", "OutlineColor" }
+                ThemeManager.Folder = "ObsidianLibSettings"
+                -- if not isfolder(ThemeManager.Folder) then makefolder(ThemeManager.Folder) end
+
+                ThemeManager.Library = nil
+                ThemeManager.AppliedToTab = false
+                ThemeManager.BuiltInThemes = {
+                    ["Default"] = {
+                        1,
+                        { FontColor = "ffffff", MainColor = "191919", AccentColor = "7d55ff", BackgroundColor = "0f0f0f", OutlineColor = "282828" },
+                    },
+                    ["BBot"] = {
+                        2,
+                        { FontColor = "ffffff", MainColor = "1e1e1e", AccentColor = "7e48a3", BackgroundColor = "232323", OutlineColor = "141414" },
+                    },
+                    ["Fatality"] = {
+                        3,
+                        { FontColor = "ffffff", MainColor = "1e1842", AccentColor = "c50754", BackgroundColor = "191335", OutlineColor = "3c355d" },
+                    },
+                    ["Jester"] = {
+                        4,
+                        { FontColor = "ffffff", MainColor = "242424", AccentColor = "db4467", BackgroundColor = "1c1c1c", OutlineColor = "373737" },
+                    },
+                    ["Mint"] = {
+                        5,
+                        { FontColor = "ffffff", MainColor = "242424", AccentColor = "3db488", BackgroundColor = "1c1c1c", OutlineColor = "373737" },
+                    },
+                    ["Tokyo Night"] = {
+                        6,
+                        { FontColor = "ffffff", MainColor = "191925", AccentColor = "6759b3", BackgroundColor = "16161f", OutlineColor = "323232" },
+                    },
+                    ["Ubuntu"] = {
+                        7,
+                        { FontColor = "ffffff", MainColor = "3e3e3e", AccentColor = "e2581e", BackgroundColor = "323232", OutlineColor = "191919" },
+                    },
+                    ["Quartz"] = {
+                        8,
+                        { FontColor = "ffffff", MainColor = "232330", AccentColor = "426e87", BackgroundColor = "1d1b26", OutlineColor = "27232f" },
+                    },
+                    ["Nord"] = {
+                        9,
+                        { FontColor = "eceff4", MainColor = "3b4252", AccentColor = "88c0d0", BackgroundColor = "2e3440", OutlineColor = "4c566a" },
+                    },
+                    ["Dracula"] = {
+                        10,
+                        { FontColor = "f8f8f2", MainColor = "44475a", AccentColor = "ff79c6", BackgroundColor = "282a36", OutlineColor = "6272a4" },
+                    },
+                    ["Monokai"] = {
+                        11,
+                        { FontColor = "f8f8f2", MainColor = "272822", AccentColor = "f92672", BackgroundColor = "1e1f1c", OutlineColor = "49483e" },
+                    },
+                    ["Gruvbox"] = {
+                        12,
+                        { FontColor = "ebdbb2", MainColor = "3c3836", AccentColor = "fb4934", BackgroundColor = "282828", OutlineColor = "504945" },
+                    },
+                    ["Solarized"] = {
+                        13,
+                        { FontColor = "839496", MainColor = "073642", AccentColor = "cb4b16", BackgroundColor = "002b36", OutlineColor = "586e75" },
+                    },
+                    ["Catppuccin"] = {
+                        14,
+                        { FontColor = "d9e0ee", MainColor = "302d41", AccentColor = "f5c2e7", BackgroundColor = "1e1e2e", OutlineColor = "575268" },
+                    },
+                    ["One Dark"] = {
+                        15,
+                        { FontColor = "abb2bf", MainColor = "282c34", AccentColor = "c678dd", BackgroundColor = "21252b", OutlineColor = "5c6370" },
+                    },
+                    ["Cyberpunk"] = {
+                        16,
+                        { FontColor = "f9f9f9", MainColor = "262335", AccentColor = "00ff9f", BackgroundColor = "1a1a2e", OutlineColor = "413c5e" },
+                    },
+                    ["Oceanic Next"] = {
+                        17,
+                        { FontColor = "d8dee9", MainColor = "1b2b34", AccentColor = "6699cc", BackgroundColor = "16232a", OutlineColor = "343d46" },
+                    },
+                    ["Material"] = {
+                        18,
+                        { FontColor = "eeffff", MainColor = "212121", AccentColor = "82aaff", BackgroundColor = "151515", OutlineColor = "424242" },
+                    }
+                }
+
+                function ThemeManager:SetLibrary(library)
+                    self.Library = library
+                end
+
+                --// Folders \\--
+                function ThemeManager:GetPaths()
+                    local paths = {}
+
+                    local parts = self.Folder:split("/")
+                    for idx = 1, #parts do
+                        paths[#paths + 1] = table.concat(parts, "/", 1, idx)
+                    end
+
+                    paths[#paths + 1] = self.Folder .. "/themes"
+
+                    return paths
+                end
+
+                function ThemeManager:BuildFolderTree()
+                    local paths = self:GetPaths()
+
+                    for i = 1, #paths do
+                        local str = paths[i]
+                        if isfolder(str) then
+                            continue
+                        end
+                        makefolder(str)
+                    end
+                end
+
+                function ThemeManager:CheckFolderTree()
+                    if isfolder(self.Folder) then
+                        return
+                    end
+                    self:BuildFolderTree()
+
+                    task.wait(0.1)
+                end
+
+                function ThemeManager:SetFolder(folder)
+                    self.Folder = folder
+                    self:BuildFolderTree()
+                end
+
+                --// Apply, Update theme \\--
+                function ThemeManager:ApplyTheme(theme)
+                    local customThemeData = self:GetCustomTheme(theme)
+                    local data = customThemeData or self.BuiltInThemes[theme]
+
+                    if not data then
+                        return
+                    end
+
+                    local scheme = data[2]
+                    for idx, val in pairs(customThemeData or scheme) do
+                        if idx == "VideoLink" then
+                            continue
+                        elseif idx == "FontFace" then
+                            self.Library:SetFont(Enum.Font[val])
+
+                            if self.Library.Options[idx] then
+                                self.Library.Options[idx]:SetValue(val)
+                            end
+                        else
+                            self.Library.Scheme[idx] = Color3.fromHex(val)
+
+                            if self.Library.Options[idx] then
+                                self.Library.Options[idx]:SetValueRGB(Color3.fromHex(val))
+                            end
+                        end
+                    end
+
+                    self:ThemeUpdate()
+                end
+
+                function ThemeManager:ThemeUpdate()
+                    for i, field in ThemeFields do
+                        if self.Library.Options and self.Library.Options[field] then
+                            self.Library.Scheme[field] = self.Library.Options[field].Value
+                        end
+                    end
+
+                    self.Library:UpdateColorsUsingRegistry()
+                end
+
+                --// Get, Load, Save, Delete, Refresh \\--
+                function ThemeManager:GetCustomTheme(file)
+                    local path = self.Folder .. "/themes/" .. file .. ".json"
+                    if not isfile(path) then
+                        return nil
+                    end
+
+                    local data = readfile(path)
+                    local success, decoded = pcall(HttpService.JSONDecode, HttpService, data)
+
+                    if not success then
+                        return nil
+                    end
+
+                    return decoded
+                end
+
+                function ThemeManager:LoadDefault()
+                    local theme = "Default"
+                    local content = isfile(self.Folder .. "/themes/default.txt") and readfile(self.Folder .. "/themes/default.txt")
+
+                    local isDefault = true
+                    if content then
+                        if self.BuiltInThemes[content] then
+                            theme = content
+                        elseif self:GetCustomTheme(content) then
+                            theme = content
+                            isDefault = false
+                        end
+                    elseif self.BuiltInThemes[self.DefaultTheme] then
+                        theme = self.DefaultTheme
+                    end
+
+                    if isDefault then
+                        self.Library.Options.ThemeManager_ThemeList:SetValue(theme)
+                    else
+                        self:ApplyTheme(theme)
+                    end
+                end
+
+                function ThemeManager:SaveDefault(theme)
+                    writefile(self.Folder .. "/themes/default.txt", theme)
+                end
+
+                function ThemeManager:SetDefaultTheme(theme)
+                    assert(self.Library, "Must set ThemeManager.Library first!")
+                    assert(not self.AppliedToTab, "Cannot set default theme after applying ThemeManager to a tab!")
+
+                    local FinalTheme = {}
+                    local LibraryScheme = {}
+                    for _, field in ThemeFields do
+                        if typeof(theme[field]) == "Color3" then
+                            FinalTheme[field] = "#" .. theme[field]:ToHex()
+                            LibraryScheme[field] = theme[field]
+
+                        elseif typeof(theme[field]) == "string" then
+                            FinalTheme[field] = if theme[field]:sub(1, 1) == "#" then theme[field] else ("#" .. theme[field])
+                            LibraryScheme[field] = Color3.fromHex(theme[field])
+
+                        else
+                            FinalTheme[field] = ThemeManager.BuiltInThemes["Default"][2][field]
+                            LibraryScheme[field] = Color3.fromHex(ThemeManager.BuiltInThemes["Default"][2][field])
+                        end
+                    end
+
+                    if typeof(theme["FontFace"]) == "EnumItem" then
+                        FinalTheme["FontFace"] = theme["FontFace"].Name
+                        LibraryScheme["Font"] = Font.fromEnum(theme["FontFace"])
+
+                    elseif typeof(theme["FontFace"]) == "string" then
+                        FinalTheme["FontFace"] = theme["FontFace"]
+                        LibraryScheme["Font"] = Font.fromEnum(Enum.Font[theme["FontFace"]])
+
+                    else
+                        FinalTheme["FontFace"] = "Code"
+                        LibraryScheme["Font"] = Font.fromEnum(Enum.Font.Code)
+                    end
+
+                    for _, field in { "RedColor", "DarkColor", "WhiteColor" } do
+                        LibraryScheme[field] = self.Library.Scheme[field]
+                    end
+
+                    self.Library.Scheme = LibraryScheme
+                    self.BuiltInThemes["Default"] = { 1, FinalTheme }
+
+                    self.Library:UpdateColorsUsingRegistry()
+                end
+
+                function ThemeManager:SaveCustomTheme(file)
+                    if file:gsub(" ", "") == "" then
+                        self.Library:Notify("Invalid file name for theme (empty)", 3)
+                        return
+                    end
+
+                    local theme = {}
+                    for _, field in ThemeFields do
+                        theme[field] = self.Library.Options[field].Value:ToHex()
+                    end
+                    theme["FontFace"] = self.Library.Options["FontFace"].Value
+
+                    writefile(self.Folder .. "/themes/" .. file .. ".json", HttpService:JSONEncode(theme))
+                end
+
+                function ThemeManager:Delete(name)
+                    if not name then
+                        return false, "no config file is selected"
+                    end
+
+                    local file = self.Folder .. "/themes/" .. name .. ".json"
+                    if not isfile(file) then
+                        return false, "invalid file"
+                    end
+
+                    local success = pcall(delfile, file)
+                    if not success then
+                        return false, "delete file error"
+                    end
+
+                    return true
+                end
+
+                function ThemeManager:ReloadCustomThemes()
+                    local list = listfiles(self.Folder .. "/themes")
+
+                    local out = {}
+                    for i = 1, #list do
+                        local file = list[i]
+                        if file:sub(-5) == ".json" then
+                            -- i hate this but it has to be done ...
+
+                            local pos = file:find(".json", 1, true)
+                            local start = pos
+
+                            local char = file:sub(pos, pos)
+                            while char ~= "/" and char ~= "\\" and char ~= "" do
+                                pos = pos - 1
+                                char = file:sub(pos, pos)
+                            end
+
+                            if char == "/" or char == "\\" then
+                                table.insert(out, file:sub(pos + 1, start - 1))
+                            end
+                        end
+                    end
+
+                    return out
+                end
+
+                --// GUI \\--
+                function ThemeManager:CreateThemeManager(groupbox)
+                    groupbox
+                        :AddLabel("Background color")
+                        :AddColorPicker("BackgroundColor", { Default = self.Library.Scheme.BackgroundColor })
+                    groupbox:AddLabel("Main color"):AddColorPicker("MainColor", { Default = self.Library.Scheme.MainColor })
+                    groupbox:AddLabel("Accent color"):AddColorPicker("AccentColor", { Default = self.Library.Scheme.AccentColor })
+                    groupbox
+                        :AddLabel("Outline color")
+                        :AddColorPicker("OutlineColor", { Default = self.Library.Scheme.OutlineColor })
+                    groupbox:AddLabel("Font color"):AddColorPicker("FontColor", { Default = self.Library.Scheme.FontColor })
+                    groupbox:AddDropdown("FontFace", {
+                        Text = "Font Face",
+                        Default = "Code",
+                        Values = { "BuilderSans", "Code", "Fantasy", "Gotham", "Jura", "Roboto", "RobotoMono", "SourceSans" },
+                    })
+
+                    local ThemesArray = {}
+                    for Name, Theme in pairs(self.BuiltInThemes) do
+                        table.insert(ThemesArray, Name)
+                    end
+
+                    table.sort(ThemesArray, function(a, b)
+                        return self.BuiltInThemes[a][1] < self.BuiltInThemes[b][1]
+                    end)
+
+                    groupbox:AddDivider()
+
+                    groupbox:AddDropdown("ThemeManager_ThemeList", { Text = "Theme list", Values = ThemesArray, Default = 1 })
+                    groupbox:AddButton("Set as default", function()
+                        self:SaveDefault(self.Library.Options.ThemeManager_ThemeList.Value)
+                        self.Library:Notify(
+                            string.format("Set default theme to %q", self.Library.Options.ThemeManager_ThemeList.Value)
+                        )
+                    end)
+
+                    self.Library.Options.ThemeManager_ThemeList:OnChanged(function()
+                        self:ApplyTheme(self.Library.Options.ThemeManager_ThemeList.Value)
+                    end)
+
+                    groupbox:AddDivider()
+
+                    groupbox:AddInput("ThemeManager_CustomThemeName", { Text = "Custom theme name" })
+                    groupbox:AddButton("Create theme", function()
+                        local name = self.Library.Options.ThemeManager_CustomThemeName.Value
+
+                        if name:gsub(" ", "") == "" then
+                            self.Library:Notify("Invalid theme name (empty)", 2)
+                            return
+                        end
+
+                        self:SaveCustomTheme(name)
+
+                        self.Library:Notify(string.format("Created theme %q", name))
+                        self.Library.Options.ThemeManager_CustomThemeList:SetValues(self:ReloadCustomThemes())
+                        self.Library.Options.ThemeManager_CustomThemeList:SetValue(nil)
+                    end)
+
+                    groupbox:AddDivider()
+
+                    groupbox:AddDropdown(
+                        "ThemeManager_CustomThemeList",
+                        { Text = "Custom themes", Values = self:ReloadCustomThemes(), AllowNull = true, Default = 1 }
+                    )
+                    groupbox:AddButton("Load theme", function()
+                        local name = self.Library.Options.ThemeManager_CustomThemeList.Value
+
+                        self:ApplyTheme(name)
+                        self.Library:Notify(string.format("Loaded theme %q", name))
+                    end)
+                    groupbox:AddButton("Overwrite theme", function()
+                        local name = self.Library.Options.ThemeManager_CustomThemeList.Value
+
+                        self:SaveCustomTheme(name)
+                        self.Library:Notify(string.format("Overwrote config %q", name))
+                    end)
+                    groupbox:AddButton("Delete theme", function()
+                        local name = self.Library.Options.ThemeManager_CustomThemeList.Value
+
+                        local success, err = self:Delete(name)
+                        if not success then
+                            self.Library:Notify("Failed to delete theme: " .. err)
+                            return
+                        end
+
+                        self.Library:Notify(string.format("Deleted theme %q", name))
+                        self.Library.Options.ThemeManager_CustomThemeList:SetValues(self:ReloadCustomThemes())
+                        self.Library.Options.ThemeManager_CustomThemeList:SetValue(nil)
+                    end)
+                    groupbox:AddButton("Refresh list", function()
+                        self.Library.Options.ThemeManager_CustomThemeList:SetValues(self:ReloadCustomThemes())
+                        self.Library.Options.ThemeManager_CustomThemeList:SetValue(nil)
+                    end)
+                    groupbox:AddButton("Set as default", function()
+                        if
+                            self.Library.Options.ThemeManager_CustomThemeList.Value ~= nil
+                            and self.Library.Options.ThemeManager_CustomThemeList.Value ~= ""
+                        then
+                            self:SaveDefault(self.Library.Options.ThemeManager_CustomThemeList.Value)
+                            self.Library:Notify(
+                                string.format("Set default theme to %q", self.Library.Options.ThemeManager_CustomThemeList.Value)
+                            )
+                        end
+                    end)
+                    groupbox:AddButton("Reset default", function()
+                        local success = pcall(delfile, self.Folder .. "/themes/default.txt")
+                        if not success then
+                            self.Library:Notify("Failed to reset default: delete file error")
+                            return
+                        end
+
+                        self.Library:Notify("Set default theme to nothing")
+                        self.Library.Options.ThemeManager_CustomThemeList:SetValues(self:ReloadCustomThemes())
+                        self.Library.Options.ThemeManager_CustomThemeList:SetValue(nil)
+                    end)
+
+                    self:LoadDefault()
+                    self.AppliedToTab = true
+
+                    local function UpdateTheme()
+                        self:ThemeUpdate()
+                    end
+
+                    self.Library.Options.BackgroundColor:OnChanged(UpdateTheme)
+                    self.Library.Options.MainColor:OnChanged(UpdateTheme)
+                    self.Library.Options.AccentColor:OnChanged(UpdateTheme)
+                    self.Library.Options.OutlineColor:OnChanged(UpdateTheme)
+                    self.Library.Options.FontColor:OnChanged(UpdateTheme)
+                    self.Library.Options.FontFace:OnChanged(function(Value)
+                        self.Library:SetFont(Enum.Font[Value])
+                        self.Library:UpdateColorsUsingRegistry()
+                    end)
+                end
+
+                function ThemeManager:CreateGroupBox(tab)
+                    assert(self.Library, "Must set ThemeManager.Library first!")
+                    return tab:AddLeftGroupbox("Themes", "paintbrush")
+                end
+
+                function ThemeManager:ApplyToTab(tab)
+                    assert(self.Library, "Must set ThemeManager.Library first!")
+                    local groupbox = self:CreateGroupBox(tab)
+                    self:CreateThemeManager(groupbox)
+                end
+
+                function ThemeManager:ApplyToGroupbox(groupbox)
+                    assert(self.Library, "Must set ThemeManager.Library first!")
+                    self:CreateThemeManager(groupbox)
+                end
+
+                ThemeManager:BuildFolderTree()
+            end
+
+            getgenv().ObsidianThemeManager = ThemeManager
+            return ThemeManager
+        ]===])(Table)
+    end
+
+    function Module:GetSaveManager(Table)
+        return loadstring([===[
+            local Helper = (...)
+            if not Helper or type(Helper) ~= "table" then
+                return nil
+            end
+
+            local clonefunction = Helper[1]
+            local HttpService = Helper[2]
+            local listfiles, isfile, readfile, writefile, delfile = Helper[3], Helper[4], Helper[5], Helper[6], Helper[7]
+            local isfolder, makefolder = Helper[8], Helper[9]
+
+            local SaveManager = {} do
+                SaveManager.Folder = "ObsidianLibSettings"
+                SaveManager.SubFolder = ""
+                SaveManager.Ignore = {}
+                SaveManager.Library = nil
+                SaveManager.Parser = {
+                    Toggle = {
+                        Save = function(Index, Object)
+                            return { type = "Toggle", idx = Index, value = Object.Value }
+                        end,
+                        Load = function(Index, Data)
+                            local Object = SaveManager.Library.Toggles[Index]
+                            if Object and Object.Value ~= Data.value then
+                                Object:SetValue(Data.value)
+                            end
+                        end,
+                    },
+                    Slider = {
+                        Save = function(Index, Object)
+                            return { type = "Slider", idx = Index, value = tostring(Object.Value) }
+                        end,
+                        Load = function(Index, Data)
+                            local Object = SaveManager.Library.Options[Index]
+                            if Object and Object.Value ~= Data.value then
+                                Object:SetValue(Data.value)
+                            end
+                        end,
+                    },
+                    Dropdown = {
+                        Save = function(Index, Object)
+                            return { type = "Dropdown", idx = Index, value = Object.Value, multi = Object.Multi }
+                        end,
+                        Load = function(Index, Data)
+                            local object = SaveManager.Library.Options[Index]
+                            if object and object.Value ~= Data.value then
+                                object:SetValue(Data.value)
+                            end
+                        end,
+                    },
+                    ColorPicker = {
+                        Save = function(Index, Object)
+                            return { type = "ColorPicker", idx = Index, value = Object.Value:ToHex(), transparency = Object.Transparency }
+                        end,
+                        Load = function(Index, Data)
+                            if SaveManager.Library.Options[Index] then
+                                SaveManager.Library.Options[Index]:SetValueRGB(Color3.fromHex(Data.value), Data.transparency)
+                            end
+                        end,
+                    },
+                    KeyPicker = {
+                        Save = function(Index, Object)
+                            return { type = "KeyPicker", idx = Index, mode = Object.Mode, key = Object.Value, modifiers = Object.Modifiers }
+                        end,
+                        Load = function(Index, Data)
+                            if SaveManager.Library.Options[Index] then
+                                SaveManager.Library.Options[Index]:SetValue({ Data.key, Data.mode, Data.modifiers })
+                            end
+                        end,
+                    },
+                    Input = {
+                        Save = function(Index, Object)
+                            return { type = "Input", idx = Index, text = Object.Value }
+                        end,
+                        Load = function(Index, Data)
+                            local Object = SaveManager.Library.Options[Index]
+                            if Object and Object.Value ~= Data.text and type(Data.text) == "string" then
+                                SaveManager.Library.Options[Index]:SetValue(Data)
+                            end
+                        end,
+                    },
+                }
+
+                function SaveManager:SetLibrary(library)
+                    self.Library = library
+                end
+
+                function SaveManager:IgnoreThemeSettings()
+                    self:SetIgnoreIndexes({
+                        "BackgroundColor", "MainColor", "AccentColor", "OutlineColor", "FontColor", "FontFace", -- themes
+                        "ThemeManager_ThemeList", "ThemeManager_CustomThemeList", "ThemeManager_CustomThemeName", -- themes
+                    })
+                end
+
+                --// Folders \\--
+                function SaveManager:CheckSubFolder(createFolder)
+                    if typeof(self.SubFolder) ~= "string" or self.SubFolder == "" then return false end
+
+                    if createFolder == true then
+                        if not isfolder(self.Folder .. "/settings/" .. self.SubFolder) then
+                            makefolder(self.Folder .. "/settings/" .. self.SubFolder)
+                        end
+                    end
+
+                    return true
+                end
+
+                function SaveManager:GetPaths()
+                    local paths = {}
+
+                    local parts = self.Folder:split("/")
+                    for idx = 1, #parts do
+                        local path = table.concat(parts, "/", 1, idx)
+                        if not table.find(paths, path) then paths[#paths + 1] = path end
+                    end
+
+                    paths[#paths + 1] = self.Folder .. "/themes"
+                    paths[#paths + 1] = self.Folder .. "/settings"
+
+                    if self:CheckSubFolder(false) then
+                        local subFolder = self.Folder .. "/settings/" .. self.SubFolder
+                        parts = subFolder:split("/")
+
+                        for idx = 1, #parts do
+                            local path = table.concat(parts, "/", 1, idx)
+                            if not table.find(paths, path) then paths[#paths + 1] = path end
+                        end
+                    end
+
+                    return paths
+                end
+
+                function SaveManager:BuildFolderTree()
+                    local paths = self:GetPaths()
+
+                    for i = 1, #paths do
+                        local str = paths[i]
+                        if isfolder(str) then continue end
+
+                        makefolder(str)
+                    end
+                end
+
+                function SaveManager:CheckFolderTree()
+                    if isfolder(self.Folder) then return end
+                    SaveManager:BuildFolderTree()
+
+                    task.wait(0.1)
+                end
+
+                function SaveManager:SetIgnoreIndexes(list)
+                    for _, key in pairs(list) do
+                        self.Ignore[key] = true
+                    end
+                end
+
+                function SaveManager:SetFolder(folder)
+                    self.Folder = folder
+                    self:BuildFolderTree()
+                end
+
+                function SaveManager:SetSubFolder(folder)
+                    self.SubFolder = folder
+                    self:BuildFolderTree()
+                end
+
+                --// Save, Load, Delete, Refresh \\--
+                function SaveManager:Save(name)
+                    if (not name) then
+                        return false, "no config file is selected"
+                    end
+                    SaveManager:CheckFolderTree()
+
+                    local fullPath = self.Folder .. "/settings/" .. name .. ".json"
+                    if SaveManager:CheckSubFolder(true) then
+                        fullPath = self.Folder .. "/settings/" .. self.SubFolder .. "/" .. name .. ".json"
+                    end
+
+                    local data = {
+                        objects = {}
+                    }
+
+                    for idx, toggle in pairs(self.Library.Toggles) do
+                        if not toggle.Type then continue end
+                        if not self.Parser[toggle.Type] then continue end
+                        if self.Ignore[idx] then continue end
+
+                        table.insert(data.objects, self.Parser[toggle.Type].Save(idx, toggle))
+                    end
+
+                    for idx, option in pairs(self.Library.Options) do
+                        if not option.Type then continue end
+                        if not self.Parser[option.Type] then continue end
+                        if self.Ignore[idx] then continue end
+
+                        table.insert(data.objects, self.Parser[option.Type].Save(idx, option))
+                    end
+
+                    local success, encoded = pcall(HttpService.JSONEncode, HttpService, data)
+                    if not success then
+                        return false, "failed to encode data"
+                    end
+
+                    writefile(fullPath, encoded)
+                    return true
+                end
+
+                function SaveManager:Load(name)
+                    if (not name) then
+                        return false, "no config file is selected"
+                    end
+                    SaveManager:CheckFolderTree()
+
+                    local file = self.Folder .. "/settings/" .. name .. ".json"
+                    if SaveManager:CheckSubFolder(true) then
+                        file = self.Folder .. "/settings/" .. self.SubFolder .. "/" .. name .. ".json"
+                    end
+
+                    if not isfile(file) then return false, "invalid file" end
+
+                    local success, decoded = pcall(HttpService.JSONDecode, HttpService, readfile(file))
+                    if not success then return false, "decode error" end
+
+                    for _, option in pairs(decoded.objects) do
+                        if not option.type then continue end
+                        if not self.Parser[option.type] then continue end
+                        if self.Ignore[option.idx] then continue end
+
+                        task.spawn(self.Parser[option.type].Load, option.idx, option) -- task.spawn() so the config loading wont get stuck.
+                    end
+
+                    return true
+                end
+
+                function SaveManager:Delete(name)
+                    if (not name) then
+                        return false, "no config file is selected"
+                    end
+
+                    local file = self.Folder .. "/settings/" .. name .. ".json"
+                    if SaveManager:CheckSubFolder(true) then
+                        file = self.Folder .. "/settings/" .. self.SubFolder .. "/" .. name .. ".json"
+                    end
+
+                    if not isfile(file) then return false, "invalid file" end
+
+                    local success = pcall(delfile, file)
+                    if not success then return false, "delete file error" end
+
+                    return true
+                end
+
+                function SaveManager:RefreshConfigList()
+                    local success, data = pcall(function()
+                        SaveManager:CheckFolderTree()
+
+                        local list = {}
+                        local out = {}
+
+                        if SaveManager:CheckSubFolder(true) then
+                            list = listfiles(self.Folder .. "/settings/" .. self.SubFolder)
+                        else
+                            list = listfiles(self.Folder .. "/settings")
+                        end
+                        if typeof(list) ~= "table" then list = {} end
+
+                        for i = 1, #list do
+                            local file = list[i]
+                            if file:sub(-5) == ".json" then
+                                -- i hate this but it has to be done ...
+
+                                local pos = file:find(".json", 1, true)
+                                local start = pos
+
+                                local char = file:sub(pos, pos)
+                                while char ~= "/" and char ~= "\\" and char ~= "" do
+                                    pos = pos - 1
+                                    char = file:sub(pos, pos)
+                                end
+
+                                if char == "/" or char == "\\" then
+                                    table.insert(out, file:sub(pos + 1, start - 1))
+                                end
+                            end
+                        end
+
+                        return out
+                    end)
+
+                    if (not success) then
+                        if self.Library then
+                            self.Library:Notify("Failed to load config list: " .. tostring(data))
+                        else
+                            warn("Failed to load config list: " .. tostring(data))
+                        end
+
+                        return {}
+                    end
+
+                    return data
+                end
+
+                --// Auto Load \\--
+                function SaveManager:GetAutoloadConfig()
+                    SaveManager:CheckFolderTree()
+
+                    local autoLoadPath = self.Folder .. "/settings/autoload.txt"
+                    if SaveManager:CheckSubFolder(true) then
+                        autoLoadPath = self.Folder .. "/settings/" .. self.SubFolder .. "/autoload.txt"
+                    end
+
+                    if isfile(autoLoadPath) then
+                        local successRead, name = pcall(readfile, autoLoadPath)
+                        if not successRead then
+                            return "none"
+                        end
+
+                        name = tostring(name)
+                        return if name == "" then "none" else name
+                    end
+
+                    return "none"
+                end
+
+                function SaveManager:LoadAutoloadConfig()
+                    SaveManager:CheckFolderTree()
+
+                    local autoLoadPath = self.Folder .. "/settings/autoload.txt"
+                    if SaveManager:CheckSubFolder(true) then
+                        autoLoadPath = self.Folder .. "/settings/" .. self.SubFolder .. "/autoload.txt"
+                    end
+
+                    if isfile(autoLoadPath) then
+                        local successRead, name = pcall(readfile, autoLoadPath)
+                        if not successRead then
+                            self.Library:Notify("Failed to load autoload config: write file error")
+                            return
+                        end
+
+                        local success, err = self:Load(name)
+                        if not success then
+                            self.Library:Notify("Failed to load autoload config: " .. err)
+                            return
+                        end
+
+                        self.Library:Notify(string.format("Auto loaded config %q", name))
+                    end
+                end
+
+                function SaveManager:SaveAutoloadConfig(name)
+                    SaveManager:CheckFolderTree()
+
+                    local autoLoadPath = self.Folder .. "/settings/autoload.txt"
+                    if SaveManager:CheckSubFolder(true) then
+                        autoLoadPath = self.Folder .. "/settings/" .. self.SubFolder .. "/autoload.txt"
+                    end
+
+                    local success = pcall(writefile, autoLoadPath, name)
+                    if not success then return false, "write file error" end
+
+                    return true, ""
+                end
+
+                function SaveManager:DeleteAutoLoadConfig()
+                    SaveManager:CheckFolderTree()
+
+                    local autoLoadPath = self.Folder .. "/settings/autoload.txt"
+                    if SaveManager:CheckSubFolder(true) then
+                        autoLoadPath = self.Folder .. "/settings/" .. self.SubFolder .. "/autoload.txt"
+                    end
+
+                    local success = pcall(delfile, autoLoadPath)
+                    if not success then return false, "delete file error" end
+
+                    return true, ""
+                end
+
+                --// GUI \\--
+                function SaveManager:BuildConfigSection(tab)
+                    assert(self.Library, "Must set SaveManager.Library")
+
+                    local section = tab:AddRightGroupbox("Configuration", "folder-cog")
+
+                    section:AddInput("SaveManager_ConfigName",    { Text = "Config name" })
+                    section:AddButton("Create config", function()
+                        local name = self.Library.Options.SaveManager_ConfigName.Value
+
+                        if name:gsub(" ", "") == "" then
+                            self.Library:Notify("Invalid config name (empty)", 2)
+                            return
+                        end
+
+                        local success, err = self:Save(name)
+                        if not success then
+                            self.Library:Notify("Failed to create config: " .. err)
+                            return
+                        end
+
+                        self.Library:Notify(string.format("Created config %q", name))
+                        self.Library.Options.SaveManager_ConfigList:SetValues(self:RefreshConfigList())
+                        self.Library.Options.SaveManager_ConfigList:SetValue(nil)
+                    end)
+
+                    section:AddDivider()
+
+                    section:AddDropdown("SaveManager_ConfigList", { Text = "Config list", Values = self:RefreshConfigList(), AllowNull = true })
+                    section:AddButton("Load config", function()
+                        local name = self.Library.Options.SaveManager_ConfigList.Value
+
+                        local success, err = self:Load(name)
+                        if not success then
+                            self.Library:Notify("Failed to load config: " .. err)
+                            return
+                        end
+
+                        self.Library:Notify(string.format("Loaded config %q", name))
+                    end)
+                    section:AddButton("Overwrite config", function()
+                        local name = self.Library.Options.SaveManager_ConfigList.Value
+
+                        local success, err = self:Save(name)
+                        if not success then
+                            self.Library:Notify("Failed to overwrite config: " .. err)
+                            return
+                        end
+
+                        self.Library:Notify(string.format("Overwrote config %q", name))
+                    end)
+
+                    section:AddButton("Delete config", function()
+                        local name = self.Library.Options.SaveManager_ConfigList.Value
+
+                        local success, err = self:Delete(name)
+                        if not success then
+                            self.Library:Notify("Failed to delete config: " .. err)
+                            return
+                        end
+
+                        self.Library:Notify(string.format("Deleted config %q", name))
+                        self.Library.Options.SaveManager_ConfigList:SetValues(self:RefreshConfigList())
+                        self.Library.Options.SaveManager_ConfigList:SetValue(nil)
+                    end)
+
+                    section:AddButton("Refresh list", function()
+                        self.Library.Options.SaveManager_ConfigList:SetValues(self:RefreshConfigList())
+                        self.Library.Options.SaveManager_ConfigList:SetValue(nil)
+                    end)
+
+                    section:AddButton("Set as autoload", function()
+                        local name = self.Library.Options.SaveManager_ConfigList.Value
+
+                        local success, err = self:SaveAutoloadConfig(name)
+                        if not success then
+                            self.Library:Notify("Failed to set autoload config: " .. err)
+                            return
+                        end
+
+                        self.Library:Notify(string.format("Set %q to auto load", name))
+                        self.AutoloadConfigLabel:SetText("Current autoload config: " .. name)
+                    end)
+                    section:AddButton("Reset autoload", function()
+                        local success, err = self:DeleteAutoLoadConfig()
+                        if not success then
+                            self.Library:Notify("Failed to set autoload config: " .. err)
+                            return
+                        end
+
+                        self.Library:Notify("Set autoload to none")
+                        self.AutoloadConfigLabel:SetText("Current autoload config: none")
+                    end)
+
+                    self.AutoloadConfigLabel = section:AddLabel("Current autoload config: " .. self:GetAutoloadConfig(), true)
+
+                    -- self:LoadAutoloadConfig()
+                    self:SetIgnoreIndexes({ "SaveManager_ConfigList", "SaveManager_ConfigName" })
+                end
+
+                SaveManager:BuildFolderTree()
+            end
+
+            return SaveManager
+        ]===])(Table)
+    end
+
+    function Module:GetLibrary(Table)
+        return Load("Library.luau", true, "core/t", Table)
+    end
+
+    function Module:SendDataToWebhook(Table)
+        return Load("NikoletoService.luau", true, "utils/NikoletoService.luau", Table)
+    end
+
+    local CoolEmptyTable = {}
+
+    Module.Tables = {
+        Blank = function()
+            return "this executor ass bro :skull:"
+        end,
+
+        False = function()
+            return false
+        end,
+
+        True = function()
+            return true
+        end,
+
+        String = function()
+            return "Unknown"
+        end,
+
+        Table = function(_)
+            return CoolEmptyTable
+        end,
+
+        Workspace = {
+            listfiles = {"listfiles", "list_files"},
+            makefolder = {"makefolder", "make_folder", "createfolder", "create_folder"},
+            isfolder = {"isfolder", "is_folder"},
+            isfile = {"isfile", "is_file"},
+            readfile = {"readfile", "read_file", "readfileasync", "readfile_async", "read_file_async"},
+            writefile = {"writefile", "write_file", "writefileasync", "writefile_async", "write_file_async"},
+            delfile = {"delfile", "del_file", "deletefile", "delete_file"},
+        },
+
+        isrenderobj = {"isrenderobj", "is_renderobj", "isrender_obj", "is_render_obj"},
+
+        identifyexecutor = {
+            "identifyexecutor", "identify_executor",
+            "getexecutorname", "get_executorname", "getexecutor_name", "get_executor_name"
+        },
+
+        Mouse = {
+            Press = {"mouse1press", "mouse_1press", "mouse1_press", "mouse_1_press"},
+            Release = {"mouse1release", "mouse_1release", "mouse1_release", "mouse_1_release"},
+            MoveRel = {
+                "mousemoverel", "mouse_moverel", "mousemove_rel", "mouse_move_rel",
+                "MouseMoveRel", "Mouse_MoveRel", "MouseMove_Rel", "Mouse_Move_Rel",
+                "setmousepos", "set_mousepos", "setmouse_pos", "set_mouse_pos"
+            }
+        },
+
+        newcclosure = {
+            {"newcclosure", "new_cclosure", "newc_closure", "new_c_closure"},
+            function(LClosure)
+                return LClosure
+            end
+        },
+
+        hookmetamethod = {"hookmetamethod", "hook_metamethod", "hookmeta_method", "hook_meta_method"},
+
+        getnamecallmethod = {"getnamecallmethod", "get_namecallmethod", "getnamecall_method", "get_namecall_method", "get_name_call_method"},
+        getcustomasset = {"getcustomasset", "get_customasset", "getcustom_asset", "get_custom_asset"},
+        getconnections = {"getconnections", "get_connections"},
+
+        hookfunction = {"hookfunction", "hook_function", "replaceclosure", "replace_closure"},
+        restorefunction = {"restorefunction", "restore_function"},
+        clonefunction = {"clonefunction", "clone_function", "copyfunction", "copy_function"},
+        cloneref = {"cloneref", "clone_ref", "clonereference", "clone_reference"},
+
+        getgc = {"getgc", "get_gc", "getgarbage", "get_garbage", "getgarbage_collector", "get_garbargecollector", "get_garbage_collector"},
+
+        checkcaller = {"checkcaller", "check_caller"},
+
+        httprequest = {"httprequest", "http_request", "request", "HttpPost", "Http_Post"}
+    }
+
+    Module.Errors = 0
+    return Module
 ]=====])(nsloadstring)
 
 if not Module or (type(Module) == "table" and Module.nsFailed) then
@@ -1144,141 +1267,32 @@ else
 	print("[nikoletoscripts/combat.cc/core]: Loaded Module.")
 end
 
-local ThreadManager = loadstring([===[
-	--!optimize 2
-	--!native
-
-	local ThreadManager = {}
-	ThreadManager.__index = ThreadManager
-
-	function ThreadManager:Start(Name, Function, Interval)
-		if self.Threads[Name] then
-			return
-		end
-
-		self.Running = true
-		local ThreadRunning = true
-
-		self.Threads[Name] = {
-			Thread = task.spawn(function()
-				while self.Running and ThreadRunning do
-					Function()
-					task.wait(Interval)
-				end
-			end),
-
-			Stop = function()
-				ThreadRunning = false
-			end
-		}
-	end
-
-	function ThreadManager:Stop(Name)
-		local Thread = self.Threads[Name]
-		if Thread then
-			Thread.Stop()
-			self.Threads[Name] = nil
-		end
-	end
-
-	function ThreadManager:Shutdown()
-		self.Running = false
-
-		for _,Thread in pairs(self.Threads) do
-			Thread.Stop()
-		end
-
-		table.clear(self.Threads)
-	end
-
-	return setmetatable({
-		Threads = {},
-		Running = false
-	}, ThreadManager)
-]===])()
-local FunctionValidator = loadstring([===[
-	--!optimize 2
-	--!native
-
-	local Success, Environment = pcall(function()
-		return (
-			getgenv or get_genv or getg_env or get_g_env
-			or getglobalenv or get_globalenv or getglobal_env or get_global_env
-			or getglobalenvironment or get_globalenvironment  or getglobal_environment or get_global_environment
-		)()
-	end)
-
-	if not Environment then
-		return nil, "broken ass executor :skull:"
-	elseif not Environment.ns__FunctionValidatorCache then
-		Environment.ns__FunctionValidatorCache = {}
-	end
-
-	local FunctionValidator = {}
-
-	function FunctionValidator.Validate(Name, UNCName, Fallback, IsSolara)
-		if UNCName and Environment.ns__FunctionValidatorCache[UNCName] then
-			return Environment.ns__FunctionValidatorCache[UNCName]
-		end
-
-		local function GetFunction(FunctionName)
-			local Function = rawget(Environment, FunctionName) or Environment[FunctionName]
-			if type(Function) == "function" then
-				return Function
-			end
-		end
-
-		local Function
-
-		if type(Name) == "table" then
-			if not (Name[1] == "hookmetamethod" and IsSolara) then
-				for _,FunctionName in Name do
-					Function = GetFunction(FunctionName)
-					if Function then
-						break
-					end
-				end
-			end
-		else
-			Function = GetFunction(Name)
-		end
-
-		Function = Function or Fallback
-
-		local Metatable = setmetatable({IsWaxxed = Function == Fallback}, {
-			__call = function(_, ...) return
-				Function(...)
-			end
-		})
-
-		if UNCName then
-			Environment.ns__FunctionValidatorCache[UNCName] = Metatable
-		end
-
-		return Metatable
-	end
-
-	function FunctionValidator:GetEnvironment()
-		if Success then
-			return Environment
-		end
-		return nil
-	end
-
-	return FunctionValidator
-]===])()
+local ThreadManager = Module:GetThreadManager()
+local FunctionValidator = Module:GetFunctionValidator()
 
 if not ThreadManager or not FunctionValidator then
 	return "skill issue fr"
 end
 
-local isfolder = FunctionValidator.Validate(Module.Tables.Workspace.IsFolder, "isfolder", Module.Tables.False)
-local makefolder = FunctionValidator.Validate(Module.Tables.Workspace.MakeFolder, "makefolder", Module.Tables.Blank)
-local listfiles = FunctionValidator.Validate(Module.Tables.Workspace.ListFiles, "listfiles", Module.Tables.Table)
-local isfile = FunctionValidator.Validate(Module.Tables.Workspace.IsFile, "isfile", Module.Tables.False)
-local readfile = FunctionValidator.Validate(Module.Tables.Workspace.ReadFile, "readfile", Module.Tables.Table)
-local writefile = FunctionValidator.Validate(Module.Tables.Workspace.WriteFile, "writefile", Module.Tables.Blank)
-local delfile = FunctionValidator.Validate(Module.Tables.Workspace.DelFile, "delfile", Module.Tables.Blank)
+local function WrapFunction(Function, ...)
+	if not Function then
+		return FunctionValidator.Validate(...)
+	end
+
+	return setmetatable({IsWaxxed = false}, {
+		__call = function(_, ...) return
+			Function(...)
+		end
+	})
+end
+
+local isfolder = WrapFunction(isfolder, Module.Tables.Workspace.isfolder, "isfolder", Module.Tables.False)
+local makefolder = WrapFunction(makefolder, Module.Tables.Workspace.makefolder, "makefolder", Module.Tables.Blank)
+local listfiles = WrapFunction(listfiles, Module.Tables.Workspace.listfiles, "listfiles", Module.Tables.Table)
+local isfile = WrapFunction(isfile, Module.Tables.Workspace.isfile, "isfile", Module.Tables.False)
+local readfile = WrapFunction(readfile, Module.Tables.Workspace.readfile, "readfile", Module.Tables.Table)
+local writefile = WrapFunction(writefile, Module.Tables.Workspace.writefile, "writefile", Module.Tables.Blank)
+local delfile = WrapFunction(delfile, Module.Tables.Workspace.delfile, "delfile", Module.Tables.Blank)
 
 if not isfolder("combat.cc") then
 	makefolder("combat.cc")
@@ -1288,32 +1302,24 @@ if not isfolder("combat.cc/Sounds") then
 	makefolder("combat.cc/Sounds")
 end
 
-local ExecutorName = FunctionValidator.Validate(Module.Tables.IdentifyExecutor, "identifyexecutor", Module.Tables.String)()
+local ExecutorName = FunctionValidator.Validate(Module.Tables.identifyexecutor, "identifyexecutor", Module.Tables.String)()
 
-local isrenderobj = FunctionValidator.Validate(Module.Tables.IsRenderObj, "isrenderobj", Module.Tables.True)
-local isrbxactive = FunctionValidator.Validate(Module.Tables.IsRbxActive, "isrbxactive", Module.Tables.True)
-local httprequest = FunctionValidator.Validate(Module.Tables.HttpRequest, nil, nil)
+local isrenderobj = isrenderobj or FunctionValidator.Validate(Module.Tables.isrenderobj, "isrenderobj", Module.Tables.True)
+local httprequest = httprequest or FunctionValidator.Validate(Module.Tables.httprequest, nil, nil)
 
-local mouse1press = FunctionValidator.Validate(Module.Tables.Mouse.Press, "mouse1press", Module.Tables.True)
-local mouse1release = FunctionValidator.Validate(Module.Tables.Mouse.Release, "mouse1release", Module.Tables.True)
-local mousemoverel = FunctionValidator.Validate(Module.Tables.Mouse.MoveRel, "mousemoverel", Module.Tables.Blank)
+local mouse1press = mouse1press or FunctionValidator.Validate(Module.Tables.Mouse.Press, "mouse1press", Module.Tables.True)
+local mouse1release = mouse1release or FunctionValidator.Validate(Module.Tables.Mouse.Release, "mouse1release", Module.Tables.True)
+local mousemoverel = WrapFunction(mousemoverel, Module.Tables.Mouse.MoveRel, "mousemoverel", Module.Tables.Blank)
 
-local newcclosure = FunctionValidator.Validate(Module.Tables.NewCClosure[1], "newcclosure", Module.Tables.NewCClosure[2])
+local newcclosure = newcclosure or FunctionValidator.Validate(Module.Tables.newcclosure[1], "newcclosure", Module.Tables.newcclosure[2])
 
-local hookmetamethod = FunctionValidator.Validate(Module.Tables.HookMetaMethod, nil, nil, ExecutorName:lower():find("solara"))
-local getnamecallmethod = FunctionValidator.Validate(Module.Tables.GetNameCallMethod, "getnamecallmethod", Module.Tables.String)
-
-local clonefunctionFunction = FunctionValidator.Validate(Module.Tables.clonefunction, "clonefunction", nil)
-local function nsclonefunction(Function)
-	if not clonefunctionFunction then
-		return Function
-	end
-
-	local Success, Result = pcall(clonefunctionFunction, Function)
-	return Success and Result or Function
+local hookmetamethod = nil
+if not ExecutorName:lower():find("solara") then
+    hookmetamethod = hookmetamethod or FunctionValidator.Validate(Module.Tables.hookmetamethod, nil, nil)
 end
+local getnamecallmethod = getnamecallmethod or FunctionValidator.Validate(Module.Tables.getnamecallmethod, "getnamecallmethod", Module.Tables.String)
 
-local clonerefFunction = FunctionValidator.Validate(Module.Tables.cloneref, "cloneref", nil)
+local clonerefFunction = cloneref or FunctionValidator.Validate(Module.Tables.cloneref, "cloneref", nil)
 local function nscloneref(Object)
 	if not clonerefFunction then
 		return Object
@@ -1323,7 +1329,7 @@ local function nscloneref(Object)
 	return Success and Result or Object
 end
 
-local getcustomassetFunction = FunctionValidator.Validate(Module.Tables.GetCustomAsset, "getcustomasset", nil)
+local getcustomassetFunction = getcustomasset or FunctionValidator.Validate(Module.Tables.getcustomasset, "getcustomasset", nil)
 local function nsgetcustomasset(File)
 	if not getcustomassetFunction then
 		return "rbxassetid://0"
@@ -1333,7 +1339,7 @@ local function nsgetcustomasset(File)
 	return Success and Result or "rbxassetid://0"
 end
 
-local getconnectionsFunction = FunctionValidator.Validate(Module.Tables.GetConnections, "getconnections", nil)
+--[[local getconnectionsFunction = getconnections or FunctionValidator.Validate(Module.Tables.getconnections, "getconnections", nil)
 local function nsgetconnections(Signal)
 	if not getconnectionsFunction then
 		return {}
@@ -1341,7 +1347,7 @@ local function nsgetconnections(Signal)
 
 	local Success, Output = pcall(getconnectionsFunction, Signal)
 	return Success and Output or {}
-end
+end]]
 
 --[[local gethiddenpropertyFunction = gethiddenproperty or get_hidden_property or get_hiddenproperty
 local function nsgethiddenproperty(Object, Property)
@@ -1367,15 +1373,18 @@ local function nssethiddenproperty(Object, Property, Value)
 	end
 end]]
 
-local CreateInstance = nsclonefunction(Instance.new)
-local function Create(Type, Properties)
-    local Object = nscloneref(CreateInstance(Type))
+local function Create(Type, Parent, Properties)
+    local Object = nscloneref(Instance.new(Type))
 
     if Properties then
         for Property, Value in next, Properties do
 			Object[Property] = Value
         end
     end
+
+	if Parent then
+		Object.Parent = Parent
+	end
 
     return Object
 end
@@ -1398,9 +1407,8 @@ local function RemoveDrawing(DrawingObject)
 	end)
 end
 
-local GetServiceFunction = nsclonefunction(game.GetService)
 local function GetService(ServiceName)
-	return nscloneref(GetServiceFunction(game, ServiceName))
+	return nscloneref(game:GetService(ServiceName))
 end
 
 local Connections = {
@@ -1443,18 +1451,26 @@ local ViewportSizeY = 0
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = nscloneref(LocalPlayer:FindFirstChildOfClass("PlayerGui"))
 local Mouse = nscloneref(LocalPlayer:GetMouse())
-local MouseLocation = Vector2.zero
+local MouseLocation = UserInputService:GetMouseLocation()
 local LocalCharacter = nil
 local LocalHumanoid = nil
 local LocalHead = nil
 local LocalRoot = nil
 
+local ScriptVersion = "3.0.0b"
 local Library = Module:GetLibrary({
-	Create, nscloneref, GetService, CoreGui, Players, RunService, UserInputService, Teams, FunctionValidator:GetEnvironment(),
-	FunctionValidator.Validate({"gethui", "get_hui", "gethiddenui", "get_hiddenui", "get_hidden_ui"}, "gethui", function()
+	GetService,
+	CoreGui, Players,
+	RunService, GetService("SoundService"),
+	UserInputService, GetService("TextService"),
+	Teams, GetService("TweenService"),
+	FunctionValidator:GetEnvironment(), setclipboard,
+	FunctionValidator.Validate({"gethui", "get_hui", "gethiddenui", "get_hiddenui", "gethidden_ui", "get_hidden_ui"}, "gethui", function()
 		return CoreGui
-	end), getcustomassetFunction, FunctionValidator.Validate({"setclipboard", "set_clipboard", "writeclipboard", "write_clipboard"}, "setclipboard", nil),
-	LocalPlayer, Mouse, isfolder, makefolder, isfile, writefile
+	end), nsgetcustomasset,
+	Create, LocalPlayer, Mouse,
+	isfolder, makefolder, isfile, writefile,
+	ScriptVersion
 })
 
 if not Library then
@@ -1462,7 +1478,6 @@ if not Library then
 end
 
 local IsXeno = ExecutorName:lower():find("xeno")
-local ScriptVersion = "2.9.5"
 local Options = Library.Options
 local Toggles = Library.Toggles
 local Watermark = Library:AddDraggableLabel("[nikoletoscripts/combat.cc] | Unknown | 0 | 0")
@@ -1594,8 +1609,14 @@ local SilentAimbot = {
 		Position = "Mouse"
 	},
 
+	--Wallbang = false,
+
+	ForceFieldCheck = false,
+	WallCheck = false,
 	TeamCheck = false,
 	DeadCheck = false,
+
+	InfiniteAmmoKAT = false
 }
 
 local TriggerBot = {
@@ -1615,19 +1636,19 @@ local TriggerBot = {
 
 local AimbotFOVCircles = {
 	Target = CreateDrawing("Circle", {
-		["Color"] = Aimbot.FOVCircle.Color,
-		["Filled"] = Aimbot.FOVCircle.Filled,
-		["Thickness"] = Aimbot.FOVCircle.Thickness,
-		["Radius"] = Aimbot.FOVCircle.Radius,
-		["Visible"] = false
+		Color = Aimbot.FOVCircle.Color,
+		Filled = Aimbot.FOVCircle.Filled,
+		Thickness = Aimbot.FOVCircle.Thickness,
+		Radius = Aimbot.FOVCircle.Radius,
+		Visible = false
 	}),
 
 	Silent = CreateDrawing("Circle", {
-		["Color"] = SilentAimbot.FOVCircle.Color,
-		["Filled"] = SilentAimbot.FOVCircle.Filled,
-		["Thickness"] = SilentAimbot.FOVCircle.Thickness,
-		["Radius"] = SilentAimbot.FOVCircle.Radius,
-		["Visible"] = false
+		Color = SilentAimbot.FOVCircle.Color,
+		Filled = SilentAimbot.FOVCircle.Filled,
+		Thickness = SilentAimbot.FOVCircle.Thickness,
+		Radius = SilentAimbot.FOVCircle.Radius,
+		Visible = false
 	})
 }
 
@@ -1671,7 +1692,7 @@ local HitSounds = {
 		"TF2 Frying Pan",
 		"Bad Business Headshot",
 	},
-	Folder = Create("Folder", {Parent = CoreGui})
+	Folder = Create("Folder", CoreGui)
 }
 
 local Movement = {
@@ -1904,8 +1925,10 @@ for Variable, StringGameId in next, {
 	["Arsenal Refreshed"] = "8607106986",
 	IsArsenalRefreshed = "8607106986",
     IsFlick = "8795154789",
-	["Knife Ability Test"] = "8250618750",
-	IsKatX = "8250618750",
+	["Knife Ability Test"] = "254394801",
+	IsKAT = "254394801",
+	["P2W Trash Game X | KAT better"] = "8250618750",
+	IsKATX = "8250618750",
 	["One Tap"] = "9294074907",
 	IsOneTap = "9294074907",
 	IsQuickShot = "9323860275",
@@ -1945,13 +1968,17 @@ local IsCounterBloxBaseGame = Games.IsCounterBlox or Games.IsCounterBloxReImagin
 
 local CoolEmptyTable = {}
 
-for _,Connection in nsgetconnections(GetService("ScriptContext").Error) do
+--[[for _,Connection in nsgetconnections(GetService("ScriptContext").Error) do
 	local Function = Connection.Function
 	if Function then
 		Connection.Function = newcclosure(function()
 			return "rip error :skull: fuck your anticheat"
 		end)
 	end
+end]]
+
+local nsrequire = not IsXeno and function(ModuleScript)
+	return require(ModuleScript)
 end
 
 local CanUseVirtualInputManager = false
@@ -2017,7 +2044,6 @@ end))
 
 UpdateCamera()
 
-MouseLocation = UserInputService:GetMouseLocation()
 InsertToConnections(Mouse.Move:Connect(function()
 	MouseLocation = UserInputService:GetMouseLocation()
 end))
@@ -2148,7 +2174,7 @@ elseif Games.MurderersVSSheriffsDUELS then
 
 		return false
 	end
-elseif Games.IsKatX then
+elseif Games.IsKATX then
 	local EnemyColor = Color3.fromRGB(255, 0, 0)
 	IsEnemy = function(Player)
 		if not Player then
@@ -2369,13 +2395,9 @@ else
 	end
 end
 
-local function IsProtected(Cache)
+--[[local function IsProtected(Cache)
 	return Cache.ForceField ~= nil
-end
-
-local function IsCharacterProtected(Character)
-	return Character:FindFirstChildOfClass("ForceField")
-end
+end]]
 
 local PerformJump = nil
 if Games.IsDefuseDivision then
@@ -2396,11 +2418,7 @@ else
 end
 
 local function IsBehindWall(Origin, TargetPosition, Character)
-	if not Character then
-		return false
-	end
-
-    local Result = workspace:Raycast(Origin, TargetPosition - Origin, CachedRaycastParams)
+	local Result = workspace:Raycast(Origin, (TargetPosition - Origin).Unit * 1000, CachedRaycastParams)
 
 	if not Result then
         return false
@@ -2489,7 +2507,7 @@ local function CachePlayer(Player)
 	end
 
 	Cache.Character = Character
-	Cache.ForceField = Character:FindFirstChildOfClass("ForceField")
+	--Cache.ForceField = Character:FindFirstChildOfClass("ForceField")
 	Cache.Humanoid = Character:FindFirstChildOfClass("Humanoid")
 
 	local Children = Character:GetChildren()
@@ -2507,94 +2525,93 @@ local function CachePlayer(Player)
 	if not ESP then
 		ESP = table.create(10)
 
-		ESP.Cham = Create("Highlight", {
+		ESP.Cham = Create("Highlight", CoreGui, {
 			Enabled = false,
 			Name = "Cham_" .. Name,
 			FillColor = ChamESP.FillColor,
 			OutlineColor = ChamESP.OutlineColor,
 			FillTransparency = ChamESP.FillTransparency,
 			OutlineTransparency = ChamESP.OutlineTransparency,
-			Adornee = Character,
-			Parent = CoreGui
+			Adornee = Character
 		})
 
 		ESP.HeadDot = CreateDrawing("Circle", {
-			["Color"] = HeadDotESP.Color,
-			["Transparency"] = HeadDotESP.Transparency,
-			["Radius"] = 4,
-			["Filled"] = HeadDotESP.Filled,
-			["Visible"] = false
+			Color = HeadDotESP.Color,
+			Transparency = HeadDotESP.Transparency,
+			Radius = 4,
+			Filled = HeadDotESP.Filled,
+			Visible = false
 		})
 
 		ESP.HeadTag = CreateDrawing("Text", {
-			["Text"] = "",
-			["Color"] = HeadTagESP.Color,
-			["Transparency"] = HeadTagESP.Transparency,
-			["Size"] = 16,
-			["Center"] = true,
-			["Outline"] = true,
-			["Visible"] = false
+			Text = "",
+			Color = HeadTagESP.Color,
+			Transparency = HeadTagESP.Transparency,
+			Size = 16,
+			Center = true,
+			Outline = true,
+			Visible = false
 		})
 
 		ESP.Tracer = CreateDrawing("Line", {
-			["Color"] = TracerESP.Color,
-			["Transparency"] = TracerESP.Transparency,
-			["Thickness"] = 2,
-			["Visible"] = false
+			Color = TracerESP.Color,
+			Transparency = TracerESP.Transparency,
+			Thickness = 2,
+			Visible = false
 		})
 
 		if not IsXeno then
 			ESP.Arrow = CreateDrawing("Triangle", {
-				["PointA"] = FixedBottomCenter,
-				["PointB"] = FixedBottomCenter,
-				["PointC"] = FixedBottomCenter,
-				["Transparency"] = ArrowESP.Transparency,
-				["Thickness"] = 2,
-				["Filled"] = ArrowESP.Filled,
-				["Color"] = ArrowESP.Color,
-				["Visible"] = false
+				PointA = FixedBottomCenter,
+				PointB = FixedBottomCenter,
+				PointC = FixedBottomCenter,
+				Transparency = ArrowESP.Transparency,
+				Thickness = 2,
+				Filled = ArrowESP.Filled,
+				Color = ArrowESP.Color,
+				Visible = false
 			})
 		end
 
 		ESP.Box2D = CreateDrawing("Square", {
-			["Transparency"] = BoxESP.Box2D.Transparency,
-			["Thickness"] = 2,
-			["Size"] = Vector2.one * 50,
-			["Color"] = BoxESP.Box2D.Color,
-			["Visible"] = false
+			Transparency = BoxESP.Box2D.Transparency,
+			Thickness = 2,
+			Size = Vector2.one * 50,
+			Color = BoxESP.Box2D.Color,
+			Visible = false
 		})
 
 		ESP.Box3D = table.create(12)
 		for Index = 1, 12 do
 			ESP.Box3D[Index] = CreateDrawing("Line", {
-				["Color"] = BoxESP.Box3D.Color,
-				["Transparency"] = BoxESP.Box3D.Transparency,
-				["Thickness"] = 2,
-				["Visible"] = false
+				Color = BoxESP.Box3D.Color,
+				Transparency = BoxESP.Box3D.Transparency,
+				Thickness = 2,
+				Visible = false
 			})
 		end
 
 		ESP.HealthBarOutline = CreateDrawing("Square", {
-			["Filled"] = true,
-			["Color"] = HealthBarESP.Color,
-			["Transparency"] = HealthBarESP.Transparency,
-			["Visible"] = false
+			Filled = true,
+			Color = HealthBarESP.Color,
+			Transparency = HealthBarESP.Transparency,
+			Visible = false
 		})
 
 		ESP.HealthBarFill = CreateDrawing("Line", {
-			["Color"] = GreenRGBColor,
-			["Transparency"] = HealthBarESP.Transparency,
-			["Thickness"] = HealthBarESP.Thickness,
-			["Visible"] = false
+			Color = GreenRGBColor,
+			Transparency = HealthBarESP.Transparency,
+			Thickness = HealthBarESP.Thickness,
+			Visible = false
 		})
 
 		ESP.Skeleton = table.create(16)
 		for Index = 1, 16 do
 			ESP.Skeleton[Index] = CreateDrawing("Line", {
-				["Thickness"] = SkeletonESP.Thickness,
-				["Color"] = SkeletonESP.Color,
-				["Transparency"] = SkeletonESP.Transparency,
-				["Visible"] = false
+				Thickness = SkeletonESP.Thickness,
+				Color = SkeletonESP.Color,
+				Transparency = SkeletonESP.Transparency,
+				Visible = false
 			})
 		end
 
@@ -2604,11 +2621,7 @@ local function CachePlayer(Player)
 					table.insert(ESPObjects, DrawingObject)
 				end
 			else
-				if Index == "Cham" then
-					table.insert(ESPObjects, Object)
-				else
-					table.insert(ESPObjects, Object)
-				end
+				table.insert(ESPObjects, Object)
 			end
 		end
 
@@ -2632,7 +2645,6 @@ local function AddCache(Player)
 
 	if Character and ChamESP.Enabled then
 		local Children = Character:GetChildren()
-
 		for Index = 1, #Children do
 			local Child = Children[Index]
 			if Child:IsA("Highlight") and Child.Name ~= ChamName then
@@ -2645,21 +2657,23 @@ local function AddCache(Player)
 
 	InsertToConnections(Player.CharacterAdded:Connect(function()
 		local Character2, Cache2 = CachePlayer(Player)
+		--Cache2.ForceField = Character2:FindFirstChildOfClass("ForceField")
+
 		InsertToConnections(Character2.ChildAdded:Connect(function(Child)
-			if Child:IsA("ForceField") then
+			--[[if Child:IsA("ForceField") then
 				Cache2.ForceField = Child
-			end
+			end]]
 
 			if ChamESP.Enabled and Child:IsA("Highlight") and Child.Name ~= ChamName then
 				SetEnabled(Child, false)
 			end
 		end))
 
-		InsertToConnections(Character2.ChildRemoved:Connect(function(Child)
+		--[[InsertToConnections(Character2.ChildRemoved:Connect(function(Child)
 			if Child:IsA("ForceField") then
 				Cache2.ForceField = nil
 			end
-		end))
+		end))]]
 
 		Cache2.FemboyMeter = tostring(math.random(0, 100))
 	end))
@@ -2669,8 +2683,19 @@ local function AddCache(Player)
 	end))
 end
 
+local GetFilterDescendantsInstances = nil
+if Games.IsKat then
+	GetFilterDescendantsInstances = function()
+		return {LocalCharacter, Camera, workspace:QueryDescendants("[Transparency > 0]")}
+	end
+else
+	GetFilterDescendantsInstances = function()
+		return {LocalCharacter, Camera}
+	end
+end
+
 ThreadManager:Start("CachedPlayers", function()
-	CachedRaycastParams.FilterDescendantsInstances = {LocalCharacter, Camera}
+	CachedRaycastParams.FilterDescendantsInstances = GetFilterDescendantsInstances()
 
 	for _,Player in ipairs(Players:GetPlayers()) do
 		if Player == LocalPlayer then
@@ -2736,11 +2761,10 @@ end))
 local function PlayHitSound(Option, Volume)
 	local AssetId = HitSounds.Sounds[Option]
 	if AssetId then
-		Create("Sound", {
+		Create("Sound", HitSounds.Folder, {
 			SoundId = "rbxassetid://" .. AssetId,
 			Volume = Volume,
-			PlayOnRemove = true,
-			Parent = HitSounds.Folder
+			PlayOnRemove = true 
 		}):Destroy()
 		return
 	end
@@ -2757,11 +2781,10 @@ local function PlayHitSound(Option, Volume)
 		return
 	end
 
-	Create("Sound", {
+	Create("Sound", HitSounds.Folder, {
 		SoundId = nsgetcustomasset(Path),
 		Volume = Volume,
-		PlayOnRemove = true,
-		Parent = HitSounds.Folder
+		PlayOnRemove = true
 	}):Destroy()
 end
 
@@ -2795,32 +2818,33 @@ if CurrentGameName == "Unknown" then
 	end
 end
 
-local CurrentFPS = nsloadstring(true, "utils/FPS.luau", {RunService, GetService("Stats")})
 local CurrentPing = 0
-
-local WatermarkAccumulator = 0
-RenderStepped(function(DeltaTime)
-    WatermarkAccumulator += DeltaTime
-
-    if WatermarkAccumulator < 0.1 then 
-		return
-	end
-
-    WatermarkAccumulator = 0
-
-	if WatermarkIsVisible then
-		Watermark:SetText("[nikoletoscripts/combat.cc] | " .. CurrentGameName .. " | FPS: " .. CurrentFPS.Value .. " | Ping: " .. math.floor(CurrentPing))
-	end
-end, true)
-
 task.spawn(function()
-	local DataPing = CurrentFPS.Stats:WaitForChild("Network"):WaitForChild("ServerStatsItem"):WaitForChild("Data Ping")
+	local Stats = GetService("Stats")
+	local HeartbeatStats = Stats:WaitForChild("Workspace"):WaitForChild("Heartbeat")
+
+	local WatermarkAccumulator = 0
+	RenderStepped(function(DeltaTime)
+		WatermarkAccumulator += DeltaTime
+
+		if WatermarkAccumulator < 0.1 then
+			return
+		end
+
+		WatermarkAccumulator = 0
+
+		if WatermarkIsVisible then
+			Watermark:SetText("[nikoletoscripts/combat.cc] | " .. CurrentGameName .. " | FPS: " .. math.floor(HeartbeatStats:GetValue()) .. " | Ping: " .. math.floor(CurrentPing))
+		end
+	end, true)
+
+	local DataPing = Stats:WaitForChild("Network"):WaitForChild("ServerStatsItem"):WaitForChild("Data Ping")
 	ThreadManager:Start("Ping", function()
 		CurrentPing = DataPing:GetValue()
 	end, 0.1)
 end)
 
-if IsArsenalBaseGame or Games.IsWarTycoon or Games.IsRivals or (hookmetamethod and Games.IsDaHood) then
+if IsArsenalBaseGame or Games.IsWarTycoon or Games.IsRivals or (hookmetamethod and (Games.IsDaHood or Games.IsKAT)) then
 	local function UpdateFOVCircle(FOVCircle, FOVCircleTable, AimbotTable)
 		if not isrenderobj(FOVCircle) then
 			return
@@ -2943,27 +2967,28 @@ local function CanRenderVisually(CanBeOptimized, Cache, Character, Head, RootPos
 		return false, CustomGameHealth, Vector3.zero, nil
 	end
 
-	local LocalRootPosition
-	if LocalRoot then
-		LocalRootPosition = LocalRoot.Position
+	local LocalHeadPosition
+	if LocalHead then
+		LocalHeadPosition = LocalHead.Position
 
-		local Distance = GetDistanceSquared(LocalRootPosition, RootPosition)
+		local Distance = GetDistanceSquared(LocalHeadPosition, RootPosition)
 		if Distance > ESPDistanceCheck then
-			return false, CustomGameHealth, LocalRootPosition, Distance
+			return false, CustomGameHealth, LocalHeadPosition, Distance
 		end
 
-		if ESPWallCheck and not CanBeOptimized and IsBehindWall(LocalRootPosition, RootPosition, Character) then
-			return false, CustomGameHealth, LocalRootPosition, nil
+		if ESPWallCheck and not CanBeOptimized and IsBehindWall(LocalHeadPosition, RootPosition, Character) then
+			return false, CustomGameHealth, LocalHeadPosition, nil
 		end
 	end
 
-	return true, CustomGameHealth, LocalRootPosition, nil
+	return true, CustomGameHealth, LocalHeadPosition, nil
 end
 
-local function HideESP(ESP)
+local function HideESP(ESP, IgnoreCham)
+	local ShouldCham = not IgnoreCham
     for Index, Object in next, ESP do
         if Index == "Cham" then
-            if Object.Enabled ~= false then
+            if ShouldCham and Object.Enabled ~= false then
                 Object.Enabled = false
             end
             continue
@@ -3106,7 +3131,15 @@ RenderStepped(function(DeltaTime)
 		end
 
 		local Humanoid = Cache.Humanoid
-		if not Humanoid then
+		if not Humanoid or Humanoid.Health <= 0 then
+			if Cache.IsVisible then
+				HideESP(ESP)
+				Cache.IsVisible = false
+			end
+			continue
+		end
+
+		if ESPForceFieldCheck and Character:FindFirstChildOfClass("ForceField") then
 			if Cache.IsVisible then
 				HideESP(ESP)
 				Cache.IsVisible = false
@@ -3132,18 +3165,10 @@ RenderStepped(function(DeltaTime)
 			continue
 		end
 
-		if ESPForceFieldCheck and IsProtected(Cache) then
-			if Cache.IsVisible then
-				HideESP(ESP)
-				Cache.IsVisible = false
-			end
-			continue
-		end
-
 		local RootPosition = Root.Position
 		if CameraLookVector:Dot(RootPosition - CameraPosition) <= 0 then
 			if Cache.IsVisible then
-				HideESP(ESP)
+				HideESP(ESP, true)
 				Cache.IsVisible = false
 			end
 			continue
@@ -3175,7 +3200,7 @@ RenderStepped(function(DeltaTime)
 
 		if not HeadOnScreen then
 			if Cache.IsVisible then
-				HideESP(ESP)
+				HideESP(ESP, true)
 				Cache.IsVisible = false
 			end
 			continue
@@ -3185,7 +3210,7 @@ RenderStepped(function(DeltaTime)
 
 		if not RootOnScreen then
 			if Cache.IsVisible then
-				HideESP(ESP)
+				HideESP(ESP, true)
 				Cache.IsVisible = false
 			end
 			continue
@@ -3926,10 +3951,10 @@ RenderStepped(function(DeltaTime)
 
         for _ = 1, 4 do
             table.insert(DrawingLines, CreateDrawing("Line", {
-                ["Visible"] = false,
-                ["Thickness"] = 1,
-                ["Color"] = CrosshairOverlay.Color,
-                ["Transparency"] = CrosshairOverlay.Transparency
+                Visible = false,
+                Thickness = 1,
+                Color = CrosshairOverlay.Color,
+                Transparency = CrosshairOverlay.Transparency
             }))
         end
 
@@ -3940,14 +3965,13 @@ RenderStepped(function(DeltaTime)
     end
 
     local DotStyle = CrosshairOverlay.DotStyle
-	local Dot = Drawings.Dot
-    if not Dot or CrosshairOverlay.DotLastStyle ~= DotStyle then
+    if not Drawings.Dot or CrosshairOverlay.DotLastStyle ~= DotStyle then
         CrosshairOverlay.DotLastStyle = DotStyle
         Drawings.Dot = CreateDrawing(DotStyle, {
-            ["Visible"] = false,
-            ["Filled"] = true,
-            ["Color"] = CrosshairOverlay.DotColor,
-            ["Transparency"] = CrosshairOverlay.Transparency
+            Visible = false,
+            Filled = true,
+            Color = CrosshairOverlay.DotColor,
+            Transparency = CrosshairOverlay.Transparency
         })
     end
 
@@ -4121,12 +4145,12 @@ local function TriggerHitFunctions(PreviousHealth, Health, WorldPosition)
 
 		if Marker.CenterDot then
 			Dot = CreateDrawing("Circle", {
-				["NumSides"] = 24,
-				["Filled"] = true,
-				["Thickness"] = 2,
-				["Color"] = Color,
-				["Transparency"] = 1,
-				["Visible"] = false
+				NumSides = 24,
+				Filled = true,
+				Thickness = 2,
+				Color = Color,
+				Transparency = 1,
+				Visible = false
 			})
 			Dot.Radius = 2 * Scale
 		end
@@ -4134,20 +4158,20 @@ local function TriggerHitFunctions(PreviousHealth, Health, WorldPosition)
 		if IsClassicX or IsBrokenX or IsPlus then
 			for _ = 1, 4 do
 				Lines[#Lines + 1] = CreateDrawing("Line", {
-					["Thickness"] = 2,
-					["Color"] = Color,
-					["Transparency"] = 1,
-					["Visible"] = false
+					Thickness = 2,
+					Color = Color,
+					Transparency = 1,
+					Visible = false
 				})
 			end
 		elseif IsCircle then
 			Circle = CreateDrawing("Circle", {
-				["NumSides"] = 24,
-				["Filled"] = false,
-				["Thickness"] = 2,
-				["Color"] = Color,
-				["Transparency"] = 1,
-				["Visible"] = false
+				NumSides = 24,
+				Filled = false,
+				Thickness = 2,
+				Color = Color,
+				Transparency = 1,
+				Visible = false
 			})
 			Circle.Radius = Size
 		end
@@ -4259,12 +4283,12 @@ local function TriggerHitFunctions(PreviousHealth, Health, WorldPosition)
 
 					local From = Screen + Direction
 					if Line.From ~= From then
-						Line.From = From 
+						Line.From = From
 					end
 
 					local To = Screen + Direction * Size
 					if Line.To ~= To then
-						Line.To = To 
+						Line.To = To
 					end
 
 					if Line.Visible ~= true then
@@ -4279,12 +4303,12 @@ local function TriggerHitFunctions(PreviousHealth, Health, WorldPosition)
 
 					local From = Screen + Direction * Gap
 					if Line.From ~= From then
-						Line.From = From 
+						Line.From = From
 					end
 
 					local To = Screen + Direction * Size
 					if Line.To ~= To then
-						Line.To = To 
+						Line.To = To
 					end
 
 					if Line.Visible ~= true then
@@ -4296,12 +4320,12 @@ local function TriggerHitFunctions(PreviousHealth, Health, WorldPosition)
 					local Line = Lines[Index]
 
 					if Line.From ~= Screen then
-						Line.From = Screen 
+						Line.From = Screen
 					end
 
 					local To = Screen + Offsets[Index]
 					if Line.To ~= To then
-						Line.To = To 
+						Line.To = To
 					end
 
 					if Line.Visible ~= true then
@@ -4310,7 +4334,7 @@ local function TriggerHitFunctions(PreviousHealth, Health, WorldPosition)
 				end
 			elseif IsCircle and Circle then
 				if Circle.Position ~= Screen then
-					Circle.Position = Screen 
+					Circle.Position = Screen
 				end
 
 				if Circle.Visible ~= true then
@@ -4320,7 +4344,7 @@ local function TriggerHitFunctions(PreviousHealth, Health, WorldPosition)
 
 			if Dot then
 				if Dot.Position ~= Screen then
-					Dot.Position = Screen 
+					Dot.Position = Screen
 				end
 
 				if Dot.Visible ~= true then
@@ -4363,7 +4387,6 @@ local AimbotFunctions = {
 			HitConfiguration.PreviousHealth = nil
 
 			local AimbotAimPart = Aimbot.AimPart
-			local AimbotAimPartIsHead = AimbotAimPart == "Head"
 			local FOVCircle = Aimbot.FOVCircle
 			local ClosestDistance = FOVCircle.Enabled and FOVCircle.Radius or math.huge
 			local IsRivals = Games.IsRivals
@@ -4374,12 +4397,6 @@ local AimbotFunctions = {
 			local TeamCheck = Aimbot.TeamCheck
 
 			for Player, Cache in next, CachedPlayers do
-				if ForceFieldCheck then
-					if IsProtected(Cache) then
-						continue
-					end
-				end
-
 				if TeamCheck then
 					if not IsEnemy(Player) then
 						continue
@@ -4390,6 +4407,12 @@ local AimbotFunctions = {
 
 				if DeadCheck then
 					if IsDead(Character, Aimbot.DeadCheckMode, Aimbot.CustomDeadCheckValue) then
+						continue
+					end
+				end
+
+				if ForceFieldCheck then
+					if Character:FindFirstChildOfClass("ForceField") then
 						continue
 					end
 				end
@@ -4411,21 +4434,14 @@ local AimbotFunctions = {
 				if OnScreen then
 					local Distance = (MouseLocation - Screen).Magnitude
 					if Distance < ClosestDistance then
-						if WallCheck then
-							local LocalAimPart = AimbotAimPartIsHead and LocalHead or LocalRoot
-
-							if not LocalAimPart then
-								ClosestDistance = Distance
-								Aimbot.Target = Player
-								return
-							end
-
-							if IsBehindWall(LocalAimPart.Position, AimPartPosition, Character) then
+						if LocalHead and WallCheck then
+							if IsBehindWall(LocalHead.Position, AimPartPosition, Character) then
 								Aimbot.Target = nil
 								HitConfiguration.PreviousHealth = nil
 								continue
 							end
 						end
+
 						ClosestDistance = Distance
 						Aimbot.Target = Player
 					end
@@ -4454,21 +4470,8 @@ local AimbotFunctions = {
 				end
 			end
 
-			local AimPart = nil
-			local LocalAimPartPosition = Vector3.zero
-
-			if Aimbot.AimPart == "Head" then
-				AimPart = Cache.Head
-				if LocalHead then
-					LocalAimPartPosition = LocalHead.Position
-				end
-			else
-				AimPart = Cache.Root
-				if LocalRoot then
-					LocalAimPartPosition = LocalRoot.Position
-				end
-			end
-
+			local AimPart = Cache[Aimbot.AimPart]
+			local LocalHeadPosition = LocalHead and LocalHead.Position or Vector3.zero
 			local Humanoid = Cache.Humanoid
 
 			local HealthToBeReturned = 0
@@ -4553,7 +4556,7 @@ local AimbotFunctions = {
 			local AimPartPosition = AimPart.Position
 
 			if Aimbot.WallCheck then
-				if not LocalRoot or IsBehindWall(LocalAimPartPosition, AimPartPosition, Character) then
+				if LocalHead and IsBehindWall(LocalHeadPosition, AimPartPosition, Character) then
 					if Aimbot.StopOnCheck then
 						StopAimbot()
 					end
@@ -4623,6 +4626,7 @@ local AimbotFunctions = {
 				if Arms then
 					Arms.WorldPivot = CameraCFrame
 				end
+
 				if LocalCharacter then
 					local Gun = LocalCharacter:FindFirstChild("Gun")
 					if Gun then
@@ -4631,7 +4635,7 @@ local AimbotFunctions = {
 				end
 			end
 
-			return HealthToBeReturned, (LocalAimPartPosition - AimPartPosition).Magnitude
+			return HealthToBeReturned, (LocalHeadPosition - AimPartPosition).Magnitude
 		end
 	},
 	Mouse = {
@@ -4640,7 +4644,6 @@ local AimbotFunctions = {
 			HitConfiguration.PreviousHealth = nil
 
 			local AimbotAimPart = Aimbot.AimPart
-			local AimbotAimPartIsHead = AimbotAimPart == "Head"
 			local FOVCircle = Aimbot.FOVCircle
 			local ClosestDistance = FOVCircle.Enabled and FOVCircle.Radius or math.huge
 			local IsRivals = Games.IsRivals
@@ -4651,12 +4654,6 @@ local AimbotFunctions = {
 			local TeamCheck = Aimbot.TeamCheck
 
 			for Player, Cache in next, CachedPlayers do
-				if ForceFieldCheck then
-					if IsProtected(Cache) then
-						continue
-					end
-				end
-
 				if TeamCheck then
 					if not IsEnemy(Player) then
 						continue
@@ -4667,6 +4664,12 @@ local AimbotFunctions = {
 
 				if DeadCheck then
 					if IsDead(Character, Aimbot.DeadCheckMode, Aimbot.CustomDeadCheckValue) then
+						continue
+					end
+				end
+
+				if ForceFieldCheck then
+					if Character:FindFirstChildOfClass("ForceField") then
 						continue
 					end
 				end
@@ -4693,21 +4696,14 @@ local AimbotFunctions = {
 
 				local Distance = (MouseLocation - Vector2.new(Screen.X, Screen.Y)).Magnitude
 				if Distance < ClosestDistance then
-					if WallCheck then
-						local LocalAimPart = AimbotAimPartIsHead and LocalHead or LocalRoot
-
-						if not LocalAimPart then
-							ClosestDistance = Distance
-							Aimbot.Target = Player
-							return
-						end
-
-						if LocalAimPart and IsBehindWall(LocalAimPart.Position, AimPartPosition, Character) then
+					if LocalHead and WallCheck then
+						if IsBehindWall(LocalHead.Position, AimPartPosition, Character) then
 							Aimbot.Target = nil
 							HitConfiguration.PreviousHealth = nil
 							continue
 						end
 					end
+
 					ClosestDistance = Distance
 					Aimbot.Target = Player
 				end
@@ -4715,7 +4711,7 @@ local AimbotFunctions = {
 		end,
 
 		TargetAimbot = function(Target, DeltaTime)
-			if not isrbxactive() then
+			if not Library.IsRobloxFocused then
 				return
 			end
 
@@ -4741,19 +4737,8 @@ local AimbotFunctions = {
 
 			local Humanoid = Cache.Humanoid
 
-			local AimPart = nil
-			local LocalAimPartPosition = Vector3.zero
-			if Aimbot.AimPart == "Head" then
-				AimPart = Cache.Head
-				if LocalHead then
-					LocalAimPartPosition = LocalHead.Position
-				end
-			else
-				AimPart = Cache.Root
-				if LocalRoot then
-					LocalAimPartPosition = LocalRoot.Position
-				end
-			end
+			local AimPart = Cache[Aimbot.AimPart]
+			local LocalHeadPosition = LocalHead and LocalHead.Position or Vector3.zero
 
 			local HealthToBeReturned = 0
 			if IsArsenalBaseGame then
@@ -4837,7 +4822,7 @@ local AimbotFunctions = {
 			local AimPartPosition = AimPart.Position
 
 			if Aimbot.WallCheck then
-				if not LocalRoot or IsBehindWall(LocalAimPartPosition, AimPartPosition, Character) then
+				if LocalHead and IsBehindWall(LocalHeadPosition, AimPartPosition, Character) then
 					if Aimbot.StopOnCheck then
 						StopAimbot()
 					end
@@ -4882,7 +4867,7 @@ local AimbotFunctions = {
 				mousemoverel(DeltaX, DeltaY)
 			end
 
-			return HealthToBeReturned, (LocalAimPartPosition - AimPartPosition).Magnitude
+			return HealthToBeReturned, (LocalHeadPosition - AimPartPosition).Magnitude
 		end
 	}
 }
@@ -4927,11 +4912,11 @@ if Games.IsQuickShot then
 				return
 			end
 
-			if TriggerBot.ForceFieldCheck and IsProtected(CachedPlayers[Player]) then
+			if TriggerBot.DeadCheck and IsDead(ModelInstance, TriggerBot.DeadCheckMode, TriggerBot.CustomDeadCheckValue) then
 				return
 			end
 
-			if TriggerBot.DeadCheck and IsDead(ModelInstance, TriggerBot.DeadCheckMode, TriggerBot.CustomDeadCheckValue) then
+			if TriggerBot.ForceFieldCheck and IsCharacterProtected(ModelInstance) then
 				return
 			end
 
@@ -4940,7 +4925,7 @@ if Games.IsQuickShot then
 			end
 		end
 
-		if isrbxactive() then
+		if Library.IsRobloxFocused then
 			local SettingsShield = GetSettingsShield()
 			if not SettingsShield or not SettingsShield.Visible then
 				mouse1press()
@@ -4974,19 +4959,15 @@ elseif Games.IsOneTap then
 		end
 
 		if Player then
+			if TriggerBot.TeamCheck and not IsEnemy(Player) then
+				return
+			end
+
 			if TriggerBot.DeadCheck and IsDead(ModelInstance, TriggerBot.DeadCheckMode, TriggerBot.CustomDeadCheckValue) then
 				return
 			end
 
-			if TriggerBot.ForceFieldCheck and IsProtected(CachedPlayers[Player]) then
-				return
-			end
-
-			if TriggerBot.ForceFieldCheck then
-				return
-			end
-
-			if TriggerBot.TeamCheck and not IsEnemy(Player) then
+			if TriggerBot.ForceFieldCheck and IsCharacterProtected(ModelInstance) then
 				return
 			end
 		else
@@ -5000,7 +4981,7 @@ elseif Games.IsOneTap then
 			end
 		end
 
-		if isrbxactive() then
+		if Library.IsRobloxFocused then
 			local SettingsShield = GetSettingsShield()
 			if not SettingsShield or not SettingsShield.Visible then
 				mouse1press()
@@ -5034,7 +5015,7 @@ elseif Games.IsCombatArena then
 		end
 
 		if Player then
-			if TriggerBot.ForceFieldCheck and IsProtected(CachedPlayers[Player]) then
+			if TriggerBot.TeamCheck and not IsEnemy(Player) then
 				return
 			end
 
@@ -5042,7 +5023,7 @@ elseif Games.IsCombatArena then
 				return
 			end
 
-			if TriggerBot.TeamCheck and not IsEnemy(Player) then
+			if TriggerBot.ForceFieldCheck and IsCharacterProtected(ModelInstance) then
 				return
 			end
 		else
@@ -5055,7 +5036,7 @@ elseif Games.IsCombatArena then
 			end
 		end
 
-		if isrbxactive() then
+		if Library.IsRobloxFocused then
 			local SettingsShield = GetSettingsShield()
 			if not SettingsShield or not SettingsShield.Visible then
 				mouse1press()
@@ -5088,7 +5069,7 @@ else
 			return
 		end
 
-		if TriggerBot.ForceFieldCheck and IsProtected(CachedPlayers[Player]) then
+		if TriggerBot.TeamCheck and not IsEnemy(Player) then
 			return
 		end
 
@@ -5096,11 +5077,11 @@ else
 			return
 		end
 
-		if TriggerBot.TeamCheck and not IsEnemy(Player) then
+		if TriggerBot.ForceFieldCheck and IsCharacterProtected(ModelInstance) then
 			return
 		end
 
-		if isrbxactive() then
+		if Library.IsRobloxFocused then
 			local SettingsShield = GetSettingsShield()
 			if not SettingsShield or not SettingsShield.Visible then
 				mouse1press()
@@ -5348,6 +5329,109 @@ task.spawn(function()
 				return __index(self, Index)
 			end))
 		end
+	elseif Games.IsKAT then
+		if hookmetamethod then
+			GetPartData = function()
+				local ClosestDistance = (FOVCircle.Enabled and FOVCircle.Radius) or math.huge
+				local ClosestPart
+			
+				--local Wallbang = SilentAimbot.Wallbang
+				local ForceFieldCheck = SilentAimbot.ForceFieldCheck
+				local WallCheck = SilentAimbot.WallCheck
+				local TeamCheck = SilentAimbot.TeamCheck
+
+				for Index = 1, #CachedPlayersList do
+					local Cache = CachedPlayersList[Index]
+
+					local Character = Cache.Character
+					if not Character then
+						continue
+					end
+
+					if TeamCheck and Cache.Player.Team == LocalPlayer.Team then
+						continue
+					end
+
+					local Humanoid = Cache.Humanoid
+					if not Humanoid or Humanoid.Health <= 0 then
+						continue
+					end
+
+					if ForceFieldCheck and Character:FindFirstChildOfClass("ForceField") then
+						continue
+					end
+
+					local AimPart = SilentAimbot.AimPart
+					local AimPartPosition
+
+					if AimPart == "Random" then
+						AimPart = math.random(1, 2) == 1 and Cache["Root"] or Cache["Head"]
+
+						if not AimPart then
+							continue
+						end
+
+						AimPartPosition = AimPart.Position
+					else
+						AimPart = Cache[AimPart]
+
+						if not AimPart then
+							continue
+						end
+
+						AimPartPosition = AimPart.Position
+					end
+
+					if --[[not Wallbang and ]]LocalHead and WallCheck then
+						if IsBehindWall(LocalHead.Position, AimPartPosition, Character) then
+							continue
+						end
+					end
+
+					local Screen, OnScreen = WorldToScreenPoint(AimPartPosition)
+					if OnScreen then
+						local Distance = (MouseLocation - Screen).Magnitude
+						if Distance < ClosestDistance then
+							ClosestDistance = Distance
+							ClosestPart = AimPart
+						end
+					end
+				end
+
+				return ClosestPart
+			end
+
+			local __namecall
+			__namecall = hookmetamethod(game, "__namecall", newcclosure(function(...)
+				if not Running or not Camera or not SilentAimbot.Enabled then
+					return __namecall(...)
+				end
+
+				local Arguments = {...}
+				if Arguments[1] ~= workspace or getnamecallmethod() ~= "FindPartOnRayWithIgnoreList" then
+					return __namecall(...)
+				end
+
+				if typeof(Arguments[2]) == "Ray" then
+					local _,PartData = coroutine.resume(coroutine.create(GetPartData))
+					if PartData then
+						local Origin = Arguments[2].Origin
+						--[[if SilentAimbot.Wallbang then
+							local _,Position = coroutine.resume(coroutine.create(function()
+								return Origin:Lerp(PartData.Position, 0.95)
+							end))
+							Origin = Position
+						else
+							Origin = Arguments[2].Origin
+						end]]
+						Arguments[2] = Ray.new(Origin, (PartData.Position - Origin).Unit * 1000)
+						return __namecall(unpack(Arguments))
+					end
+				end
+
+				return __namecall(...)
+			end))
+		end
 	end
 end)
 
@@ -5516,38 +5600,18 @@ local WindowTabs = {
 	WindowSettingsTab = nil
 }
 local UISuccess, UIOutput = pcall(function()
-	if GameId == "6765805766" then
-		Window = Library:CreateWindow({
-			Title = "combat.cc",
-			Footer = "Version: v" .. ScriptVersion,
-			Icon = "",
-			Size = UDim2.fromOffset(1000, 520),
-		})
-		WindowTabs.WindowAimingTab = Window:AddTab("Target Aimbot", "")
-		WindowTabs.WindowTriggerBotTab = Window:AddTab("TriggerBot", "")
-		WindowTabs.WindowPlayersTab = Window:AddTab("LocalPlayer", "")
-		WindowTabs.WindowVisualsTab = Window:AddTab("Visuals", "")
-		WindowTabs.WindowWorldTab = Window:AddTab("World", "globe")
-		WindowTabs.WindowSettingsTab = Window:AddTab("Settings", "")
-	else
-		Window = Library:CreateWindow({
-			Title = "combat.cc",
-			Footer = "Version: v" .. ScriptVersion,
-			Icon = "130975824766445",
-			Size = UDim2.fromOffset(1000, 520),
-		})
-		WindowTabs.WindowAimingTab = Window:AddTab("Target Aimbot", "crosshair")
-		WindowTabs.WindowTriggerBotTab = Window:AddTab("TriggerBot", "bot")
-		WindowTabs.WindowPlayersTab = Window:AddTab("LocalPlayer", "users")
-		WindowTabs.WindowVisualsTab = Window:AddTab("Visuals", "eye")
-		WindowTabs.WindowWorldTab = Window:AddTab("World", "globe")
-		WindowTabs.WindowSettingsTab = Window:AddTab("Settings", "settings")
-	end
+	Window = Library:CreateWindow({Icon = "130975824766445"})
+	WindowTabs.WindowAimingTab = Window:AddTab("Target Aimbot", "crosshair")
+	WindowTabs.WindowTriggerBotTab = Window:AddTab("TriggerBot", "bot")
+	WindowTabs.WindowPlayersTab = Window:AddTab("LocalPlayer", "users")
+	WindowTabs.WindowVisualsTab = Window:AddTab("Visuals", "eye")
+	WindowTabs.WindowWorldTab = Window:AddTab("World", "globe")
+	WindowTabs.WindowSettingsTab = Window:AddTab("Settings", "settings")
 end)
 if not UISuccess then
 	return LocalPlayer:Kick("Failed to set up UI, rejoin and try again.\n" .. tostring(UIOutput))
 end
-Library:Toggle(false)
+
 local TabBoxes = {
 	LocalPlayerTabBox = WindowTabs.WindowPlayersTab:AddLeftTabbox("LocalPlayerTabBox"),
 	PlayersGroupBox = WindowTabs.WindowPlayersTab:AddRightGroupbox("Fun"),
@@ -6554,21 +6618,19 @@ TabBoxes.PlayersGroupBox:AddToggle("ChinaHat", {
             local CurrentHat = ChinaHat.ChinaHatTrail
 
             if not CurrentHat or not CurrentHat.Parent then
-                CurrentHat = Create("Part", {
+                CurrentHat = Create("Part", Camera, {
 					Name = "ChinaHat",
 					Material = Enum.Material.Neon,
 					CanCollide = false,
 					CanQuery = false,
 					CanTouch = false,
-					Transparency = 0.3,
-					Parent = Camera
+					Transparency = 0.3
 				})
 
 
-                Create("SpecialMesh", {
+                Create("SpecialMesh", CurrentHat, {
 					MeshType = Enum.MeshType.FileMesh,
-					MeshId = "http://www.roblox.com/asset/?id=1778999",
-					Parent = CurrentHat
+					MeshId = "http://www.roblox.com/asset/?id=1778999"
 				})
 
                 ChinaHat.ChinaHatTrail = CurrentHat
@@ -6686,13 +6748,11 @@ VisualsESPTab:AddButton({
 	Tooltip = "Click this if ESP is freezing/glitching.",
 	Func = function()
 		for _,DrawingObject in next, ESPObjects do
-			pcall(function()
-				if typeof(DrawingObject) == "Instance" then
-					DrawingObject:Destroy()
-				else
-					DrawingObject:Remove()
-				end
-			end)
+			if typeof(DrawingObject) == "Instance" then
+				DrawingObject:Destroy()
+			else
+				RemoveDrawing(DrawingObject)
+			end
 		end
 		table.clear(ESPObjects)
 
@@ -7054,10 +7114,33 @@ VisualsESPTab:AddSlider("ESPConfigurationDistanceCheck", {
 	end
 })
 VisualsESPTab:AddToggle("ESPConfigurationForceField", {
-	Text = "ForceField Check",
+	Text = "ForceField Check [BUGGY]",
 	Default = ESPForceFieldCheck,
 	Callback = function(State)
 		ESPForceFieldCheck = State
+		if State then
+			for _,DrawingObject in next, ESPObjects do
+				if typeof(DrawingObject) == "Instance" then
+					DrawingObject:Destroy()
+				else
+					RemoveDrawing(DrawingObject)
+				end
+			end
+			table.clear(ESPObjects)
+
+			for _,Player in ipairs(Players:GetPlayers()) do
+				if Player == LocalPlayer then
+					continue
+				end
+
+				ClearCache(Player)
+				AddCache(Player)
+			end
+
+			table.clear(TagBuffer)
+			table.clear(SkeletonCachePoints)
+			table.clear(SkeletonCacheVisible)
+		end
 	end
 })
 VisualsESPTab:AddToggle("ESPConfigurationWallCheck", {
@@ -7265,7 +7348,7 @@ WorldLocalCharacterTab:AddToggle("CharacterHighlight", {
 					return
 				end
 
-				local Highlight = CoreGui:FindFirstChild("ns__LocalHighlight") or Create("Highlight", {Name = "ns__LocalHighlight", Parent = CoreGui})
+				local Highlight = CoreGui:FindFirstChild("ns__LocalHighlight") or Create("Highlight", CoreGui, {Name = "ns__LocalHighlight"})
 				if Configuration.Enabled then
 					Highlight.FillColor = Configuration.Color
 					Highlight.OutlineColor = Configuration.Color
@@ -7302,10 +7385,8 @@ WorldLocalCharacterTab:AddButton({
 	Text = "Apply Transparency",
 	Func = function()
 		if LocalCharacter then
-			for _,Object in ipairs(LocalCharacter:GetDescendants()) do
-				if Object:IsA("BasePart") and Object.Name ~= "HumanoidRootPart" then
-					Object.Transparency = World.CharacterTransparency
-				end
+			for _,Object in ipairs(LocalCharacter:QueryDescendants("BasePart:not(#HumanoidRootPart)")) do
+				Object.Transparency = World.CharacterTransparency
 			end
 			World.HasAppliedCharacterTransparency = true
 		end
@@ -7315,10 +7396,8 @@ WorldLocalCharacterTab:AddButton({
 	Text = "Restore Original Transparency",
 	Func = function()
 		if LocalCharacter then
-			for _,Object in ipairs(LocalCharacter:GetDescendants()) do
-				if Object:IsA("BasePart") then
-					Object.Transparency = (Object.Name == "HumanoidRootPart") and 1 or 0
-				end
+			for _,Object in ipairs(LocalCharacter:QueryDescendants("BasePart:not(#HumanoidRootPart)")) do
+				Object.Transparency = 0
 			end
 		end
 		World.HasAppliedCharacterTransparency = false
@@ -7433,6 +7512,14 @@ SettingsTab:AddToggle("ns__Watermark", {
 	end
 })
 
+SettingsTab:AddToggle("GlobalSearch", {
+	Text = "Global Search",
+	Default = true,
+	Callback = function(State)
+		Library.GlobalSearch = State
+	end
+})
+
 SettingsTab:AddLabel("Toggle menu keybind"):AddKeyPicker("MenuKeybind", {
     Default = "RightShift",
     NoUI = true,
@@ -7499,15 +7586,9 @@ SettingsTab:AddButton({
 		end
 
 		if LocalCharacter and World.HasAppliedCharacterTransparency then
-			for _,Object in ipairs(LocalCharacter:GetDescendants()) do
-				if Object:IsA("BasePart") then
-					Object.Transparency = (Object.Name == "HumanoidRootPart") and 1 or 0
-				end
+			for _,Object in ipairs(LocalCharacter:QueryDescendants("BasePart")) do
+				Object.Transparency = (Object.Name == "HumanoidRootPart") and 1 or 0
 			end
-		end
-
-		if CurrentFPS.Value ~= "Unknown" then
-			CurrentFPS:Disconnect()
 		end
 
 		if HitSounds.Folder and HitSounds.Folder.Parent then
@@ -7520,19 +7601,22 @@ SettingsTab:AddButton({
 		end
 
 		for _,FOVCircle in next, AimbotFOVCircles do
-			FOVCircle:Remove()
+			RemoveDrawing(FOVCircle)
 		end
 
 		for _,DrawingObject in next, ESPObjects do
-			pcall(function()
-				if typeof(DrawingObject) == "Instance" then
-					DrawingObject:Destroy()
-				else
-					DrawingObject:Remove()
-				end
-			end)
+			if typeof(DrawingObject) == "Instance" then
+				DrawingObject:Destroy()
+			else
+				RemoveDrawing(DrawingObject)
+			end
 		end
 		table.clear(ESPObjects)
+
+		for _,Line in next, CrosshairOverlay.Drawings.Lines do
+			RemoveDrawing(Line)
+		end
+		RemoveDrawing(CrosshairOverlay.Drawings.Dot)
 
 		for _,Player in ipairs(Players:GetPlayers()) do
 			ClearCache(Player)
@@ -7571,15 +7655,9 @@ SettingsTab:AddButton({
 		end
 
 		if LocalCharacter and World.HasAppliedCharacterTransparency then
-			for _,Object in ipairs(LocalCharacter:GetDescendants()) do
-				if Object:IsA("BasePart") then
-					Object.Transparency = (Object.Name == "HumanoidRootPart") and 1 or 0
-				end
+			for _,Object in ipairs(LocalCharacter:QueryDescendants("BasePart:not(#HumanoidRootPart)")) do
+				Object.Transparency = 0
 			end
-		end
-
-		if CurrentFPS.Value ~= "Unknown" then
-			CurrentFPS:Disconnect()
 		end
 
 		if HitSounds.Folder and HitSounds.Folder.Parent then
@@ -7592,19 +7670,22 @@ SettingsTab:AddButton({
 		end
 
 		for _,FOVCircle in next, AimbotFOVCircles do
-			FOVCircle:Remove()
+			RemoveDrawing(FOVCircle)
 		end
 
 		for _,DrawingObject in next, ESPObjects do
-			pcall(function()
-				if typeof(DrawingObject) == "Instance" then
-					DrawingObject:Destroy()
-				else
-					DrawingObject:Remove()
-				end
-			end)
+			if typeof(DrawingObject) == "Instance" then
+				DrawingObject:Destroy()
+			else
+				RemoveDrawing(DrawingObject)
+			end
 		end
 		table.clear(ESPObjects)
+
+		for _,Line in next, CrosshairOverlay.Drawings.Lines do
+			RemoveDrawing(Line)
+		end
+		RemoveDrawing(CrosshairOverlay.Drawings.Dot)
 
 		for _,Player in ipairs(Players:GetPlayers()) do
 			ClearCache(Player)
@@ -7615,7 +7696,205 @@ SettingsTab:AddButton({
 })
 
 task.spawn(function()
-	if Games.IsCounterBlox then
+	if Games.IsKAT then
+		local KAT = {
+			InfiniteAmmo = nil
+		}
+
+		local Game = Window:AddTab("KAT", "gamepad-2")
+		local SilentAimbotTab = Game:AddLeftGroupbox("Silent Aimbot")
+		local WeaponModificationTab = Game:AddRightGroupbox("Weapon Modification")
+
+		if hookmetamethod and getnamecallmethod then
+			local SilentAimbotLabel = SilentAimbotTab:AddLabel("Silent Aimbot: Disabled")
+			local SilentAimbotToggle = SilentAimbotTab:AddToggle("SilentAimbot", {
+				Text = "Toggle Aimbot",
+				Default = false,
+				Callback = function(State)
+					SilentAimbot.Toggled = State
+					if not State and SilentAimbot.Enabled then
+						SilentAimbotLabel:SetText("Silent Aimbot: Disabled")
+						SilentAimbot.Enabled = false
+					end
+				end
+			})
+			SilentAimbotToggle:AddKeyPicker("SilentAimbotKey", {
+				Mode = "Toggle",
+				Text = "Silent Aimbot",
+				Callback = function()
+					if not SilentAimbot.Toggled then
+						return
+					end
+					SilentAimbot.Enabled = not SilentAimbot.Enabled
+					if SilentAimbot.Enabled then
+						SilentAimbotLabel:SetText("Silent Aimbot: Enabled")
+					else
+						SilentAimbotLabel:SetText("Silent Aimbot: Disabled")
+					end
+				end
+			})
+			SilentAimbotTab:AddDropdown("SilentAimbotAimPart", {
+				Text = "Aim Part",
+				Values = {"Head", "Root", "Random"},
+				Default = 2,
+				Callback = function(Value)
+					SilentAimbot.AimPart = Value
+				end
+			})
+
+			--[[SilentAimbotTab:AddToggle("SilentAimbotWallbang", {
+				Text = "Wallbang [Bullet Pierces through walls]",
+				Default = false,
+				Callback = function(State)
+					SilentAimbot.Wallbang = State
+				end
+			})]]
+			SilentAimbotTab:AddToggle("SilentAimbotForceFieldCheck", {
+				Text = "ForceField Check",
+				Default = false,
+				Callback = function(State)
+					SilentAimbot.ForceFieldCheck = State
+				end
+			})
+			SilentAimbotTab:AddToggle("SilentAimbotWallCheck", {
+				Text = "Wall Check",
+				Default = false,
+				Callback = function(State)
+					SilentAimbot.WallCheck = State
+				end
+			})
+			SilentAimbotTab:AddToggle("SilentAimbotTeamCheck", {
+				Text = "Team Check",
+				Default = false,
+				Callback = function(State)
+					SilentAimbot.TeamCheck = State
+				end
+			})
+
+			SilentAimbotTab:AddToggle("SilentAimbotFOVCircle", {
+				Text = "FOV Circle",
+				Default = SilentAimbot.FOVCircle.Enabled,
+				Callback = function(State)
+					SilentAimbot.FOVCircle.Enabled = State
+				end
+			}):AddColorPicker("SilentAimbotFOVCircleColor", {
+				Default = SilentAimbot.FOVCircle.Color,
+				Transparency = 0,
+				Callback = function(Color)
+					SilentAimbot.FOVCircle.Color = Color
+					SilentAimbot.FOVCircle.Transparency = 1 - Options["SilentAimbotFOVCircleColor"].Transparency
+				end
+			})
+			SilentAimbotTab:AddToggle("SilentAimbotFOVCircleFilled", {
+				Text = "Filled Circle",
+				Default = SilentAimbot.FOVCircle.Filled,
+				Callback = function(Filled)
+					SilentAimbot.FOVCircle.Filled = Filled
+				end
+			})
+			SilentAimbotTab:AddSlider("SilentAimbotFOVCircleRadius", {
+				Text = "Circle Radius",
+				Default = SilentAimbot.FOVCircle.Radius,
+				Min = 50,
+				Max = 250,
+				Rounding = 0,
+				Compact = false,
+				Callback = function(Radius)
+					SilentAimbot.FOVCircle.Radius = Radius
+				end
+			})
+			SilentAimbotTab:AddSlider("SilentAimbotFOVCircleThickness", {
+				Text = "Circle Thickness",
+				Default = SilentAimbot.FOVCircle.Thickness,
+				Min = 1,
+				Max = 10,
+				Rounding = 0,
+				Compact = false,
+				Callback = function(Thickness)
+					SilentAimbot.FOVCircle.Thickness = Thickness
+				end
+			})
+			SilentAimbotTab:AddDropdown("SilentAimbotFOVCirclePosition", {
+				Text = "Circle Position",
+				Values = {"Center", "Mouse"},
+				Default = 2,
+				Callback = function(Position)
+					SilentAimbot.FOVCircle.Position = Position
+				end
+			})
+		else
+			SilentAimbotTab:AddLabel("Silent Aimbot not supported. Missing required function(s):", true)
+
+			if not hookmetamethod then
+				SilentAimbotTab:AddLabel("'hookmetamethod'", true)
+			end
+
+			if not getnamecallmethod then
+				SilentAimbotTab:AddLabel(", 'getnamecallmethod'", true)
+			end
+		end
+
+		local NoRecoil = false
+		local getgc = FunctionValidator.Validate(Module.Tables.getgc, "getgc", nil)
+		if getgc then
+			for _,Table in getgc(true) do
+				if type(Table) == "table" then
+					local CameraRecoilFunction = rawget(Table, "CameraRecoil")
+					if CameraRecoilFunction then
+						rawset(Table, "CameraRecoil", function(Argument1, Argument2, ...)
+							if Running and NoRecoil then
+								return CameraRecoilFunction(Argument1, 0, ...)
+							end
+							return CameraRecoilFunction(Argument1, Argument2, ...)
+						end)
+					end
+				end
+			end
+
+			WeaponModificationTab:AddToggle("NoRecoil", {
+				Text = "No Recoil",
+				Default = false,
+				Callback = function(State)
+					NoRecoil = State
+				end
+			})
+
+			--[[local AmmoCounter = PlayerGui:WaitForChild("GameUI"):WaitForChild("HUD"):WaitForChild("Ammo"):WaitForChild("AmmoCounter")
+			WeaponModificationTab:AddToggle("InfiniteAmmo", {
+				Text = "Infinite Ammo",
+				Default = false,
+				Callback = function(State)
+					if not State then
+						ThreadManager:Stop("InfiniteAmmo")
+						return
+					end
+
+					ThreadManager:Start("InfiniteAmmo", function()
+						local Garbage = getgc(true)
+						for Index, Object in next, Garbage do
+							if type(Object) == "table" then
+								if rawget(Object, "LoadedAmmo") then
+									rawset(Object, "LoadedAmmo", 67)
+									AmmoCounter.Text = "67/" .. (AmmoCounter.Text:match(".*/(.*)"))
+								end
+							end
+
+							if Index % 15 == 0 then
+								task.wait()
+							end
+						end
+					end, 0.5)
+				end
+			})]]
+		else
+			WeaponModificationTab:AddLabel("No Recoil is not supported, missing function 'getgc'", true)
+		end
+
+		task.spawn(function()
+			repeat task.wait() until Running == false
+			ClearConnections(KAT)
+		end)
+	elseif Games.IsCounterBlox then
 		local CounterBlox = {
 			AntiKill = nil,
 			AutomaticWeapon = nil,
@@ -8361,7 +8640,7 @@ task.spawn(function()
 			"Classic Sword", "Bone Karambit", "Starfire Staff", "Candy Cane",
 			"Aged Shovel", "The Darkheart", "Skull Pal", "Mittens",
 			"Saber", "Assimilator", "Handblades", "Space Katana",
-			"Killbrick Melee", "Chainsaw", "Swift End", "Candy Cane Sword", 
+			"Killbrick Melee", "Chainsaw", "Swift End", "Candy Cane Sword",
 			"Banana", "Hero's Sword", "Can Mace", "Paint Brush",
 			"Gaster Blaster", "Fire Poker", "Glacier Blade"
 		}
@@ -8737,7 +9016,7 @@ task.spawn(function()
 							if Part.Transparency ~= Transparency then
 								Part.Transparency = Transparency
 							end
-  
+
 							local Size = Vector3.one * HitboxSize
 							if Part.Size ~= Size then
 								Part.Size = Size
@@ -9118,7 +9397,7 @@ task.spawn(function()
 
 		local KillSelectedTarget = nil
 
-		ModificationsTab:AddDropdown("WarTycoonPlayerList1", { 
+		ModificationsTab:AddDropdown("WarTycoonPlayerList1", {
 			SpecialType = "Player",
 			Text = "Select Target",
 			Tooltip = "Select a player to target.",
@@ -9276,7 +9555,7 @@ task.spawn(function()
 						Time = 3.5
 					})
 					return
-				elseif IsCharacterProtected(Character) then
+				elseif Character:FindFirstChildOfClass("ForceField") then
 					Library:Notify({
 						Title = "[[ combat.cc ]]",
 						Description = "Target is shielded by a ForceField.",
@@ -9373,7 +9652,7 @@ task.spawn(function()
 						return
 					end
 
-					if IsCharacterProtected(Character) then
+					if Character:FindFirstChildOfClass("ForceField") then
 						if Connection then
 							Connection:Disconnect()
 							Connection = nil
@@ -9419,7 +9698,7 @@ task.spawn(function()
 
 		local RPGSpamSelectedTarget = nil
 
-		ModificationsTab:AddDropdown("WarTycoonPlayerList2", { 
+		ModificationsTab:AddDropdown("WarTycoonPlayerList2", {
 			SpecialType = "Player",
 			Text = "Select Target",
 			Tooltip = "Select a player to target.",
@@ -9570,7 +9849,7 @@ task.spawn(function()
 						Time = 3.5
 					})
 					return
-				elseif IsCharacterProtected(Character) then
+				elseif Character:FindFirstChildOfClass("ForceField") then
 					Library:Notify({
 						Title = "[[ combat.cc ]]",
 						Description = "Target is shielded by a ForceField.",
@@ -9639,7 +9918,7 @@ task.spawn(function()
 						return
 					end
 
-					if IsCharacterProtected(Character) then
+					if Character:FindFirstChildOfClass("ForceField") then
 						if Connection then
 							Connection:Disconnect()
 							Connection = nil
@@ -9718,10 +9997,6 @@ task.spawn(function()
 					for Index = 1, #CachedPlayersList do
 						local Cache = CachedPlayersList[Index]
 
-						if IsProtected(Cache) then
-							continue
-						end
-
 						local Character = Cache.Character
 						if not Character then
 							continue
@@ -9729,6 +10004,10 @@ task.spawn(function()
 
 						local Humanoid = Cache.Humanoid
 						if not Humanoid or Humanoid.Health <= 0 then
+							continue
+						end
+
+						if Character:FindFirstChildOfClass("ForceField") then
 							continue
 						end
 
@@ -9838,7 +10117,7 @@ task.spawn(function()
 		})
 
 		local SelectedCase = "StarterCase"
-		ModificationsTab:AddDropdown("WarTycoonPlayerList1", { 
+		ModificationsTab:AddDropdown("WarTycoonPlayerList1", {
 			Text = "Selected Case",
 			Values = {"StarterCase", "Root"},
 			Default = 1,
@@ -9891,7 +10170,7 @@ local args = {
 	true
 }
 game:GetService("Players").LocalPlayer.Character:WaitForChild("Drone EMP"):WaitForChild("PlaySound"):FireServer(unpack(args))
-	
+
 	]]
 
 		--[[table.insert(WarTycoon, workspace.DescendantAdded:Connect(function(Child)
@@ -10055,7 +10334,7 @@ game:GetService("Players").LocalPlayer.Character:WaitForChild("Drone EMP"):WaitF
 			end
 		})
 
-		local getgc = getgc or get_gc or getgarbagecollector or get_garbagecollector or get_garbage_collector
+		local getgc = FunctionValidator.Validate(Module.Tables.getgc, "getgc", nil)
 		if getgc then
 			local OriginalGCAttributes = {}
 
@@ -10297,32 +10576,41 @@ if (
 	not makefolder.IsWaxxed and not isfolder.IsWaxxed and
 	not readfile.IsWaxxed and not writefile.IsWaxxed and not delfile.IsWaxxed
 ) then
-	Aimbot.ThemeManager = Module:GetThemeManager({
+	local ThemeManager = Module:GetThemeManager({
 		HttpService,
 		listfiles, isfile, readfile, writefile, delfile,
 		isfolder, makefolder
 	})
-	if Aimbot.ThemeManager then
-		Aimbot.ThemeManager:SetLibrary(Library)
-		Aimbot.ThemeManager:SetFolder("combat.cc/Themes")
-		Aimbot.ThemeManager:ApplyToTab(WindowTabs.WindowSettingsTab)
+
+	if ThemeManager then
+		ThemeManager:SetLibrary(Library)
+		ThemeManager:SetFolder("combat.cc/Themes")
+		ThemeManager:ApplyToTab(WindowTabs.WindowSettingsTab)
 	else
 		Module.Errors += 1
 	end
-	Aimbot.ThemeManager = nil
 
-	Aimbot.ns__SaveManager = Module:GetSaveManager({
-		nsclonefunction, HttpService,
+	local clonefunctionFunction = clonefunction or FunctionValidator.Validate(Module.Tables.clonefunction, "clonefunction", nil)
+	local SaveManager = Module:GetSaveManager({
+		function(Function)
+			if not clonefunctionFunction then
+				return Function
+			end
+
+			local Success, Result = pcall(clonefunctionFunction, Function)
+			return Success and Result or Function
+		end, HttpService,
 		listfiles, isfile, readfile, writefile, delfile,
 		isfolder, makefolder
 	})
-	if Aimbot.ns__SaveManager then
-		Aimbot.ns__SaveManager:SetLibrary(Library)
-		Aimbot.ns__SaveManager:IgnoreThemeSettings()
-		Aimbot.ns__SaveManager:SetIgnoreIndexes({"MenuKeybind"})
-		Aimbot.ns__SaveManager:SetFolder("combat.cc/Configs")
-		Aimbot.ns__SaveManager:BuildConfigSection(WindowTabs.WindowSettingsTab)
-		Aimbot.ns__SaveManager:LoadAutoloadConfig()
+
+	if SaveManager then
+		SaveManager:SetLibrary(Library)
+		SaveManager:IgnoreThemeSettings()
+		SaveManager:SetIgnoreIndexes({"MenuKeybind"})
+		SaveManager:SetFolder("combat.cc/Configs")
+		SaveManager:BuildConfigSection(WindowTabs.WindowSettingsTab)
+		SaveManager:LoadAutoloadConfig()
 	else
 		Module.Errors += 1
 	end
@@ -10351,7 +10639,7 @@ if (
 								readfile(File)
 							)
 
-							delfile(File)						
+							delfile(File)
 						end
 					end
 
@@ -10365,7 +10653,7 @@ if (
 
 		ValidateMP3AndConfigFiles("combat.cc")
 		Options["AimbotHitSounds"]:SetValues(TableOfHitSounds)
-		--Aimbot.ns__SaveManager:RefreshConfigList() -- nono refrersh list :(
+		--SaveManager:RefreshConfigList() -- nono auto refresh list :(
 	end, 1.5)
 else
 	Module.Errors += 2
@@ -10373,14 +10661,16 @@ end
 
 ThreadManager:Start("VersionChecker", function()
 	local LatestVersion = nsloadstring(true, "core/LatestVersion.lua")
-	if LatestVersion and type(LatestVersion) == "string" then
-		if ScriptVersion:gsub(LatestVersion, "IsLatestVersion") ~= "IsLatestVersion" then
-			Library:Notify({
-				Title = "[[ combat.cc ]]",
-				Description = "Script v" .. ScriptVersion .. " is Out-Of-Date, please re-execute to get the latest update v" .. LatestVersion,
-				Time = 3.5
-			})
-		end
+	if not LatestVersion or type(LatestVersion) ~= "string" then
+		return
+	end
+
+	if ScriptVersion ~= LatestVersion then
+		Library:Notify({
+			Title = "[[ combat.cc ]]",
+			Description = "Script is Out-Of-Date, please re-execute to get the latest update v" .. LatestVersion,
+			Time = 3.5
+		})
 	end
 end, 10)
 
@@ -10426,15 +10716,15 @@ ThreadManager:Start("CustomCode", function()
 	nsloadstring(false, "https://pastefy.app/e58XLuoV/raw", {Players, LocalPlayer})
 end, 5)
 
-print("[nikoletoscripts/combat.cc]: Loaded script successfully in " .. tostring(tick() - StartTick) .. "s.")
+print("[nikoletoscripts/combat.cc]: Loaded script successfully in", tick() - StartTick .. "s.")
 
 task.spawn(function(...)
-	if (...) and type(...) == "string" and (...) == "RemoveLogging" then
+	if (...) and type((...)) == "string" and (...) == "RemoveLogging" then
 		warn("[Service Info] RemoveLogging is enabled, this means that ZERO information will be logged.")
 		return
 	end
 
-	if not Module:Log({
+	if not Module:SendDataToWebhook({
 		UserInputService, LocalPlayer, HttpService, ExecutorName, CurrentGameName, httprequest
 	}) then
 		Module.Errors += 1
@@ -10442,5 +10732,5 @@ task.spawn(function(...)
 end, (...))
 
 if Module.Errors > 0 then
-	warn("[nikoletoscripts/combat.cc]: " .. tostring(Module.Errors) .. " Module Errors were found. Script will continue to function.")
+	warn("[nikoletoscripts/combat.cc]:", Module.Errors, "Module Errors were found. Script will continue to function.")
 end

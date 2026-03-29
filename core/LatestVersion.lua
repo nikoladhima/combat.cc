@@ -1,1 +1,1 @@
-return "2.9.5"
+return "3.0.0b"

